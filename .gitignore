@@ -1,0 +1,30 @@
+# Secrets and local state
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+
+# Frontend build output
+frontend/dist/
+frontend/node_modules/
+backend/app/static/
+*.tsbuildinfo
+
+# Local data (database, FIT files)
+data/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

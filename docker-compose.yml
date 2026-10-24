@@ -1,0 +1,22 @@
+name: run-dashboard
+
+services:
+  run:
+    build:
+      context: .
+    image: run-dashboard:0.1.0
+    container_name: run-dashboard
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # Bound to localhost on purpose. See README before exposing it.
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - run-data:/data
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  run-data:
+    name: run-dashboard-data

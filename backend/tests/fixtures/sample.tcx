@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="Running">
+      <Id>2026-05-30T07:00:00Z</Id>
+    <Lap StartTime="2026-05-30T07:00:00Z">
+      <TotalTimeSeconds>360</TotalTimeSeconds>
+      <DistanceMeters>1000</DistanceMeters>
+      <MaximumSpeed>2.9</MaximumSpeed>
+      <Calories>95</Calories>
+      <AverageHeartRateBpm><Value>135</Value></AverageHeartRateBpm>
+      <MaximumHeartRateBpm><Value>145</Value></MaximumHeartRateBpm>
+      <Intensity>Active</Intensity>
+      <Cadence>84</Cadence>
+      <TriggerMethod>Manual</TriggerMethod>
+      <Track>
+      <Trackpoint>
+        <Time>2026-05-30T07:00:00Z</Time>
+        <Position><LatitudeDegrees>40.4168000</LatitudeDegrees><LongitudeDegrees>-3.7038000</LongitudeDegrees></Position>
+        <AltitudeMeters>650.0</AltitudeMeters>
+        <DistanceMeters>0.0</DistanceMeters>
+        <HeartRateBpm><Value>132</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:00:30Z</Time>
+        <Position><LatitudeDegrees>40.4170084</LatitudeDegrees><LongitudeDegrees>-3.7031844</LongitudeDegrees></Position>
+        <AltitudeMeters>650.8</AltitudeMeters>
+        <DistanceMeters>83.3</DistanceMeters>
+        <HeartRateBpm><Value>132</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:01:00Z</Time>
+        <Position><LatitudeDegrees>40.4172104</LatitudeDegrees><LongitudeDegrees>-3.7026430</LongitudeDegrees></Position>
+        <AltitudeMeters>651.6</AltitudeMeters>
+        <DistanceMeters>166.7</DistanceMeters>
+        <HeartRateBpm><Value>132</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:01:30Z</Time>
+        <Position><LatitudeDegrees>40.4174000</LatitudeDegrees><LongitudeDegrees>-3.7022412</LongitudeDegrees></Position>
+        <AltitudeMeters>652.4</AltitudeMeters>
+        <DistanceMeters>250.0</DistanceMeters>
+        <HeartRateBpm><Value>132</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:02:00Z</Time>
+        <Position><LatitudeDegrees>40.4175713</LatitudeDegrees><LongitudeDegrees>-3.7020273</LongitudeDegrees></Position>
+        <AltitudeMeters>653.1</AltitudeMeters>
+        <DistanceMeters>333.3</DistanceMeters>
+        <HeartRateBpm><Value>133</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:02:30Z</Time>
+        <Position><LatitudeDegrees>40.4177193</LatitudeDegrees><LongitudeDegrees>-3.7020273</LongitudeDegrees></Position>
+        <AltitudeMeters>653.7</AltitudeMeters>
+        <DistanceMeters>416.7</DistanceMeters>
+        <HeartRateBpm><Value>133</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:03:00Z</Time>
+        <Position><LatitudeDegrees>40.4178392</LatitudeDegrees><LongitudeDegrees>-3.7022412</LongitudeDegrees></Position>
+        <AltitudeMeters>654.2</AltitudeMeters>
+        <DistanceMeters>500.0</DistanceMeters>
+        <HeartRateBpm><Value>133</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:03:30Z</Time>
+        <Position><LatitudeDegrees>40.4179276</LatitudeDegrees><LongitudeDegrees>-3.7026430</LongitudeDegrees></Position>
+        <AltitudeMeters>654.6</AltitudeMeters>
+        <DistanceMeters>583.3</DistanceMeters>
+        <HeartRateBpm><Value>133</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:04:00Z</Time>
+        <Position><LatitudeDegrees>40.4179818</LatitudeDegrees><LongitudeDegrees>-3.7031844</LongitudeDegrees></Position>
+        <AltitudeMeters>654.9</AltitudeMeters>
+        <DistanceMeters>666.7</DistanceMeters>
+        <HeartRateBpm><Value>134</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:04:30Z</Time>
+        <Position><LatitudeDegrees>40.4180000</LatitudeDegrees><LongitudeDegrees>-3.7038000</LongitudeDegrees></Position>
+        <AltitudeMeters>655.0</AltitudeMeters>
+        <DistanceMeters>750.0</DistanceMeters>
+        <HeartRateBpm><Value>134</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:05:00Z</Time>
+        <Position><LatitudeDegrees>40.4179818</LatitudeDegrees><LongitudeDegrees>-3.7044156</LongitudeDegrees></Position>
+        <AltitudeMeters>655.0</AltitudeMeters>
+        <DistanceMeters>833.3</DistanceMeters>
+        <HeartRateBpm><Value>134</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:05:30Z</Time>
+        <Position><LatitudeDegrees>40.4179276</LatitudeDegrees><LongitudeDegrees>-3.7049570</LongitudeDegrees></Position>
+        <AltitudeMeters>654.8</AltitudeMeters>
+        <DistanceMeters>916.7</DistanceMeters>
+        <HeartRateBpm><Value>134</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:06:00Z</Time>
+        <Position><LatitudeDegrees>40.4178392</LatitudeDegrees><LongitudeDegrees>-3.7053588</LongitudeDegrees></Position>
+        <AltitudeMeters>654.5</AltitudeMeters>
+        <DistanceMeters>1000.0</DistanceMeters>
+        <HeartRateBpm><Value>135</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      </Track>
+    </Lap>
+    <Lap StartTime="2026-05-30T07:06:00Z">
+      <TotalTimeSeconds>360</TotalTimeSeconds>
+      <DistanceMeters>1000</DistanceMeters>
+      <MaximumSpeed>2.9</MaximumSpeed>
+      <Calories>95</Calories>
+      <AverageHeartRateBpm><Value>142</Value></AverageHeartRateBpm>
+      <MaximumHeartRateBpm><Value>152</Value></MaximumHeartRateBpm>
+      <Intensity>Active</Intensity>
+      <Cadence>84</Cadence>
+      <TriggerMethod>Manual</TriggerMethod>
+      <Track>
+      <Trackpoint>
+        <Time>2026-05-30T07:06:00Z</Time>
+        <Position><LatitudeDegrees>40.4178392</LatitudeDegrees><LongitudeDegrees>-3.7053588</LongitudeDegrees></Position>
+        <AltitudeMeters>654.5</AltitudeMeters>
+        <DistanceMeters>1000.0</DistanceMeters>
+        <HeartRateBpm><Value>139</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:06:30Z</Time>
+        <Position><LatitudeDegrees>40.4177193</LatitudeDegrees><LongitudeDegrees>-3.7055727</LongitudeDegrees></Position>
+        <AltitudeMeters>654.1</AltitudeMeters>
+        <DistanceMeters>1083.3</DistanceMeters>
+        <HeartRateBpm><Value>139</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:07:00Z</Time>
+        <Position><LatitudeDegrees>40.4175713</LatitudeDegrees><LongitudeDegrees>-3.7055727</LongitudeDegrees></Position>
+        <AltitudeMeters>653.6</AltitudeMeters>
+        <DistanceMeters>1166.7</DistanceMeters>
+        <HeartRateBpm><Value>139</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:07:30Z</Time>
+        <Position><LatitudeDegrees>40.4174000</LatitudeDegrees><LongitudeDegrees>-3.7053588</LongitudeDegrees></Position>
+        <AltitudeMeters>653.0</AltitudeMeters>
+        <DistanceMeters>1250.0</DistanceMeters>
+        <HeartRateBpm><Value>139</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:08:00Z</Time>
+        <Position><LatitudeDegrees>40.4172104</LatitudeDegrees><LongitudeDegrees>-3.7049570</LongitudeDegrees></Position>
+        <AltitudeMeters>652.3</AltitudeMeters>
+        <DistanceMeters>1333.3</DistanceMeters>
+        <HeartRateBpm><Value>140</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:08:30Z</Time>
+        <Position><LatitudeDegrees>40.4170084</LatitudeDegrees><LongitudeDegrees>-3.7044156</LongitudeDegrees></Position>
+        <AltitudeMeters>651.5</AltitudeMeters>
+        <DistanceMeters>1416.7</DistanceMeters>
+        <HeartRateBpm><Value>140</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:09:00Z</Time>
+        <Position><LatitudeDegrees>40.4168000</LatitudeDegrees><LongitudeDegrees>-3.7038000</LongitudeDegrees></Position>
+        <AltitudeMeters>650.7</AltitudeMeters>
+        <DistanceMeters>1500.0</DistanceMeters>
+        <HeartRateBpm><Value>140</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:09:30Z</Time>
+        <Position><LatitudeDegrees>40.4165916</LatitudeDegrees><LongitudeDegrees>-3.7031844</LongitudeDegrees></Position>
+        <AltitudeMeters>649.9</AltitudeMeters>
+        <DistanceMeters>1583.3</DistanceMeters>
+        <HeartRateBpm><Value>140</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:10:00Z</Time>
+        <Position><LatitudeDegrees>40.4163896</LatitudeDegrees><LongitudeDegrees>-3.7026430</LongitudeDegrees></Position>
+        <AltitudeMeters>649.0</AltitudeMeters>
+        <DistanceMeters>1666.7</DistanceMeters>
+        <HeartRateBpm><Value>141</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:10:30Z</Time>
+        <Position><LatitudeDegrees>40.4162000</LatitudeDegrees><LongitudeDegrees>-3.7022412</LongitudeDegrees></Position>
+        <AltitudeMeters>648.2</AltitudeMeters>
+        <DistanceMeters>1750.0</DistanceMeters>
+        <HeartRateBpm><Value>141</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:11:00Z</Time>
+        <Position><LatitudeDegrees>40.4160287</LatitudeDegrees><LongitudeDegrees>-3.7020273</LongitudeDegrees></Position>
+        <AltitudeMeters>647.5</AltitudeMeters>
+        <DistanceMeters>1833.3</DistanceMeters>
+        <HeartRateBpm><Value>141</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:11:30Z</Time>
+        <Position><LatitudeDegrees>40.4158807</LatitudeDegrees><LongitudeDegrees>-3.7020273</LongitudeDegrees></Position>
+        <AltitudeMeters>646.8</AltitudeMeters>
+        <DistanceMeters>1916.7</DistanceMeters>
+        <HeartRateBpm><Value>141</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:12:00Z</Time>
+        <Position><LatitudeDegrees>40.4157608</LatitudeDegrees><LongitudeDegrees>-3.7022412</LongitudeDegrees></Position>
+        <AltitudeMeters>646.2</AltitudeMeters>
+        <DistanceMeters>2000.0</DistanceMeters>
+        <HeartRateBpm><Value>142</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      </Track>
+    </Lap>
+    <Lap StartTime="2026-05-30T07:12:00Z">
+      <TotalTimeSeconds>360</TotalTimeSeconds>
+      <DistanceMeters>1000</DistanceMeters>
+      <MaximumSpeed>2.9</MaximumSpeed>
+      <Calories>95</Calories>
+      <AverageHeartRateBpm><Value>149</Value></AverageHeartRateBpm>
+      <MaximumHeartRateBpm><Value>159</Value></MaximumHeartRateBpm>
+      <Intensity>Active</Intensity>
+      <Cadence>84</Cadence>
+      <TriggerMethod>Manual</TriggerMethod>
+      <Track>
+      <Trackpoint>
+        <Time>2026-05-30T07:12:00Z</Time>
+        <Position><LatitudeDegrees>40.4157608</LatitudeDegrees><LongitudeDegrees>-3.7022412</LongitudeDegrees></Position>
+        <AltitudeMeters>646.2</AltitudeMeters>
+        <DistanceMeters>2000.0</DistanceMeters>
+        <HeartRateBpm><Value>146</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:12:30Z</Time>
+        <Position><LatitudeDegrees>40.4156724</LatitudeDegrees><LongitudeDegrees>-3.7026430</LongitudeDegrees></Position>
+        <AltitudeMeters>645.7</AltitudeMeters>
+        <DistanceMeters>2083.3</DistanceMeters>
+        <HeartRateBpm><Value>146</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:13:00Z</Time>
+        <Position><LatitudeDegrees>40.4156182</LatitudeDegrees><LongitudeDegrees>-3.7031844</LongitudeDegrees></Position>
+        <AltitudeMeters>645.4</AltitudeMeters>
+        <DistanceMeters>2166.7</DistanceMeters>
+        <HeartRateBpm><Value>146</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:13:30Z</Time>
+        <Position><LatitudeDegrees>40.4156000</LatitudeDegrees><LongitudeDegrees>-3.7038000</LongitudeDegrees></Position>
+        <AltitudeMeters>645.1</AltitudeMeters>
+        <DistanceMeters>2250.0</DistanceMeters>
+        <HeartRateBpm><Value>146</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:14:00Z</Time>
+        <Position><LatitudeDegrees>40.4156182</LatitudeDegrees><LongitudeDegrees>-3.7044156</LongitudeDegrees></Position>
+        <AltitudeMeters>645.0</AltitudeMeters>
+        <DistanceMeters>2333.3</DistanceMeters>
+        <HeartRateBpm><Value>147</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:14:30Z</Time>
+        <Position><LatitudeDegrees>40.4156724</LatitudeDegrees><LongitudeDegrees>-3.7049570</LongitudeDegrees></Position>
+        <AltitudeMeters>645.0</AltitudeMeters>
+        <DistanceMeters>2416.7</DistanceMeters>
+        <HeartRateBpm><Value>147</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:15:00Z</Time>
+        <Position><LatitudeDegrees>40.4157608</LatitudeDegrees><LongitudeDegrees>-3.7053588</LongitudeDegrees></Position>
+        <AltitudeMeters>645.2</AltitudeMeters>
+        <DistanceMeters>2500.0</DistanceMeters>
+        <HeartRateBpm><Value>147</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:15:30Z</Time>
+        <Position><LatitudeDegrees>40.4158807</LatitudeDegrees><LongitudeDegrees>-3.7055727</LongitudeDegrees></Position>
+        <AltitudeMeters>645.5</AltitudeMeters>
+        <DistanceMeters>2583.3</DistanceMeters>
+        <HeartRateBpm><Value>147</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:16:00Z</Time>
+        <Position><LatitudeDegrees>40.4160287</LatitudeDegrees><LongitudeDegrees>-3.7055727</LongitudeDegrees></Position>
+        <AltitudeMeters>645.9</AltitudeMeters>
+        <DistanceMeters>2666.7</DistanceMeters>
+        <HeartRateBpm><Value>148</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:16:30Z</Time>
+        <Position><LatitudeDegrees>40.4162000</LatitudeDegrees><LongitudeDegrees>-3.7053588</LongitudeDegrees></Position>
+        <AltitudeMeters>646.5</AltitudeMeters>
+        <DistanceMeters>2750.0</DistanceMeters>
+        <HeartRateBpm><Value>148</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:17:00Z</Time>
+        <Position><LatitudeDegrees>40.4163896</LatitudeDegrees><LongitudeDegrees>-3.7049570</LongitudeDegrees></Position>
+        <AltitudeMeters>647.1</AltitudeMeters>
+        <DistanceMeters>2833.3</DistanceMeters>
+        <HeartRateBpm><Value>148</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:17:30Z</Time>
+        <Position><LatitudeDegrees>40.4165916</LatitudeDegrees><LongitudeDegrees>-3.7044156</LongitudeDegrees></Position>
+        <AltitudeMeters>647.8</AltitudeMeters>
+        <DistanceMeters>2916.7</DistanceMeters>
+        <HeartRateBpm><Value>148</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      <Trackpoint>
+        <Time>2026-05-30T07:18:00Z</Time>
+        <Position><LatitudeDegrees>40.4168000</LatitudeDegrees><LongitudeDegrees>-3.7038000</LongitudeDegrees></Position>
+        <AltitudeMeters>648.6</AltitudeMeters>
+        <DistanceMeters>3000.0</DistanceMeters>
+        <HeartRateBpm><Value>149</Value></HeartRateBpm>
+        <Cadence>84</Cadence>
+        <Extensions><TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"><Speed>2.778</Speed><RunCadence>84</RunCadence></TPX></Extensions>
+      </Trackpoint>
+      </Track>
+    </Lap>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>

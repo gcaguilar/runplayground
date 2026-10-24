@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Run Dashboard test" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>GPX test run</name></metadata>
+  <trk>
+    <name>GPX test run</name>
+    <type>running</type>
+    <trkseg>
+  <trkpt lat="40.4168000" lon="-3.7038000">
+    <ele>645.0</ele>
+    <time>2026-05-30T07:00:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>120</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4173209" lon="-3.7037696">
+    <ele>646.1</ele>
+    <time>2026-05-30T07:01:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>121</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4178261" lon="-3.7036794">
+    <ele>647.2</ele>
+    <time>2026-05-30T07:02:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>122</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4183000" lon="-3.7035321">
+    <ele>648.3</ele>
+    <time>2026-05-30T07:03:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>123</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4187284" lon="-3.7033321">
+    <ele>649.4</ele>
+    <time>2026-05-30T07:04:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>124</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4190981" lon="-3.7030856">
+    <ele>650.6</ele>
+    <time>2026-05-30T07:05:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>125</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4193981" lon="-3.7028000">
+    <ele>651.7</ele>
+    <time>2026-05-30T07:06:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>126</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4196191" lon="-3.7024840">
+    <ele>652.8</ele>
+    <time>2026-05-30T07:07:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>127</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4197544" lon="-3.7021473">
+    <ele>653.9</ele>
+    <time>2026-05-30T07:08:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>128</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4198000" lon="-3.7018000">
+    <ele>655.0</ele>
+    <time>2026-05-30T07:09:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>129</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4197544" lon="-3.7014527">
+    <ele>656.1</ele>
+    <time>2026-05-30T07:10:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>130</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4196191" lon="-3.7011160">
+    <ele>657.2</ele>
+    <time>2026-05-30T07:11:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>131</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4193981" lon="-3.7008000">
+    <ele>658.3</ele>
+    <time>2026-05-30T07:12:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>132</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4190981" lon="-3.7005144">
+    <ele>659.4</ele>
+    <time>2026-05-30T07:13:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>133</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4187284" lon="-3.7002679">
+    <ele>660.6</ele>
+    <time>2026-05-30T07:14:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>134</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4183000" lon="-3.7000679">
+    <ele>661.7</ele>
+    <time>2026-05-30T07:15:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>135</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4178261" lon="-3.6999206">
+    <ele>662.8</ele>
+    <time>2026-05-30T07:16:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>136</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4173209" lon="-3.6998304">
+    <ele>663.9</ele>
+    <time>2026-05-30T07:17:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>137</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4168000" lon="-3.6998000">
+    <ele>665.0</ele>
+    <time>2026-05-30T07:18:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>138</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4162791" lon="-3.6998304">
+    <ele>666.1</ele>
+    <time>2026-05-30T07:19:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>139</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4157739" lon="-3.6999206">
+    <ele>667.2</ele>
+    <time>2026-05-30T07:20:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>140</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4153000" lon="-3.7000679">
+    <ele>668.3</ele>
+    <time>2026-05-30T07:21:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>141</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4148716" lon="-3.7002679">
+    <ele>669.4</ele>
+    <time>2026-05-30T07:22:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>142</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4145019" lon="-3.7005144">
+    <ele>670.6</ele>
+    <time>2026-05-30T07:23:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>143</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4142019" lon="-3.7008000">
+    <ele>671.7</ele>
+    <time>2026-05-30T07:24:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>144</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4139809" lon="-3.7011160">
+    <ele>672.8</ele>
+    <time>2026-05-30T07:25:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>145</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4138456" lon="-3.7014527">
+    <ele>673.9</ele>
+    <time>2026-05-30T07:26:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>146</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4138000" lon="-3.7018000">
+    <ele>675.0</ele>
+    <time>2026-05-30T07:27:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>147</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4138456" lon="-3.7021473">
+    <ele>676.1</ele>
+    <time>2026-05-30T07:28:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>148</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4139809" lon="-3.7024840">
+    <ele>677.2</ele>
+    <time>2026-05-30T07:29:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>149</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4142019" lon="-3.7028000">
+    <ele>678.3</ele>
+    <time>2026-05-30T07:30:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>150</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4145019" lon="-3.7030856">
+    <ele>679.4</ele>
+    <time>2026-05-30T07:31:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>151</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4148716" lon="-3.7033321">
+    <ele>680.6</ele>
+    <time>2026-05-30T07:32:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>152</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4153000" lon="-3.7035321">
+    <ele>681.7</ele>
+    <time>2026-05-30T07:33:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>153</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4157739" lon="-3.7036794">
+    <ele>682.8</ele>
+    <time>2026-05-30T07:34:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>154</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4162791" lon="-3.7037696">
+    <ele>683.9</ele>
+    <time>2026-05-30T07:35:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>155</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+  <trkpt lat="40.4168000" lon="-3.7038000">
+    <ele>685.0</ele>
+    <time>2026-05-30T07:36:00Z</time>
+    <extensions><gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><gpxtpx:hr>156</gpxtpx:hr><gpxtpx:cad>84</gpxtpx:cad></gpxtpx:TrackPointExtension></extensions>
+  </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
