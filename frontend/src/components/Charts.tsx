@@ -12,11 +12,17 @@ import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/esm/core";
 import { BarChart3, HeartPulse } from "lucide-react";
 
-import type { StreamPoint, WeeklyDay } from "@/api/client";
+import type {
+  GarminMetricPoint,
+  PerformanceSnapshot,
+  StreamPoint,
+  WeeklyDay,
+} from "@/api/client";
 import { useI18n } from "@/i18n";
 import { EmptyState } from "@/components/ui";
 import {
   formatClock,
+  formatDate,
   formatNumber,
   formatPace,
   parseUtc,
@@ -334,6 +340,209 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
       option={option}
       opts={chartOpts}
       style={{ height: 318, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+const DISTANCE_META = [
+  { key: "5k", label: "distance.5k" as const, color: "#c9f56a" },
+  { key: "10k", label: "distance.10k" as const, color: "#7bc8ff" },
+  { key: "half_marathon", label: "distance.half_marathon" as const, color: "#ffab6b" },
+  { key: "marathon", label: "distance.marathon" as const, color: "#b79bff" },
+];
+
+export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[] }) {
+  const { locale, t } = useI18n();
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 16, top: 28, bottom: 8, containLabel: true },
+      legend: {
+        top: 0,
+        right: 0,
+        icon: "roundRect",
+        itemWidth: 9,
+        itemHeight: 9,
+        textStyle: { color: TEXT, fontSize: 11, fontFamily: "Manrope Variable" },
+      },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          if (!list.length) return "";
+          const header = `<div style="font-weight:700;margin-bottom:4px">${list[0].axisValueLabel ?? ""}</div>`;
+          return (
+            header +
+            list
+              .map((item) => {
+                const value = Number((item.value as [number, number] | undefined)?.[1]);
+                if (!Number.isFinite(value)) return "";
+                return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                  ${item.marker ?? ""}
+                  <span style="color:#a9b5ae">${item.seriesName ?? ""}</span>
+                  <strong style="margin-left:auto">${formatClock(value)}</strong>
+                </div>`;
+              })
+              .join("")
+          );
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: items.map((item) => formatDate(item.date, locale, { day: "numeric", month: "short" })),
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        inverse: true,
+        scale: true,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatClock(value),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: DISTANCE_META.map((distance) => ({
+        name: t(distance.label),
+        type: "line" as const,
+        data: items.map((item) => {
+          const prediction = (item.predictions ?? []).find(
+            (entry) => entry.distance_key === distance.key,
+          );
+          return prediction?.planning_s ?? null;
+        }),
+        connectNulls: true,
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { color: distance.color, width: 2 },
+        itemStyle: { color: distance.color },
+        emphasis: { focus: "series" as const },
+      })),
+    }),
+    [items, locale, t],
+  );
+
+  if (!items.length) {
+    return (
+      <EmptyState
+        compact
+        icon={BarChart3}
+        title={t("performance.history.empty")}
+        description={t("performance.history.note")}
+      />
+    );
+  }
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 264, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
+  const { locale, t } = useI18n();
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 6, right: 10, top: 18, bottom: 4, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [9, 11],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const item = list[0];
+          if (!item) return "";
+          const value = Number((item.value as [number, number] | undefined)?.[1]);
+          return `<div style="font-weight:700;margin-bottom:2px">${item.axisValueLabel ?? ""}</div>
+            <span style="color:#a9b5ae">${t("performance.garmin.vo2max")}</span>
+            <strong style="margin-left:8px">${formatNumber(value, locale, 1)}</strong>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: points.map((point) => formatDate(point.date, locale, { day: "numeric", month: "short" })),
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        scale: true,
+        splitNumber: 3,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          type: "line",
+          data: points.map((point) => point.value),
+          showSymbol: false,
+          smooth: 0.25,
+          lineStyle: { color: ACCENT, width: 2 },
+          itemStyle: { color: ACCENT },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(201,245,106,0.20)" },
+                { offset: 1, color: "rgba(201,245,106,0)" },
+              ],
+            },
+          },
+        },
+      ],
+    }),
+    [locale, points, t],
+  );
+
+  if (points.length < 2) return null;
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 150, width: "100%" }}
       notMerge
       lazyUpdate
     />

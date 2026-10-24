@@ -219,6 +219,176 @@ class RaceCandidate(ApiModel):
     duration_s: float
 
 
+# ---------------------------------------------------------------------------
+# Performance
+
+
+class EffortOut(ApiModel):
+    activity_id: int
+    activity_name: str
+    start_time_utc: datetime
+    distance_m: float
+    duration_s: float
+    pace_s_per_km: float
+    method: str
+    is_full_activity: bool
+    is_race: bool
+    has_gps: bool
+    quality: float
+    segment_start_s: float
+    segment_end_s: float
+
+
+class GoalOut(ApiModel):
+    distance_m: float
+    target_time_s: float
+    target_date: date | None = None
+    race_name: str | None = None
+    notes: str | None = None
+    updated_at: datetime
+
+
+class GoalUpsert(ApiModel):
+    target_time_s: float = Field(gt=0, le=24 * 3600)
+    target_date: date | None = None
+    race_name: str | None = Field(default=None, max_length=255)
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class PredictionEstimateOut(ApiModel):
+    time_s: float
+    low_s: float
+    high_s: float
+    pace_s_per_km: float
+    method: str
+    sigma: float
+    source_efforts: list[EffortOut] = Field(default_factory=list)
+    detail: dict[str, Any] = Field(default_factory=dict)
+
+
+class DistancePredictionOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    status: str
+    official_pr: EffortOut | None = None
+    recent_best: EffortOut | None = None
+    goal: GoalOut | None = None
+    ceiling: PredictionEstimateOut | None = None
+    planning: PredictionEstimateOut | None = None
+    gap_s: float | None = None
+    gap_pct: float | None = None
+    goal_gap_s: float | None = None
+    goal_gap_pct: float | None = None
+    confidence: str
+    confidence_score: float
+    confidence_reasons: list[str] = Field(default_factory=list)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+
+class FitnessAnchorOut(ApiModel):
+    distance_m: float
+    time_s: float
+    low_s: float
+    high_s: float
+    pace_s_per_km: float
+    confidence: str
+    confidence_score: float
+    as_of: datetime
+
+
+class PerformanceDataSummary(ApiModel):
+    running_activities: int
+    activities_with_streams: int
+    efforts: int
+    races: int
+    first_effort_at: datetime | None = None
+    last_effort_at: datetime | None = None
+
+
+class PreparationSummary(ApiModel):
+    longest_run_90d_m: float | None = None
+    weekly_distance_28d_m: float | None = None
+    races_365d: int
+    efforts_365d: int
+
+
+class GarminMetricPoint(ApiModel):
+    date: date
+    value: float
+
+
+class GarminRacePrediction(ApiModel):
+    date: date
+    distance_m: float
+    time_s: float
+
+
+class GarminReference(ApiModel):
+    imported_at: datetime | None = None
+    vo2max: GarminMetricPoint | None = None
+    vo2max_series: list[GarminMetricPoint] = Field(default_factory=list)
+    readiness: GarminMetricPoint | None = None
+    acute_training_load: GarminMetricPoint | None = None
+    chronic_training_load: GarminMetricPoint | None = None
+    race_predictions: list[GarminRacePrediction] = Field(default_factory=list)
+
+
+class PerformanceOverview(ApiModel):
+    generated_at: datetime
+    model_version: str
+    window_days: int
+    recent_days: int
+    status: str
+    fitness_anchor: FitnessAnchorOut | None = None
+    distances: list[DistancePredictionOut]
+    data: PerformanceDataSummary
+    preparation: PreparationSummary
+    garmin: GarminReference
+    warnings: list[str] = Field(default_factory=list)
+
+
+class SnapshotPredictionOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    planning_s: float | None = None
+    planning_low_s: float | None = None
+    planning_high_s: float | None = None
+    confidence: str | None = None
+
+
+class PerformanceSnapshotOut(ApiModel):
+    date: date
+    computed_at: datetime
+    fitness_anchor_s: float | None = None
+    fitness_anchor_low_s: float | None = None
+    fitness_anchor_high_s: float | None = None
+    fitness_confidence: str | None = None
+    predictions: list[SnapshotPredictionOut] = Field(default_factory=list)
+
+
+class PerformanceHistory(ApiModel):
+    items: list[PerformanceSnapshotOut]
+    days: int
+
+
+class PerformanceRecomputeResponse(ApiModel):
+    activities: int
+    efforts: int
+    overview: PerformanceOverview
+
+
+class GarminExportResponse(ApiModel):
+    run_id: int
+    status: str
+    files_scanned: int
+    metrics_imported: int
+    metrics_skipped: int
+    activities_imported: int
+    activities_merged: int
+    activities_skipped: int
+    warnings: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime
@@ -287,10 +457,13 @@ class ImportResponse(ApiModel):
 
 class ImportRunOut(ApiModel):
     id: int
+    kind: str = "file_import"
     status: str
     started_at: datetime
     finished_at: datetime | None = None
     message: str | None = None
+    metrics_imported: int = 0
+    metrics_skipped: int = 0
     results: list[ImportFileResult] = Field(default_factory=list)
 
 

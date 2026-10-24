@@ -20,6 +20,7 @@ from app.schemas import (
     SourceOut,
     StreamPoint,
 )
+from app.services.performance import refresh_activity_efforts
 
 router = APIRouter(prefix="/activities", tags=["activities"])
 
@@ -108,8 +109,9 @@ def patch_activity(
         raise HTTPException(status_code=404, detail="Activity not found")
     if payload.name is not None:
         activity.name = payload.name.strip()[:255]
-    if payload.is_race is not None:
+    if payload.is_race is not None and payload.is_race != activity.is_race:
         activity.is_race = payload.is_race
+        refresh_activity_efforts(db, activity)
     db.commit()
     return _detail(db, activity_id)
 

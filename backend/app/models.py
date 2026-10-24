@@ -8,11 +8,12 @@ activity itself.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -84,6 +85,10 @@ class Activity(Base):
         cascade="all, delete-orphan",
         order_by="ActivityLap.lap_index",
         lazy="selectin",
+    )
+    best_efforts: Mapped[list[BestEffort]] = relationship(
+        back_populates="activity",
+        cascade="all, delete-orphan",
     )
 
     __table_args__ = (Index("ix_activities_start_sport", "start_time_utc", "sport"),)
@@ -229,4 +234,107 @@ class AppState(Base):
     value: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+
+class BestEffort(Base):
+    """Fastest continuous segment of an activity at a standard race distance.
+
+    The same activity can hold efforts at several distances (a 10K race also
+    contains a 5K split). ``method`` records whether the effort uses the whole
+    activity or a segment of its stream, so predictions can weigh a real race
+    result differently from a split.
+    """
+
+    __tablename__ = "best_efforts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    activity_id: Mapped[int] = mapped_column(
+        ForeignKey("activities.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    distance_m: Mapped[float] = mapped_column(Float, nullable=False)
+    duration_s: Mapped[float] = mapped_column(Float, nullable=False)
+    segment_start_s: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    segment_end_s: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    method: Mapped[str] = mapped_column(String(20), default="stream", nullable=False)
+    is_full_activity: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    quality: Mapped[float] = mapped_column(Float, default=0.8, nullable=False)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+    activity: Mapped[Activity] = relationship(back_populates="best_efforts", lazy="joined")
+
+    __table_args__ = (
+        UniqueConstraint("activity_id", "distance_m", name="uq_best_effort_activity_distance"),
+        Index("ix_best_efforts_distance_duration", "distance_m", "duration_s"),
+    )
+
+
+class RaceGoal(Base):
+    """A target time for one of the standard distances.
+
+    Goals are deliberately simple in M1: one active goal per distance. The
+    calendar and multiple named races arrive in M3 without changing this table.
+    """
+
+    __tablename__ = "race_goals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    distance_m: Mapped[float] = mapped_column(Float, unique=True, nullable=False)
+    target_time_s: Mapped[float] = mapped_column(Float, nullable=False)
+    target_date: Mapped[date | None] = mapped_column(Date)
+    race_name: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+
+class PerformanceSnapshot(Base):
+    """One prediction set per day, used to draw the evolution over time."""
+
+    __tablename__ = "performance_snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    snapshot_date: Mapped[date] = mapped_column(Date, unique=True, nullable=False, index=True)
+    computed_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    model_version: Mapped[str] = mapped_column(String(30), nullable=False)
+    fitness_anchor_s: Mapped[float | None] = mapped_column(Float)
+    fitness_anchor_low_s: Mapped[float | None] = mapped_column(Float)
+    fitness_anchor_high_s: Mapped[float | None] = mapped_column(Float)
+    fitness_confidence: Mapped[str | None] = mapped_column(String(20))
+    predictions: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    summary: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+
+
+class ExternalMetric(Base):
+    """Historical metric imported from a Garmin data export.
+
+    ``distance_m`` is 0 for non-distance metrics. Using 0 instead of NULL keeps
+    the unique constraint effective in SQLite, where NULL values never collide.
+    """
+
+    __tablename__ = "external_metrics"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    metric: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    metric_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    distance_m: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    value: Mapped[float] = mapped_column(Float, nullable=False)
+    unit: Mapped[str] = mapped_column(String(20), default="", nullable=False)
+    source_file: Mapped[str | None] = mapped_column(String(500))
+    source_key: Mapped[str | None] = mapped_column(String(255))
+    raw: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "source",
+            "metric",
+            "metric_date",
+            "distance_m",
+            name="uq_external_metric_source_metric_date_distance",
+        ),
+        Index("ix_external_metrics_metric_date_lookup", "metric", "metric_date"),
     )

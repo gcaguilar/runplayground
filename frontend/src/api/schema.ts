@@ -176,6 +176,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/performance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Performance Overview */
+        get: operations["performance_overview_api_v1_performance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/recompute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recompute Performance */
+        post: operations["recompute_performance_api_v1_performance_recompute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Performance History */
+        get: operations["performance_history_api_v1_performance_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Performance Goals */
+        get: operations["performance_goals_api_v1_performance_goals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/goals/{distance_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Performance Goal */
+        put: operations["put_performance_goal_api_v1_performance_goals__distance_key__put"];
+        post?: never;
+        /** Remove Performance Goal */
+        delete: operations["remove_performance_goal_api_v1_performance_goals__distance_key__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/reference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Performance Reference */
+        get: operations["performance_reference_api_v1_performance_reference_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sync": {
         parameters: {
             query?: never;
@@ -222,6 +325,23 @@ export interface paths {
         put?: never;
         /** Import Files */
         post: operations["import_files_api_v1_imports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/garmin-export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Garmin Export Zip */
+        post: operations["import_garmin_export_zip_api_v1_imports_garmin_export_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -539,6 +659,153 @@ export interface components {
             /** Files */
             files: string[];
         };
+        /** Body_import_garmin_export_zip_api_v1_imports_garmin_export_post */
+        Body_import_garmin_export_zip_api_v1_imports_garmin_export_post: {
+            /** File */
+            file: string;
+        };
+        /** DistancePredictionOut */
+        DistancePredictionOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Status */
+            status: string;
+            official_pr?: components["schemas"]["EffortOut"] | null;
+            recent_best?: components["schemas"]["EffortOut"] | null;
+            goal?: components["schemas"]["GoalOut"] | null;
+            ceiling?: components["schemas"]["PredictionEstimateOut"] | null;
+            planning?: components["schemas"]["PredictionEstimateOut"] | null;
+            /** Gap S */
+            gap_s?: number | null;
+            /** Gap Pct */
+            gap_pct?: number | null;
+            /** Goal Gap S */
+            goal_gap_s?: number | null;
+            /** Goal Gap Pct */
+            goal_gap_pct?: number | null;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Confidence Reasons */
+            confidence_reasons?: string[];
+            /** Inputs */
+            inputs?: {
+                [key: string]: unknown;
+            };
+        };
+        /** EffortOut */
+        EffortOut: {
+            /** Activity Id */
+            activity_id: number;
+            /** Activity Name */
+            activity_name: string;
+            /**
+             * Start Time Utc
+             * Format: date-time
+             */
+            start_time_utc: string;
+            /** Distance M */
+            distance_m: number;
+            /** Duration S */
+            duration_s: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+            /** Method */
+            method: string;
+            /** Is Full Activity */
+            is_full_activity: boolean;
+            /** Is Race */
+            is_race: boolean;
+            /** Has Gps */
+            has_gps: boolean;
+            /** Quality */
+            quality: number;
+            /** Segment Start S */
+            segment_start_s: number;
+            /** Segment End S */
+            segment_end_s: number;
+        };
+        /** FitnessAnchorOut */
+        FitnessAnchorOut: {
+            /** Distance M */
+            distance_m: number;
+            /** Time S */
+            time_s: number;
+            /** Low S */
+            low_s: number;
+            /** High S */
+            high_s: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+        };
+        /** GarminExportResponse */
+        GarminExportResponse: {
+            /** Run Id */
+            run_id: number;
+            /** Status */
+            status: string;
+            /** Files Scanned */
+            files_scanned: number;
+            /** Metrics Imported */
+            metrics_imported: number;
+            /** Metrics Skipped */
+            metrics_skipped: number;
+            /** Activities Imported */
+            activities_imported: number;
+            /** Activities Merged */
+            activities_merged: number;
+            /** Activities Skipped */
+            activities_skipped: number;
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** GarminMetricPoint */
+        GarminMetricPoint: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Value */
+            value: number;
+        };
+        /** GarminRacePrediction */
+        GarminRacePrediction: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Distance M */
+            distance_m: number;
+            /** Time S */
+            time_s: number;
+        };
+        /** GarminReference */
+        GarminReference: {
+            /** Imported At */
+            imported_at?: string | null;
+            vo2max?: components["schemas"]["GarminMetricPoint"] | null;
+            /** Vo2Max Series */
+            vo2max_series?: components["schemas"]["GarminMetricPoint"][];
+            readiness?: components["schemas"]["GarminMetricPoint"] | null;
+            acute_training_load?: components["schemas"]["GarminMetricPoint"] | null;
+            chronic_training_load?: components["schemas"]["GarminMetricPoint"] | null;
+            /** Race Predictions */
+            race_predictions?: components["schemas"]["GarminRacePrediction"][];
+        };
         /** GarminTokenStatus */
         GarminTokenStatus: {
             /** Configured */
@@ -549,6 +816,35 @@ export interface components {
             expires_at?: number | null;
             /** Expires In Seconds */
             expires_in_seconds?: number | null;
+        };
+        /** GoalOut */
+        GoalOut: {
+            /** Distance M */
+            distance_m: number;
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** GoalUpsert */
+        GoalUpsert: {
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Notes */
+            notes?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -586,6 +882,11 @@ export interface components {
         ImportRunOut: {
             /** Id */
             id: number;
+            /**
+             * Kind
+             * @default file_import
+             */
+            kind: string;
             /** Status */
             status: string;
             /**
@@ -597,6 +898,16 @@ export interface components {
             finished_at?: string | null;
             /** Message */
             message?: string | null;
+            /**
+             * Metrics Imported
+             * @default 0
+             */
+            metrics_imported: number;
+            /**
+             * Metrics Skipped
+             * @default 0
+             */
+            metrics_skipped: number;
             /** Results */
             results?: components["schemas"]["ImportFileResult"][];
         };
@@ -652,6 +963,115 @@ export interface components {
             /** Missing */
             missing: string[];
         };
+        /** PerformanceDataSummary */
+        PerformanceDataSummary: {
+            /** Running Activities */
+            running_activities: number;
+            /** Activities With Streams */
+            activities_with_streams: number;
+            /** Efforts */
+            efforts: number;
+            /** Races */
+            races: number;
+            /** First Effort At */
+            first_effort_at?: string | null;
+            /** Last Effort At */
+            last_effort_at?: string | null;
+        };
+        /** PerformanceHistory */
+        PerformanceHistory: {
+            /** Items */
+            items: components["schemas"]["PerformanceSnapshotOut"][];
+            /** Days */
+            days: number;
+        };
+        /** PerformanceOverview */
+        PerformanceOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Window Days */
+            window_days: number;
+            /** Recent Days */
+            recent_days: number;
+            /** Status */
+            status: string;
+            fitness_anchor?: components["schemas"]["FitnessAnchorOut"] | null;
+            /** Distances */
+            distances: components["schemas"]["DistancePredictionOut"][];
+            data: components["schemas"]["PerformanceDataSummary"];
+            preparation: components["schemas"]["PreparationSummary"];
+            garmin: components["schemas"]["GarminReference"];
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** PerformanceRecomputeResponse */
+        PerformanceRecomputeResponse: {
+            /** Activities */
+            activities: number;
+            /** Efforts */
+            efforts: number;
+            overview: components["schemas"]["PerformanceOverview"];
+        };
+        /** PerformanceSnapshotOut */
+        PerformanceSnapshotOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Computed At
+             * Format: date-time
+             */
+            computed_at: string;
+            /** Fitness Anchor S */
+            fitness_anchor_s?: number | null;
+            /** Fitness Anchor Low S */
+            fitness_anchor_low_s?: number | null;
+            /** Fitness Anchor High S */
+            fitness_anchor_high_s?: number | null;
+            /** Fitness Confidence */
+            fitness_confidence?: string | null;
+            /** Predictions */
+            predictions?: components["schemas"]["SnapshotPredictionOut"][];
+        };
+        /** PredictionEstimateOut */
+        PredictionEstimateOut: {
+            /** Time S */
+            time_s: number;
+            /** Low S */
+            low_s: number;
+            /** High S */
+            high_s: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+            /** Method */
+            method: string;
+            /** Sigma */
+            sigma: number;
+            /** Source Efforts */
+            source_efforts?: components["schemas"]["EffortOut"][];
+            /** Detail */
+            detail?: {
+                [key: string]: unknown;
+            };
+        };
+        /** PreparationSummary */
+        PreparationSummary: {
+            /** Longest Run 90D M */
+            longest_run_90d_m?: number | null;
+            /** Weekly Distance 28D M */
+            weekly_distance_28d_m?: number | null;
+            /** Races 365D */
+            races_365d: number;
+            /** Efforts 365D */
+            efforts_365d: number;
+        };
         /** RaceCandidate */
         RaceCandidate: {
             /** Id */
@@ -669,6 +1089,21 @@ export interface components {
             distance_m: number;
             /** Duration S */
             duration_s: number;
+        };
+        /** SnapshotPredictionOut */
+        SnapshotPredictionOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Planning S */
+            planning_s?: number | null;
+            /** Planning Low S */
+            planning_low_s?: number | null;
+            /** Planning High S */
+            planning_high_s?: number | null;
+            /** Confidence */
+            confidence?: string | null;
         };
         /** SourceOut */
         SourceOut: {
@@ -1272,6 +1707,231 @@ export interface operations {
             };
         };
     };
+    performance_overview_api_v1_performance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerformanceOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recompute_performance_api_v1_performance_recompute_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerformanceRecomputeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    performance_history_api_v1_performance_history_get: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerformanceHistory"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    performance_goals_api_v1_performance_goals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_performance_goal_api_v1_performance_goals__distance_key__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                distance_key: string;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalUpsert"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_performance_goal_api_v1_performance_goals__distance_key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                distance_key: string;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    performance_reference_api_v1_performance_reference_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GarminReference"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     start_sync_api_v1_sync_post: {
         parameters: {
             query?: never;
@@ -1393,6 +2053,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_garmin_export_zip_api_v1_imports_garmin_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_garmin_export_zip_api_v1_imports_garmin_export_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GarminExportResponse"];
                 };
             };
             /** @description Validation Error */

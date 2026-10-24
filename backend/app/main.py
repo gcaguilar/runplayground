@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import update
 
-from app.api import activities, audit, auth, imports, summary, sync, system
+from app.api import activities, audit, auth, imports, performance, summary, sync, system
 from app.auth import require_auth
 from app.config import configure_logging, get_settings
 from app.db import get_session_factory
@@ -97,6 +97,7 @@ api = APIRouter(prefix="/api/v1", dependencies=[Depends(require_auth)])
 api.include_router(activities.router)
 api.include_router(summary.router)
 api.include_router(audit.router)
+api.include_router(performance.router)
 api.include_router(sync.router)
 api.include_router(imports.router)
 api.include_router(system.router)

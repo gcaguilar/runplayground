@@ -13,9 +13,9 @@ import { DataQualityPage } from "@/pages/DataQualityPage";
 import { ImportsPage } from "@/pages/ImportsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { PerformancePage } from "@/pages/PerformancePage";
 import {
   DiagnosticsPage,
-  PerformancePage,
   ProgressPage,
   TrainingPage,
 } from "@/pages/PlaceholderPages";

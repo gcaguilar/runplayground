@@ -5,16 +5,23 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M0 — ingestion and foundation.** Sync, file import, activities,
-> weekly summary, data audit and the bilingual UI are working. The
-> Performance, Progress, Diagnostics and Training sections are placeholders
-> for the next milestones.
+> **Status: M1 — performance and predictions.** Sync, import, activities,
+> weekly summary and data audit work, and the Performance section now turns
+> your efforts into 5K/10K/half/marathon predictions with ranges and
+> confidence. Progress, Diagnostics and Training remain placeholders.
 
 ## What works today
 
 - **Garmin sync** through the official Personal API: incremental sync,
   full backfill, and original FIT file download.
 - **Manual import** of FIT, TCX and GPX files, individually or in batches.
+- **Garmin bulk export** (ZIP) for historical VO₂max, Training Readiness,
+  acute/chronic load and Garmin race predictions, plus any FIT files inside.
+- **Performance predictions** for 5K, 10K, half and marathon. Each distance
+  shows the official PR, the recent best effort, your goal, a speed ceiling
+  (A), a distance-specific forecast (B), the A–B gap and an 80% range.
+- **10K fitness anchor** and daily prediction snapshots to follow changes over
+  time. Confidence is explicit and explains what is missing.
 - **Deduplication and provenance**: every activity records where it came
   from, when it was imported, its raw file hash and the parser version.
   Cross-format duplicates are merged instead of double-counted.
@@ -59,8 +66,18 @@ never stored in the database or exposed in the UI.
 Without a key the dashboard still works: import FIT/TCX/GPX files from
 **Importar**. The audit page tells you exactly what is missing.
 
-M0 syncs activities and their FIT files. Sleep, HRV, Body Battery, weight and
-historical Garmin metrics are planned for M1/M2.
+### Garmin bulk export
+
+Garmin Connect can also produce a one-off archive: **Settings → Data
+Management → Export your data**. Download the ZIP and upload it from
+**Importar → Export histórico de Garmin**. The dashboard reads VO₂max,
+Training Readiness, acute/chronic load and Garmin's own race predictions, and
+imports any FIT files contained in the archive. Re-uploading the same ZIP is
+idempotent. These values appear as a separate Garmin reference; they do not
+feed the internal A/B prediction models.
+
+M1 syncs activities and their FIT files. Sleep, HRV, Body Battery and weight
+are still outside the current scope.
 
 ### Try it without a watch
 
@@ -90,7 +107,8 @@ See [`.env.example`](.env.example) for the full annotated list.
 | `SYNC_INTERVAL_HOURS` | `12` | Automatic sync interval. `0` disables the scheduler. |
 | `SYNC_ON_STARTUP` | `false` | Run a sync when the container starts. |
 | `SYNC_DOWNLOAD_FIT` | `true` | Keep the original FIT file for each activity. |
-| `MAX_UPLOAD_MB` | `50` | Maximum size per imported file. |
+| `MAX_UPLOAD_MB` | `50` | Maximum size per imported FIT/TCX/GPX file. |
+| `GARMIN_EXPORT_MAX_MB` | `500` | Maximum size of a Garmin bulk-export ZIP. |
 | `DATA_DIR` | `/data` | Database and raw files. Do not change inside Docker. |
 | `LOG_LEVEL` | `INFO` | Python log level. |
 
@@ -222,7 +240,7 @@ for a single-user instance; horizontal scaling is not a goal.
 | Milestone | Scope |
 | --- | --- |
 | **M0** | Infrastructure, Garmin sync, FIT/TCX/GPX import, activities, weekly summary, audit, Docker. |
-| **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. |
+| **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. **Current.** |
 | **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
 | **M3** | Goals, calendar, reports, race planning. |
 | **M4** | Future scenarios, continuous tracking of predictions and goals. |

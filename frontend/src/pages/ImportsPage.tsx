@@ -6,6 +6,7 @@ import {
   Clock3,
   Database,
   FileUp,
+  HeartPulse,
   History,
   Info,
   Trash2,
@@ -14,8 +15,8 @@ import {
   XCircle,
 } from "lucide-react";
 
-import type { ImportFileResult, ImportRun } from "@/api/client";
-import { useImportFiles, useImports } from "@/api/queries";
+import type { GarminExportResponse, ImportFileResult, ImportRun } from "@/api/client";
+import { useImportFiles, useImportGarminExport, useImports } from "@/api/queries";
 import {
   Badge,
   Button,
@@ -36,6 +37,7 @@ import { cn } from "@/lib/cn";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_FILES = 20;
+const MAX_GARMIN_BYTES = 500 * 1024 * 1024;
 const ACCEPTED = [".fit", ".tcx", ".gpx"];
 
 type PendingFile = {
@@ -47,11 +49,15 @@ export function ImportsPage() {
   const { locale, t } = useI18n();
   const imports = useImports();
   const upload = useImportFiles();
+  const garminUpload = useImportGarminExport();
   const inputRef = useRef<HTMLInputElement>(null);
+  const garminInputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [problems, setProblems] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [results, setResults] = useState<ImportFileResult[] | null>(null);
+  const [garminResult, setGarminResult] = useState<GarminExportResponse | null>(null);
+  const [garminProblem, setGarminProblem] = useState<string | null>(null);
 
   const addFiles = (incoming: FileList | File[]) => {
     const nextProblems: string[] = [];
@@ -105,6 +111,25 @@ export function ImportsPage() {
         },
       },
     );
+  };
+
+  const startGarminUpload = (file: File) => {
+    setGarminProblem(null);
+    if (!file.name.toLowerCase().endsWith(".zip")) {
+      setGarminProblem(t("imports.garmin.error"));
+      return;
+    }
+    if (file.size > MAX_GARMIN_BYTES) {
+      setGarminProblem(t("imports.garmin.tooBig"));
+      return;
+    }
+    garminUpload.mutate(file, {
+      onSuccess: (response) => setGarminResult(response),
+      onError: (error) =>
+        setGarminProblem(
+          error instanceof Error ? error.message : t("imports.garmin.error"),
+        ),
+    });
   };
 
   return (
@@ -294,6 +319,89 @@ export function ImportsPage() {
               </div>
             </Card>
           ) : null}
+
+          <Card className="panel garmin-import" id="garmin-export">
+            <SectionHeading
+              title={t("imports.garmin.title")}
+              subtitle={t("imports.garmin.subtitle")}
+              icon={HeartPulse}
+            />
+            <div className="garmin-import__body">
+              <div className="garmin-import__fact">
+                <Database size={16} aria-hidden="true" />
+                <span>{t("imports.garmin.hint")}</span>
+              </div>
+              <Button
+                variant="primary"
+                size="md"
+                loading={garminUpload.isPending}
+                onClick={() => garminInputRef.current?.click()}
+              >
+                <FileUp size={16} aria-hidden="true" />
+                {garminUpload.isPending
+                  ? t("imports.garmin.importing")
+                  : t("imports.garmin.button")}
+              </Button>
+              <input
+                ref={garminInputRef}
+                type="file"
+                accept=".zip,application/zip"
+                className="visually-hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) startGarminUpload(file);
+                  event.target.value = "";
+                }}
+              />
+            </div>
+
+            {garminProblem ? (
+              <ul className="problem-list" role="alert">
+                <li>
+                  <TriangleAlert size={14} aria-hidden="true" />
+                  {garminProblem}
+                </li>
+              </ul>
+            ) : null}
+
+            {garminResult ? (
+              <div className="garmin-import__result">
+                <div className="garmin-import__result-head">
+                  <CheckCircle2 size={18} aria-hidden="true" />
+                  <strong>
+                    {t("imports.garmin.result", {
+                      metrics: garminResult.metrics_imported,
+                      activities: garminResult.activities_imported,
+                    })}
+                  </strong>
+                  <Badge tone={resultTone(garminResult.status)}>
+                    {statusLabel(garminResult.status, t)}
+                  </Badge>
+                </div>
+                {garminResult.metrics_skipped ? (
+                  <p>
+                    {t("imports.garmin.skipped", {
+                      count: garminResult.metrics_skipped,
+                    })}
+                  </p>
+                ) : null}
+                {garminResult.warnings?.length ? (
+                  <details className="import-history__details">
+                    <summary>{t("imports.warnings")}</summary>
+                    <ul>
+                      {garminResult.warnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+                <Link to="/performance" className="text-link">
+                  {t("performance.page.title")}
+                  <ArrowRight size={13} aria-hidden="true" />
+                </Link>
+              </div>
+            ) : null}
+          </Card>
         </div>
 
         <aside className="imports-rail">
@@ -351,7 +459,11 @@ function ImportRunRow({ run, locale }: { run: ImportRun; locale: "es" | "en" }) 
         <div>
           <strong>{formatDateTime(run.started_at, locale)}</strong>
           <span>
-            {t("imports.history.files", { count: files.length })}
+            {run.kind === "garmin_export"
+              ? t("imports.garmin.kind")
+              : files.length === 1
+                ? t("imports.history.file", { count: files.length })
+                : t("imports.history.files", { count: files.length })}
             <span className="dot-sep" aria-hidden="true" />
             {formatRelative(run.started_at, locale)}
           </span>
@@ -372,6 +484,13 @@ function ImportRunRow({ run, locale }: { run: ImportRun; locale: "es" | "en" }) 
             ))}
           </ul>
         </details>
+      ) : run.kind === "garmin_export" ? (
+        <span className="import-history__none">
+          {t("imports.garmin.history", {
+            metrics: run.metrics_imported ?? 0,
+            skipped: run.metrics_skipped ?? 0,
+          })}
+        </span>
       ) : (
         <span className="import-history__none">{t("imports.history.noDetails")}</span>
       )}

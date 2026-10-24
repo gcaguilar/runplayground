@@ -4,6 +4,7 @@ import {
   api,
   type ActivityListParams,
   type ActivityPatch,
+  type GoalUpsert,
 } from "./client";
 
 export const queryKeys = {
@@ -16,6 +17,10 @@ export const queryKeys = {
   audit: ["audit"] as const,
   sync: ["sync"] as const,
   imports: ["imports"] as const,
+  performance: ["performance"] as const,
+  performanceHistory: (days: number) => ["performance", "history", days] as const,
+  performanceGoals: ["performance", "goals"] as const,
+  performanceReference: ["performance", "reference"] as const,
 };
 
 export function useAuthStatus() {
@@ -108,6 +113,8 @@ export function usePatchActivity() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
     },
   });
 }
@@ -130,6 +137,91 @@ export function useImportFiles() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+    },
+  });
+}
+
+export function usePerformance() {
+  return useQuery({
+    queryKey: queryKeys.performance,
+    queryFn: api.performance,
+    staleTime: 60_000,
+  });
+}
+
+export function usePerformanceHistory(days = 180) {
+  return useQuery({
+    queryKey: queryKeys.performanceHistory(days),
+    queryFn: () => api.performanceHistory(days),
+    staleTime: 60_000,
+  });
+}
+
+export function usePerformanceGoals() {
+  return useQuery({
+    queryKey: queryKeys.performanceGoals,
+    queryFn: api.performanceGoals,
+    staleTime: 60_000,
+  });
+}
+
+export function useGarminReference() {
+  return useQuery({
+    queryKey: queryKeys.performanceReference,
+    queryFn: api.garminReference,
+    staleTime: 60_000,
+  });
+}
+
+export function useRecomputePerformance() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.recomputePerformance,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+    },
+  });
+}
+
+export function useUpsertGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ distanceKey, goal }: { distanceKey: string; goal: GoalUpsert }) =>
+      api.upsertGoal(distanceKey, goal),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+    },
+  });
+}
+
+export function useDeleteGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (distanceKey: string) => api.deleteGoal(distanceKey),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+    },
+  });
+}
+
+export function useImportGarminExport() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => api.uploadGarminExport(file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.imports });
+      void queryClient.invalidateQueries({ queryKey: ["activities"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performanceReference });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
     },
   });
 }

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     database_url: str | None = None
     max_upload_mb: int = 50
+    garmin_export_max_mb: int = 500
 
     # --- web --------------------------------------------------------------
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"

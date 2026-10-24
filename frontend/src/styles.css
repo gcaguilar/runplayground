@@ -2594,6 +2594,86 @@ svg {
   margin-top: 3px;
 }
 
+.garmin-import {
+  position: relative;
+  overflow: hidden;
+}
+
+.garmin-import::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--blue), transparent 80%);
+  opacity: 0.7;
+}
+
+.garmin-import__body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.garmin-import__fact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.garmin-import__fact svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.garmin-import__result {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border: 1px solid rgba(201, 245, 106, 0.18);
+  border-radius: 11px;
+  background: rgba(201, 245, 106, 0.035);
+  font-size: 11.5px;
+}
+
+.garmin-import__result-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.garmin-import__result-head > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.garmin-import__result-head strong {
+  flex: 1;
+  min-width: 180px;
+  font-size: 12px;
+}
+
+.garmin-import__result > p {
+  color: var(--muted);
+}
+
+.garmin-import__result .text-link {
+  align-self: flex-start;
+}
+
+
 /* ------------------------------------------------------------------ */
 /* Data quality                                                        */
 
@@ -3411,6 +3491,776 @@ svg {
 }
 
 /* ------------------------------------------------------------------ */
+/* Performance (M1)                                                    */
+
+.performance-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.skeleton--panel {
+  height: 230px;
+  border-radius: var(--radius-lg);
+}
+
+.performance-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.performance-warnings {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 171, 107, 0.2);
+  border-radius: 11px;
+  background: rgba(255, 171, 107, 0.045);
+}
+
+.performance-warnings__icon {
+  display: inline-flex;
+  color: var(--orange);
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.performance-warnings__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.performance-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.anchor-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(201, 245, 106, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 60%),
+    var(--surface);
+}
+
+.anchor-card::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: -70px;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 245, 106, 0.09);
+  pointer-events: none;
+}
+
+.anchor-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.anchor-card__head h2 {
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+
+.anchor-card__value {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 3px 0 0;
+}
+
+.anchor-card__value strong {
+  font-family: var(--font-mono);
+  font-size: clamp(40px, 5vw, 58px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--accent-strong);
+}
+
+.anchor-card__value span {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.anchor-card__range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.anchor-card__range span {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.anchor-card__range strong {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: -0.02em;
+}
+
+.anchor-card__copy {
+  color: var(--muted);
+  font-size: 11.5px;
+  max-width: 52ch;
+}
+
+.anchor-card__asof {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.performance-data-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.performance-data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.data-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.data-stat span {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.data-stat strong {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.performance-prep {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.performance-prep h3 {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.performance-prep__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prep-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+}
+
+.prep-row svg {
+  color: var(--faint);
+  flex-shrink: 0;
+}
+
+.prep-row span {
+  color: var(--muted);
+  flex: 1;
+}
+
+.prep-row strong {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.performance-distances {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.distance-card {
+  --distance-accent: var(--accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  overflow: hidden;
+}
+
+.distance-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--distance-accent), transparent 72%);
+  opacity: 0.75;
+}
+
+.distance-card--10k {
+  --distance-accent: var(--blue);
+}
+
+.distance-card--half_marathon {
+  --distance-accent: var(--orange);
+}
+
+.distance-card--marathon {
+  --distance-accent: var(--violet);
+}
+
+.distance-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.distance-card__head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.distance-card__key {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.distance-card__distance {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.distance-card__primary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--distance-accent) 6%, transparent), transparent 80%),
+    rgba(0, 0, 0, 0.14);
+}
+
+.distance-card__value {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.distance-card__value strong {
+  font-family: var(--font-mono);
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  color: var(--distance-accent);
+}
+
+.distance-card__value > span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.distance-card__range {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+}
+
+.distance-card__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.distance-card__split > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.distance-card__split span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.distance-card__split strong {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.distance-card__gap-copy {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.is-close {
+  color: var(--accent);
+}
+
+.is-moderate {
+  color: var(--orange);
+}
+
+.is-wide {
+  color: var(--red);
+}
+
+.distance-card__marks {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+  padding-top: 4px;
+}
+
+.mark-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-areas:
+    "label value"
+    "label meta";
+  align-items: center;
+  gap: 1px 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.mark-row:last-child {
+  border-bottom: none;
+}
+
+.mark-row__label {
+  grid-area: label;
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mark-row strong {
+  grid-area: value;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.mark-row__meta {
+  grid-area: meta;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--faint);
+  font-size: 9.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mark-row--empty strong,
+.mark-row--empty .mark-row__meta {
+  color: var(--faint);
+}
+
+.distance-card__goal-gap {
+  color: var(--orange);
+  font-size: 10.5px;
+}
+
+.distance-card__goal-gap.is-ahead {
+  color: var(--accent);
+}
+
+.distance-card__confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.distance-card__confidence-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.distance-card__confidence-head span {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.distance-card__confidence-head strong {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.reason-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.reason-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 19px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.distance-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.goal-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+  padding: 13px;
+  border: 1px solid rgba(201, 245, 106, 0.22);
+  border-radius: 11px;
+  background: rgba(201, 245, 106, 0.03);
+}
+
+.goal-editor__head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.goal-editor__head strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.goal-editor__head span {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.goal-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.goal-editor label:nth-of-type(3),
+.goal-editor label:nth-of-type(4) {
+  grid-column: 1 / -1;
+}
+
+.goal-editor label > span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.goal-editor input,
+.goal-editor textarea {
+  width: 100%;
+  font-size: 11.5px;
+  padding: 7px 9px;
+}
+
+.goal-editor textarea {
+  resize: vertical;
+}
+
+.goal-editor__problem {
+  grid-column: 1 / -1;
+  color: var(--red);
+  font-size: 10.5px;
+}
+
+.goal-editor__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.performance-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.performance-history,
+.performance-garmin {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.performance-note {
+  color: var(--faint);
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.garmin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 11px;
+}
+
+.garmin-empty p {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.garmin-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.garmin-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.garmin-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.garmin-metric span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.garmin-metric strong {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.garmin-metric small {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+}
+
+.garmin-chart {
+  padding: 10px 11px 4px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.garmin-chart .eyebrow {
+  margin-bottom: 2px;
+}
+
+.garmin-predictions h3 {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+.garmin-predictions__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.garmin-prediction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 10.5px;
+}
+
+.garmin-prediction span {
+  color: var(--muted);
+}
+
+.garmin-prediction strong {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.garmin-prediction small {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+}
+
+.garmin-predictions__empty {
+  color: var(--faint);
+  font-size: 10.5px;
+}
+
+.performance-method {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.method-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.method-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(201, 245, 106, 0.18);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.method-item h3 {
+  font-size: 12px;
+  font-weight: 750;
+  margin-bottom: 3px;
+}
+
+.method-item p {
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------ */
 /* Responsive                                                          */
 
 @media (max-width: 1240px) {
@@ -3453,6 +4303,11 @@ svg {
 
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .performance-hero,
+  .performance-lower {
+    grid-template-columns: 1fr;
   }
 
   .page {
@@ -3615,6 +4470,11 @@ svg {
   .placeholder-note {
     flex-wrap: wrap;
   }
+
+  .distance-grid,
+  .method-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -3680,5 +4540,17 @@ svg {
 
   .detail-hero__identity {
     flex-direction: column;
+  }
+
+  .performance-actions {
+    width: 100%;
+  }
+
+  .goal-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .mark-row {
+    grid-template-columns: 84px minmax(0, 1fr);
   }
 }

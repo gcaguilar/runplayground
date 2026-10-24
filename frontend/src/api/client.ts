@@ -28,6 +28,20 @@ export type ImportFileResult = Schemas["ImportFileResult"];
 export type ImportRun = Schemas["ImportRunOut"];
 export type AuthStatus = Schemas["AuthStatus"];
 export type StartSyncResponse = Schemas["StartSyncResponse"];
+export type PerformanceOverview = Schemas["PerformanceOverview"];
+export type DistancePrediction = Schemas["DistancePredictionOut"];
+export type PredictionEstimate = Schemas["PredictionEstimateOut"];
+export type PerformanceEffort = Schemas["EffortOut"];
+export type FitnessAnchor = Schemas["FitnessAnchorOut"];
+export type PerformanceGoal = Schemas["GoalOut"];
+export type GoalUpsert = Schemas["GoalUpsert"];
+export type PerformanceHistory = Schemas["PerformanceHistory"];
+export type PerformanceSnapshot = Schemas["PerformanceSnapshotOut"];
+export type PerformanceRecomputeResponse = Schemas["PerformanceRecomputeResponse"];
+export type GarminReference = Schemas["GarminReference"];
+export type GarminMetricPoint = Schemas["GarminMetricPoint"];
+export type GarminRacePrediction = Schemas["GarminRacePrediction"];
+export type GarminExportResponse = Schemas["GarminExportResponse"];
 
 const API_BASE = "/api/v1";
 
@@ -166,4 +180,27 @@ export const api = {
     for (const file of files) form.append("files", file);
     return request<ImportResponse>("/imports", { method: "POST", body: form });
   },
+  uploadGarminExport: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<GarminExportResponse>("/imports/garmin-export", {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  performance: () => request<PerformanceOverview>("/performance"),
+  recomputePerformance: () =>
+    request<PerformanceRecomputeResponse>("/performance/recompute", { method: "POST" }),
+  performanceHistory: (days = 180) =>
+    request<PerformanceHistory>(`/performance/history?days=${days}`),
+  performanceGoals: () => request<PerformanceGoal[]>("/performance/goals"),
+  upsertGoal: (distanceKey: string, goal: GoalUpsert) =>
+    request<PerformanceGoal>(`/performance/goals/${distanceKey}`, {
+      method: "PUT",
+      body: JSON.stringify(goal),
+    }),
+  deleteGoal: (distanceKey: string) =>
+    request<void>(`/performance/goals/${distanceKey}`, { method: "DELETE" }),
+  garminReference: () => request<GarminReference>("/performance/reference"),
 };

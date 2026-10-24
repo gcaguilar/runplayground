@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.models import Activity, ActivityLap, ActivitySource, RawFile, StreamSample
 from app.parsers import PARSER_VERSION, ParsedActivity, ParseError, parse_activity_file
+from app.services.performance import refresh_activity_efforts
 from app.utils import fingerprint, sha256_bytes
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,12 @@ def store_raw_file(
 
 
 def ingest_upload(
-    db: Session, filename: str, data: bytes, content_type: str | None = None
+    db: Session,
+    filename: str,
+    data: bytes,
+    content_type: str | None = None,
+    *,
+    source: str = "upload",
 ) -> IngestOutcome:
     try:
         parsed = parse_activity_file(filename, data)
@@ -82,7 +88,7 @@ def ingest_upload(
     return upsert_parsed(
         db,
         parsed,
-        source="upload",
+        source=source,
         external_id=sha256_bytes(data),
         filename=filename,
         content_type=content_type or _content_type_for(Path(filename).suffix.lower()),
@@ -144,6 +150,7 @@ def upsert_parsed(
             _merge_activity(activity, parsed, prefer_incoming_time=source == "garmin_api")
             _replace_streams(db, activity, parsed)
             activity.quality_flags = _quality_flags(parsed, extra_warnings)
+            refresh_activity_efforts(db, activity)
             db.commit()
             return IngestOutcome(
                 filename=filename,
@@ -154,6 +161,7 @@ def upsert_parsed(
             )
         else:
             _merge_activity(activity, parsed, prefer_incoming_time=False)
+            refresh_activity_efforts(db, activity)
             db.commit()
             return IngestOutcome(
                 filename=filename,
@@ -182,6 +190,7 @@ def upsert_parsed(
                 meta=source_meta or {},
             )
         )
+        refresh_activity_efforts(db, activity)
         db.commit()
         return IngestOutcome(
             filename=filename,
@@ -240,6 +249,7 @@ def upsert_parsed(
             meta=source_meta or {},
         )
     )
+    refresh_activity_efforts(db, activity)
     db.commit()
 
     return IngestOutcome(

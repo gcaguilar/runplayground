@@ -69,6 +69,30 @@ def cmd_export_openapi() -> int:
     return 0
 
 
+def cmd_recompute() -> int:
+    from app.services.performance import (
+        build_overview,
+        mark_efforts_refreshed,
+        refresh_all_efforts,
+        store_snapshot,
+    )
+
+    session = get_session_factory()()
+    try:
+        activities, efforts = refresh_all_efforts(session)
+        mark_efforts_refreshed(session, activities, efforts)
+        session.commit()
+        overview = build_overview(session)
+        store_snapshot(session, overview)
+        anchor = overview.fitness_anchor
+        print(f"activities: {activities}, efforts: {efforts}, status: {overview.status}")
+        if anchor is not None:
+            print(f"10K anchor: {anchor.time_s:.0f}s ({anchor.confidence})")
+        return 0
+    finally:
+        session.close()
+
+
 def cmd_check() -> int:
     settings = get_settings()
     print(f"app: {settings.app_name} {settings.app_version}")
@@ -90,6 +114,7 @@ def main() -> int:
 
     subparsers.add_parser("create-db", help="create tables without Alembic (development)")
     subparsers.add_parser("export-openapi", help="write frontend/openapi.json")
+    subparsers.add_parser("recompute", help="rebuild best efforts and performance snapshots")
     subparsers.add_parser("check", help="print effective configuration")
 
     args = parser.parse_args()
@@ -99,6 +124,8 @@ def main() -> int:
         return cmd_create_db()
     if args.command == "export-openapi":
         return cmd_export_openapi()
+    if args.command == "recompute":
+        return cmd_recompute()
     if args.command == "check":
         return cmd_check()
     return 1

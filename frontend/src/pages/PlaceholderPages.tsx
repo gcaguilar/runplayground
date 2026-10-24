@@ -2,7 +2,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Dumbbell,
-  Gauge,
   Info,
   Stethoscope,
   TrendingUp,
@@ -24,22 +23,7 @@ type PlaceholderConfig = {
   stage: string;
 };
 
-const CONFIG: Record<"performance" | "progress" | "diagnostics" | "training", PlaceholderConfig> = {
-  performance: {
-    eyebrow: "performance.eyebrow",
-    title: "performance.title",
-    subtitle: "performance.subtitle",
-    capabilities: [
-      "performance.capability.1",
-      "performance.capability.2",
-      "performance.capability.3",
-      "performance.capability.4",
-    ],
-    progressTitle: "performance.progress.title",
-    progressBody: "performance.progress.body",
-    icon: Gauge,
-    stage: "M1",
-  },
+const CONFIG: Record<"progress" | "diagnostics" | "training", PlaceholderConfig> = {
   progress: {
     eyebrow: "progress.eyebrow",
     title: "progress.title",
@@ -138,10 +122,6 @@ function PlaceholderPage({ config }: { config: PlaceholderConfig }) {
       </Card>
     </div>
   );
-}
-
-export function PerformancePage() {
-  return <PlaceholderPage config={CONFIG.performance} />;
 }
 
 export function ProgressPage() {
