@@ -61,6 +61,21 @@ Open <http://127.0.0.1:8080>.
 Database migrations run automatically at container start. Data lives in the
 `run-dashboard-data` Docker volume.
 
+### Prebuilt image
+
+GitHub Actions builds and publishes multi-arch images (amd64 and arm64) to
+GitHub Container Registry on every push to `main` and on `v*` tags. To run the
+published image instead of building locally:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Tags include `latest`, `main`, the version tag and `sha-<commit>`. The publish
+workflow lives in
+[`.github/workflows/docker-image.yml`](.github/workflows/docker-image.yml).
+
 ### Garmin Personal API key
 
 Run uses Garmin's official **Personal API**, not account scraping. Access is
