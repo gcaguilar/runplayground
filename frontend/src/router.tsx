@@ -10,16 +10,14 @@ import { ActivitiesPage } from "@/pages/ActivitiesPage";
 import { ActivityDetailPage } from "@/pages/ActivityDetailPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DataQualityPage } from "@/pages/DataQualityPage";
+import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
 import { ImportsPage } from "@/pages/ImportsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PerformancePage } from "@/pages/PerformancePage";
-import {
-  DiagnosticsPage,
-  ProgressPage,
-  TrainingPage,
-} from "@/pages/PlaceholderPages";
+import { ProgressPage } from "@/pages/PlaceholderPages";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { TrainingPage } from "@/pages/TrainingPage";
 
 function RootGate() {
   const auth = useAuthStatus();

@@ -176,6 +176,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diagnostics Overview */
+        get: operations["diagnostics_overview_api_v1_diagnostics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Training Plan */
+        get: operations["training_plan_api_v1_training_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/performance": {
         parameters: {
             query?: never;
@@ -566,6 +600,42 @@ export interface components {
             /** Points */
             points: components["schemas"]["StreamPoint"][];
         };
+        /** AnalysisCoverageOut */
+        AnalysisCoverageOut: {
+            /** Activities */
+            activities: number;
+            /** Weeks With Data */
+            weeks_with_data: number;
+            /** Window Weeks */
+            window_weeks: number;
+            /** First Activity At */
+            first_activity_at?: string | null;
+            /** Last Activity At */
+            last_activity_at?: string | null;
+            /** Last Race At */
+            last_race_at?: string | null;
+            /** Has Anchor */
+            has_anchor: boolean;
+            /** Anchor Pace S Per Km */
+            anchor_pace_s_per_km?: number | null;
+            /** Has Hr */
+            has_hr: boolean;
+            /** Trail Share */
+            trail_share: number;
+            /** Readiness Days */
+            readiness_days: number;
+        };
+        /** AnalysisReferenceOut */
+        AnalysisReferenceOut: {
+            /** Imported At */
+            imported_at?: string | null;
+            /** Readiness 28D */
+            readiness_28d?: number | null;
+            /** Acute Load */
+            acute_load?: number | null;
+            /** Chronic Load */
+            chronic_load?: number | null;
+        };
         /** AuditCoverage */
         AuditCoverage: {
             /** Total Activities */
@@ -663,6 +733,58 @@ export interface components {
         Body_import_garmin_export_zip_api_v1_imports_garmin_export_post: {
             /** File */
             file: string;
+        };
+        /** DiagnosticsOverview */
+        DiagnosticsOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Window Days */
+            window_days: number;
+            /** Status */
+            status: string;
+            /** Score */
+            score?: number | null;
+            /** Headline */
+            headline: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            goal?: components["schemas"]["GoalOut"] | null;
+            /** Dimensions */
+            dimensions: components["schemas"]["DimensionOut"][];
+            /** Limiters */
+            limiters: components["schemas"]["LimiterOut"][];
+            intensity: components["schemas"]["IntensityOut"];
+            load: components["schemas"]["LoadOut"];
+            coverage: components["schemas"]["AnalysisCoverageOut"];
+            reference: components["schemas"]["AnalysisReferenceOut"];
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** DimensionOut */
+        DimensionOut: {
+            /** Key */
+            key: string;
+            /** Score */
+            score?: number | null;
+            /** Status */
+            status: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Reasons */
+            reasons?: string[];
+            /** Metrics */
+            metrics?: {
+                [key: string]: number;
+            };
         };
         /** DistancePredictionOut */
         DistancePredictionOut: {
@@ -911,6 +1033,45 @@ export interface components {
             /** Results */
             results?: components["schemas"]["ImportFileResult"][];
         };
+        /** IntensityBucketOut */
+        IntensityBucketOut: {
+            /** Key */
+            key: string;
+            /** Sessions */
+            sessions: number;
+            /** Duration S */
+            duration_s: number;
+            /** Distance M */
+            distance_m: number;
+            /** Share */
+            share: number;
+        };
+        /** IntensityOut */
+        IntensityOut: {
+            /** Buckets */
+            buckets: components["schemas"]["IntensityBucketOut"][];
+            /** Targets */
+            targets: components["schemas"]["IntensityTargetOut"][];
+            /** Classified Sessions */
+            classified_sessions: number;
+            /** Unknown Sessions */
+            unknown_sessions: number;
+            /** Score */
+            score?: number | null;
+            /** Status */
+            status: string;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** IntensityTargetOut */
+        IntensityTargetOut: {
+            /** Key */
+            key: string;
+            /** Low */
+            low: number;
+            /** High */
+            high: number;
+        };
         /** LapOut */
         LapOut: {
             /** Lap Index */
@@ -941,6 +1102,42 @@ export interface components {
             descent_m?: number | null;
             /** Calories */
             calories?: number | null;
+        };
+        /** LimiterOut */
+        LimiterOut: {
+            /** Dimension Key */
+            dimension_key: string;
+            /** Priority */
+            priority: number;
+            /** Score */
+            score: number;
+            /** Impact */
+            impact: number;
+            /** Reasons */
+            reasons?: string[];
+            /** Metrics */
+            metrics?: {
+                [key: string]: number;
+            };
+        };
+        /** LoadOut */
+        LoadOut: {
+            /** Weekly */
+            weekly: components["schemas"]["WeeklyLoadOut"][];
+            /** Acute 7D */
+            acute_7d: number;
+            /** Chronic Weekly */
+            chronic_weekly: number;
+            /** Ratio */
+            ratio?: number | null;
+            /** Ramp Pct */
+            ramp_pct?: number | null;
+            /** Score */
+            score?: number | null;
+            /** Status */
+            status: string;
+            /** Reasons */
+            reasons?: string[];
         };
         /** LoginRequest */
         LoginRequest: {
@@ -1263,6 +1460,93 @@ export interface components {
             /** Supported Formats */
             supported_formats: string[];
         };
+        /** TrainingFocusOut */
+        TrainingFocusOut: {
+            /** Dimension Key */
+            dimension_key: string;
+            /** Priority */
+            priority: number;
+            /** Score */
+            score?: number | null;
+            /** Action */
+            action: string;
+            /** Reasons */
+            reasons?: string[];
+            /** Metrics */
+            metrics?: {
+                [key: string]: number;
+            };
+        };
+        /** TrainingLoadTargetOut */
+        TrainingLoadTargetOut: {
+            /** Weekly Distance Low M */
+            weekly_distance_low_m: number;
+            /** Weekly Distance High M */
+            weekly_distance_high_m: number;
+            /** Current Weekly Distance M */
+            current_weekly_distance_m: number;
+            /** Long Run Low M */
+            long_run_low_m: number;
+            /** Long Run High M */
+            long_run_high_m: number;
+            /** Quality Sessions Low */
+            quality_sessions_low: number;
+            /** Quality Sessions High */
+            quality_sessions_high: number;
+        };
+        /** TrainingPlan */
+        TrainingPlan: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Status */
+            status: string;
+            /** Phase */
+            phase: string;
+            /** Phase Reason */
+            phase_reason: string;
+            /** Weeks To Goal */
+            weeks_to_goal?: number | null;
+            goal?: components["schemas"]["GoalOut"] | null;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Focus */
+            focus: components["schemas"]["TrainingFocusOut"][];
+            /** Sessions */
+            sessions: components["schemas"]["TrainingSessionOut"][];
+            load_target: components["schemas"]["TrainingLoadTargetOut"];
+            intensity: components["schemas"]["IntensityOut"];
+            load: components["schemas"]["LoadOut"];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
+        /** TrainingSessionOut */
+        TrainingSessionOut: {
+            /** Type */
+            type: string;
+            /** Intensity */
+            intensity: string;
+            /** Priority */
+            priority: string;
+            /** Duration Low S */
+            duration_low_s?: number | null;
+            /** Duration High S */
+            duration_high_s?: number | null;
+            /** Distance Low M */
+            distance_low_m?: number | null;
+            /** Distance High M */
+            distance_high_m?: number | null;
+            /** Purpose */
+            purpose: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1289,6 +1573,22 @@ export interface components {
             distance_m: number;
             /** Duration S */
             duration_s: number;
+        };
+        /** WeeklyLoadOut */
+        WeeklyLoadOut: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /** Distance M */
+            distance_m: number;
+            /** Duration S */
+            duration_s: number;
+            /** Load */
+            load: number;
+            /** Sessions */
+            sessions: number;
         };
         /** WeeklySummary */
         WeeklySummary: {
@@ -1694,6 +1994,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    diagnostics_overview_api_v1_diagnostics_get: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticsOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    training_plan_api_v1_training_get: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlan"];
                 };
             };
             /** @description Validation Error */

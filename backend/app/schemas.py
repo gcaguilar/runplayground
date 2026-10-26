@@ -389,6 +389,161 @@ class GarminExportResponse(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Diagnostics and training (M2)
+
+
+class DimensionOut(ApiModel):
+    key: str
+    score: float | None = None
+    status: str
+    confidence: str
+    confidence_score: float
+    reasons: list[str] = Field(default_factory=list)
+    metrics: dict[str, float] = Field(default_factory=dict)
+
+
+class LimiterOut(ApiModel):
+    dimension_key: str
+    priority: int
+    score: float
+    impact: float
+    reasons: list[str] = Field(default_factory=list)
+    metrics: dict[str, float] = Field(default_factory=dict)
+
+
+class IntensityBucketOut(ApiModel):
+    key: str
+    sessions: int
+    duration_s: float
+    distance_m: float
+    share: float
+
+
+class IntensityTargetOut(ApiModel):
+    key: str
+    low: float
+    high: float
+
+
+class IntensityOut(ApiModel):
+    buckets: list[IntensityBucketOut]
+    targets: list[IntensityTargetOut]
+    classified_sessions: int
+    unknown_sessions: int
+    score: float | None = None
+    status: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class WeeklyLoadOut(ApiModel):
+    week_start: date
+    distance_m: float
+    duration_s: float
+    load: float
+    sessions: int
+
+
+class LoadOut(ApiModel):
+    weekly: list[WeeklyLoadOut]
+    acute_7d: float
+    chronic_weekly: float
+    ratio: float | None = None
+    ramp_pct: float | None = None
+    score: float | None = None
+    status: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class AnalysisCoverageOut(ApiModel):
+    activities: int
+    weeks_with_data: int
+    window_weeks: int
+    first_activity_at: datetime | None = None
+    last_activity_at: datetime | None = None
+    last_race_at: datetime | None = None
+    has_anchor: bool
+    anchor_pace_s_per_km: float | None = None
+    has_hr: bool
+    trail_share: float
+    readiness_days: int
+
+
+class AnalysisReferenceOut(ApiModel):
+    imported_at: datetime | None = None
+    readiness_28d: float | None = None
+    acute_load: float | None = None
+    chronic_load: float | None = None
+
+
+class DiagnosticsOverview(ApiModel):
+    generated_at: datetime
+    model_version: str
+    window_days: int
+    status: str
+    score: float | None = None
+    headline: str
+    confidence: str
+    confidence_score: float
+    goal: GoalOut | None = None
+    dimensions: list[DimensionOut]
+    limiters: list[LimiterOut]
+    intensity: IntensityOut
+    load: LoadOut
+    coverage: AnalysisCoverageOut
+    reference: AnalysisReferenceOut
+    warnings: list[str] = Field(default_factory=list)
+
+
+class TrainingFocusOut(ApiModel):
+    dimension_key: str
+    priority: int
+    score: float | None = None
+    action: str
+    reasons: list[str] = Field(default_factory=list)
+    metrics: dict[str, float] = Field(default_factory=dict)
+
+
+class TrainingSessionOut(ApiModel):
+    type: str
+    intensity: str
+    priority: str
+    duration_low_s: float | None = None
+    duration_high_s: float | None = None
+    distance_low_m: float | None = None
+    distance_high_m: float | None = None
+    purpose: str
+
+
+class TrainingLoadTargetOut(ApiModel):
+    weekly_distance_low_m: float
+    weekly_distance_high_m: float
+    current_weekly_distance_m: float
+    long_run_low_m: float
+    long_run_high_m: float
+    quality_sessions_low: int
+    quality_sessions_high: int
+
+
+class TrainingPlan(ApiModel):
+    generated_at: datetime
+    model_version: str
+    status: str
+    phase: str
+    phase_reason: str
+    weeks_to_goal: int | None = None
+    goal: GoalOut | None = None
+    confidence: str
+    confidence_score: float
+    focus: list[TrainingFocusOut]
+    sessions: list[TrainingSessionOut]
+    load_target: TrainingLoadTargetOut
+    intensity: IntensityOut
+    load: LoadOut
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime

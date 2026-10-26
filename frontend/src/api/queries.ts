@@ -21,6 +21,8 @@ export const queryKeys = {
   performanceHistory: (days: number) => ["performance", "history", days] as const,
   performanceGoals: ["performance", "goals"] as const,
   performanceReference: ["performance", "reference"] as const,
+  diagnostics: ["diagnostics"] as const,
+  training: ["training"] as const,
 };
 
 export function useAuthStatus() {
@@ -115,6 +117,8 @@ export function usePatchActivity() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }
@@ -139,6 +143,8 @@ export function useImportFiles() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }
@@ -175,6 +181,22 @@ export function useGarminReference() {
   });
 }
 
+export function useDiagnostics() {
+  return useQuery({
+    queryKey: queryKeys.diagnostics,
+    queryFn: api.diagnostics,
+    staleTime: 60_000,
+  });
+}
+
+export function useTraining() {
+  return useQuery({
+    queryKey: queryKeys.training,
+    queryFn: api.training,
+    staleTime: 60_000,
+  });
+}
+
 export function useRecomputePerformance() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -182,6 +204,8 @@ export function useRecomputePerformance() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }
@@ -195,6 +219,8 @@ export function useUpsertGoal() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }
@@ -207,6 +233,8 @@ export function useDeleteGoal() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }
@@ -222,6 +250,8 @@ export function useImportGarminExport() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performanceReference });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
     },
   });
 }

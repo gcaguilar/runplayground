@@ -682,6 +682,128 @@
         }
       }
     },
+    "/api/v1/diagnostics": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Diagnostics Overview",
+        "operationId": "diagnostics_overview_api_v1_diagnostics_get",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticsOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Training Plan",
+        "operationId": "training_plan_api_v1_training_get",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlan"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/performance": {
       "get": {
         "tags": [
@@ -2136,6 +2258,147 @@
         ],
         "title": "ActivityStreams"
       },
+      "AnalysisCoverageOut": {
+        "properties": {
+          "activities": {
+            "type": "integer",
+            "title": "Activities"
+          },
+          "weeks_with_data": {
+            "type": "integer",
+            "title": "Weeks With Data"
+          },
+          "window_weeks": {
+            "type": "integer",
+            "title": "Window Weeks"
+          },
+          "first_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Activity At"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At"
+          },
+          "last_race_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Race At"
+          },
+          "has_anchor": {
+            "type": "boolean",
+            "title": "Has Anchor"
+          },
+          "anchor_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Pace S Per Km"
+          },
+          "has_hr": {
+            "type": "boolean",
+            "title": "Has Hr"
+          },
+          "trail_share": {
+            "type": "number",
+            "title": "Trail Share"
+          },
+          "readiness_days": {
+            "type": "integer",
+            "title": "Readiness Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activities",
+          "weeks_with_data",
+          "window_weeks",
+          "has_anchor",
+          "has_hr",
+          "trail_share",
+          "readiness_days"
+        ],
+        "title": "AnalysisCoverageOut"
+      },
+      "AnalysisReferenceOut": {
+        "properties": {
+          "imported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported At"
+          },
+          "readiness_28d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness 28D"
+          },
+          "acute_load": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acute Load"
+          },
+          "chronic_load": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chronic Load"
+          }
+        },
+        "type": "object",
+        "title": "AnalysisReferenceOut"
+      },
       "AuditCoverage": {
         "properties": {
           "total_activities": {
@@ -2418,6 +2681,163 @@
           "file"
         ],
         "title": "Body_import_garmin_export_zip_api_v1_imports_garmin_export_post"
+      },
+      "DiagnosticsOverview": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "headline": {
+            "type": "string",
+            "title": "Headline"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/DimensionOut"
+            },
+            "type": "array",
+            "title": "Dimensions"
+          },
+          "limiters": {
+            "items": {
+              "$ref": "#/components/schemas/LimiterOut"
+            },
+            "type": "array",
+            "title": "Limiters"
+          },
+          "intensity": {
+            "$ref": "#/components/schemas/IntensityOut"
+          },
+          "load": {
+            "$ref": "#/components/schemas/LoadOut"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/AnalysisCoverageOut"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/AnalysisReferenceOut"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "window_days",
+          "status",
+          "headline",
+          "confidence",
+          "confidence_score",
+          "dimensions",
+          "limiters",
+          "intensity",
+          "load",
+          "coverage",
+          "reference"
+        ],
+        "title": "DiagnosticsOverview"
+      },
+      "DimensionOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "status",
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "DimensionOut"
       },
       "DistancePredictionOut": {
         "properties": {
@@ -3168,6 +3588,119 @@
         ],
         "title": "ImportRunOut"
       },
+      "IntensityBucketOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "share": {
+            "type": "number",
+            "title": "Share"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "sessions",
+          "duration_s",
+          "distance_m",
+          "share"
+        ],
+        "title": "IntensityBucketOut"
+      },
+      "IntensityOut": {
+        "properties": {
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/IntensityBucketOut"
+            },
+            "type": "array",
+            "title": "Buckets"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/IntensityTargetOut"
+            },
+            "type": "array",
+            "title": "Targets"
+          },
+          "classified_sessions": {
+            "type": "integer",
+            "title": "Classified Sessions"
+          },
+          "unknown_sessions": {
+            "type": "integer",
+            "title": "Unknown Sessions"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "buckets",
+          "targets",
+          "classified_sessions",
+          "unknown_sessions",
+          "status"
+        ],
+        "title": "IntensityOut"
+      },
+      "IntensityTargetOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "low": {
+            "type": "number",
+            "title": "Low"
+          },
+          "high": {
+            "type": "number",
+            "title": "High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "low",
+          "high"
+        ],
+        "title": "IntensityTargetOut"
+      },
       "LapOut": {
         "properties": {
           "lap_index": {
@@ -3324,6 +3857,119 @@
           "lap_index"
         ],
         "title": "LapOut"
+      },
+      "LimiterOut": {
+        "properties": {
+          "dimension_key": {
+            "type": "string",
+            "title": "Dimension Key"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "impact": {
+            "type": "number",
+            "title": "Impact"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dimension_key",
+          "priority",
+          "score",
+          "impact"
+        ],
+        "title": "LimiterOut"
+      },
+      "LoadOut": {
+        "properties": {
+          "weekly": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyLoadOut"
+            },
+            "type": "array",
+            "title": "Weekly"
+          },
+          "acute_7d": {
+            "type": "number",
+            "title": "Acute 7D"
+          },
+          "chronic_weekly": {
+            "type": "number",
+            "title": "Chronic Weekly"
+          },
+          "ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ratio"
+          },
+          "ramp_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ramp Pct"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weekly",
+          "acute_7d",
+          "chronic_weekly",
+          "status"
+        ],
+        "title": "LoadOut"
       },
       "LoginRequest": {
         "properties": {
@@ -4333,6 +4979,276 @@
         ],
         "title": "SystemStatus"
       },
+      "TrainingFocusOut": {
+        "properties": {
+          "dimension_key": {
+            "type": "string",
+            "title": "Dimension Key"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dimension_key",
+          "priority",
+          "action"
+        ],
+        "title": "TrainingFocusOut"
+      },
+      "TrainingLoadTargetOut": {
+        "properties": {
+          "weekly_distance_low_m": {
+            "type": "number",
+            "title": "Weekly Distance Low M"
+          },
+          "weekly_distance_high_m": {
+            "type": "number",
+            "title": "Weekly Distance High M"
+          },
+          "current_weekly_distance_m": {
+            "type": "number",
+            "title": "Current Weekly Distance M"
+          },
+          "long_run_low_m": {
+            "type": "number",
+            "title": "Long Run Low M"
+          },
+          "long_run_high_m": {
+            "type": "number",
+            "title": "Long Run High M"
+          },
+          "quality_sessions_low": {
+            "type": "integer",
+            "title": "Quality Sessions Low"
+          },
+          "quality_sessions_high": {
+            "type": "integer",
+            "title": "Quality Sessions High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weekly_distance_low_m",
+          "weekly_distance_high_m",
+          "current_weekly_distance_m",
+          "long_run_low_m",
+          "long_run_high_m",
+          "quality_sessions_low",
+          "quality_sessions_high"
+        ],
+        "title": "TrainingLoadTargetOut"
+      },
+      "TrainingPlan": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "phase": {
+            "type": "string",
+            "title": "Phase"
+          },
+          "phase_reason": {
+            "type": "string",
+            "title": "Phase Reason"
+          },
+          "weeks_to_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weeks To Goal"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "focus": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingFocusOut"
+            },
+            "type": "array",
+            "title": "Focus"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingSessionOut"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "load_target": {
+            "$ref": "#/components/schemas/TrainingLoadTargetOut"
+          },
+          "intensity": {
+            "$ref": "#/components/schemas/IntensityOut"
+          },
+          "load": {
+            "$ref": "#/components/schemas/LoadOut"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "status",
+          "phase",
+          "phase_reason",
+          "confidence",
+          "confidence_score",
+          "focus",
+          "sessions",
+          "load_target",
+          "intensity",
+          "load"
+        ],
+        "title": "TrainingPlan"
+      },
+      "TrainingSessionOut": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "intensity": {
+            "type": "string",
+            "title": "Intensity"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "duration_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Low S"
+          },
+          "duration_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration High S"
+          },
+          "distance_low_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Low M"
+          },
+          "distance_high_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance High M"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "intensity",
+          "priority",
+          "purpose"
+        ],
+        "title": "TrainingSessionOut"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -4401,6 +5317,40 @@
           "duration_s"
         ],
         "title": "WeeklyDay"
+      },
+      "WeeklyLoadOut": {
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Week Start"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "load": {
+            "type": "number",
+            "title": "Load"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week_start",
+          "distance_m",
+          "duration_s",
+          "load",
+          "sessions"
+        ],
+        "title": "WeeklyLoadOut"
       },
       "WeeklySummary": {
         "properties": {

@@ -5,10 +5,12 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M1 — performance and predictions.** Sync, import, activities,
-> weekly summary and data audit work, and the Performance section now turns
-> your efforts into 5K/10K/half/marathon predictions with ranges and
-> confidence. Progress, Diagnostics and Training remain placeholders.
+> **Status: M2 — diagnostics and training.** Sync, import, activities,
+> weekly summary and data audit work. Performance turns your efforts into
+> 5K/10K/half/marathon predictions with ranges and confidence. Diagnostics
+> scores six training dimensions and explains every limiter; Training turns
+> that reading and your goal into a conservative seven-day plan. Progress
+> remains a placeholder for M3.
 
 ## What works today
 
@@ -22,6 +24,16 @@ metric dump.
   (A), a distance-specific forecast (B), the A–B gap and an 80% range.
 - **10K fitness anchor** and daily prediction snapshots to follow changes over
   time. Confidence is explicit and explains what is missing.
+- **Diagnostics** across six dimensions: volume, consistency, intensity, load,
+  recovery and specificity. Every score shows its status, confidence, evidence
+  and reason codes; missing data lowers confidence instead of inventing a value.
+- **Intensity and load analysis**: approximate easy/moderate/hard distribution
+  from pace relative to the 10K anchor (HR fallback), plus a transparent
+  internally estimated load model, acute/chronic ratio and a 12-week chart.
+- **Limiting factors and weekly training plan**: ranked limiters, a conservative
+  seven-day plan for the current phase (maintenance, base, build, peak, taper or
+  recovery), and weekly volume, long-run and quality targets. Garmin readiness
+  and load remain reference-only and never change the diagnostics score.
 - **Deduplication and provenance**: every activity records where it came
   from, when it was imported, its raw file hash and the parser version.
   Cross-format duplicates are merged instead of double-counted.
@@ -74,10 +86,10 @@ Management → Export your data**. Download the ZIP and upload it from
 Training Readiness, acute/chronic load and Garmin's own race predictions, and
 imports any FIT files contained in the archive. Re-uploading the same ZIP is
 idempotent. These values appear as a separate Garmin reference; they do not
-feed the internal A/B prediction models.
+feed the internal A/B prediction models or the diagnostics score.
 
-M1 syncs activities and their FIT files. Sleep, HRV, Body Battery and weight
-are still outside the current scope.
+The dashboard syncs activities and their FIT files. Sleep, HRV, Body Battery
+and weight are still outside the current scope.
 
 ### Try it without a watch
 
@@ -240,9 +252,9 @@ for a single-user instance; horizontal scaling is not a goal.
 | Milestone | Scope |
 | --- | --- |
 | **M0** | Infrastructure, Garmin sync, FIT/TCX/GPX import, activities, weekly summary, audit, Docker. |
-| **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. **Current.** |
-| **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
-| **M3** | Goals, calendar, reports, race planning. |
+| **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. |
+| **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. **Current.** |
+| **M3** | Progress views, goals, calendar, reports and race planning. |
 | **M4** | Future scenarios, continuous tracking of predictions and goals. |
 
 ## License and disclaimer

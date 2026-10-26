@@ -13,6 +13,7 @@ import ReactECharts from "echarts-for-react/esm/core";
 import { BarChart3, HeartPulse } from "lucide-react";
 
 import type {
+  AnalysisLoad,
   GarminMetricPoint,
   PerformanceSnapshot,
   StreamPoint,
@@ -23,6 +24,7 @@ import { EmptyState } from "@/components/ui";
 import {
   formatClock,
   formatDate,
+  formatDistance,
   formatNumber,
   formatPace,
   parseUtc,
@@ -543,6 +545,134 @@ export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
       option={option}
       opts={chartOpts}
       style={{ height: 150, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
+  const { locale, t, units } = useI18n();
+  const labels = load.weekly.map((point) =>
+    formatDate(point.week_start, locale, { day: "numeric", month: "short" }),
+  );
+  const values = load.weekly.map((point) => point.load);
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(255,255,255,0.025)" } },
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const index = list[0]?.dataIndex ?? 0;
+          const point = load.weekly[index];
+          if (!point) return "";
+          return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
+            point.week_start,
+            locale,
+            { day: "numeric", month: "short", year: "numeric" },
+          )}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:2px;background:${ACCENT};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("analysis.load.chartLoad")}</span>
+              <strong style="margin-left:auto">${formatNumber(point.load, locale)}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("analysis.load.chartChronic")}</span>
+              <strong style="margin-left:auto">${formatNumber(load.chronic_weekly, locale)}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="color:#a9b5ae">${t("analysis.load.chartDistance")}</span>
+              <strong style="margin-left:auto">${formatDistance(
+                point.distance_m,
+                units,
+                locale,
+                { digits: 1 },
+              )}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="color:#a9b5ae">${t("analysis.load.chartSessions")}</span>
+              <strong style="margin-left:auto">${formatNumber(point.sessions, locale)}</strong>
+            </div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        splitNumber: 4,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatNumber(value, locale),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          type: "bar",
+          data: values.map((value, index) => ({
+            value,
+            itemStyle: {
+              borderRadius: [4, 4, 2, 2],
+              color:
+                index === values.length - 1 ? ACCENT : "rgba(201, 245, 106, 0.42)",
+            },
+          })),
+          barWidth: "52%",
+          emphasis: { itemStyle: { color: "#dcff94" } },
+        },
+        {
+          type: "line",
+          data: values.map(() => load.chronic_weekly),
+          showSymbol: false,
+          silent: true,
+          lineStyle: { color: ORANGE, width: 1.4, type: "dashed", opacity: 0.8 },
+          itemStyle: { color: ORANGE },
+          z: 3,
+        },
+      ],
+    }),
+    [labels, load.chronic_weekly, load.weekly, locale, t, units, values],
+  );
+
+  if (!values.some((value) => value > 0)) {
+    return (
+      <EmptyState
+        compact
+        icon={BarChart3}
+        title={t("analysis.load.empty")}
+        description={t("analysis.load.chartSubtitle")}
+      />
+    );
+  }
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 248, width: "100%" }}
       notMerge
       lazyUpdate
     />

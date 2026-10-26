@@ -1,9 +1,7 @@
 import {
   ArrowRight,
   CheckCircle2,
-  Dumbbell,
   Info,
-  Stethoscope,
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
@@ -23,52 +21,20 @@ type PlaceholderConfig = {
   stage: string;
 };
 
-const CONFIG: Record<"progress" | "diagnostics" | "training", PlaceholderConfig> = {
-  progress: {
-    eyebrow: "progress.eyebrow",
-    title: "progress.title",
-    subtitle: "progress.subtitle",
-    capabilities: [
-      "progress.capability.1",
-      "progress.capability.2",
-      "progress.capability.3",
-      "progress.capability.4",
-    ],
-    progressTitle: "progress.progress.title",
-    progressBody: "progress.progress.body",
-    icon: TrendingUp,
-    stage: "M2",
-  },
-  diagnostics: {
-    eyebrow: "diagnostics.eyebrow",
-    title: "diagnostics.title",
-    subtitle: "diagnostics.subtitle",
-    capabilities: [
-      "diagnostics.capability.1",
-      "diagnostics.capability.2",
-      "diagnostics.capability.3",
-      "diagnostics.capability.4",
-    ],
-    progressTitle: "diagnostics.progress.title",
-    progressBody: "diagnostics.progress.body",
-    icon: Stethoscope,
-    stage: "M2",
-  },
-  training: {
-    eyebrow: "training.eyebrow",
-    title: "training.title",
-    subtitle: "training.subtitle",
-    capabilities: [
-      "training.capability.1",
-      "training.capability.2",
-      "training.capability.3",
-      "training.capability.4",
-    ],
-    progressTitle: "training.progress.title",
-    progressBody: "training.progress.body",
-    icon: Dumbbell,
-    stage: "M2",
-  },
+const CONFIG: PlaceholderConfig = {
+  eyebrow: "progress.eyebrow",
+  title: "progress.title",
+  subtitle: "progress.subtitle",
+  capabilities: [
+    "progress.capability.1",
+    "progress.capability.2",
+    "progress.capability.3",
+    "progress.capability.4",
+  ],
+  progressTitle: "progress.progress.title",
+  progressBody: "progress.progress.body",
+  icon: TrendingUp,
+  stage: "M3",
 };
 
 function PlaceholderPage({ config }: { config: PlaceholderConfig }) {
@@ -125,13 +91,5 @@ function PlaceholderPage({ config }: { config: PlaceholderConfig }) {
 }
 
 export function ProgressPage() {
-  return <PlaceholderPage config={CONFIG.progress} />;
-}
-
-export function DiagnosticsPage() {
-  return <PlaceholderPage config={CONFIG.diagnostics} />;
-}
-
-export function TrainingPage() {
-  return <PlaceholderPage config={CONFIG.training} />;
+  return <PlaceholderPage config={CONFIG} />;
 }

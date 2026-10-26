@@ -42,6 +42,20 @@ export type GarminReference = Schemas["GarminReference"];
 export type GarminMetricPoint = Schemas["GarminMetricPoint"];
 export type GarminRacePrediction = Schemas["GarminRacePrediction"];
 export type GarminExportResponse = Schemas["GarminExportResponse"];
+export type DiagnosticsOverview = Schemas["DiagnosticsOverview"];
+export type AnalysisDimension = Schemas["DimensionOut"];
+export type AnalysisLimiter = Schemas["LimiterOut"];
+export type AnalysisIntensity = Schemas["IntensityOut"];
+export type AnalysisIntensityBucket = Schemas["IntensityBucketOut"];
+export type AnalysisIntensityTarget = Schemas["IntensityTargetOut"];
+export type AnalysisLoad = Schemas["LoadOut"];
+export type WeeklyLoad = Schemas["WeeklyLoadOut"];
+export type AnalysisCoverage = Schemas["AnalysisCoverageOut"];
+export type AnalysisReference = Schemas["AnalysisReferenceOut"];
+export type TrainingPlan = Schemas["TrainingPlan"];
+export type TrainingFocus = Schemas["TrainingFocusOut"];
+export type TrainingSession = Schemas["TrainingSessionOut"];
+export type TrainingLoadTarget = Schemas["TrainingLoadTargetOut"];
 
 const API_BASE = "/api/v1";
 
@@ -203,4 +217,17 @@ export const api = {
   deleteGoal: (distanceKey: string) =>
     request<void>(`/performance/goals/${distanceKey}`, { method: "DELETE" }),
   garminReference: () => request<GarminReference>("/performance/reference"),
+
+  diagnostics: () =>
+    request<DiagnosticsOverview>(
+      `/diagnostics${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  training: () =>
+    request<TrainingPlan>(
+      `/training${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
 };
