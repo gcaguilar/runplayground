@@ -28,11 +28,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY backend/pyproject.toml ./
+# Install dependencies from pyproject.toml only. Keeping the application
+# source out of this layer means code changes do not reinstall every package.
+# The app itself is imported from /app via PYTHONPATH.
+COPY backend/pyproject.toml /tmp/run-dashboard/pyproject.toml
+RUN pip install /tmp/run-dashboard \
+    && rm -rf /tmp/run-dashboard
+
 COPY backend/app ./app
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./
-RUN pip install .
 
 COPY --from=frontend /build/dist ./app/static
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint
