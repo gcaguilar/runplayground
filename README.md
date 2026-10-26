@@ -186,6 +186,44 @@ Before exposing it to a LAN or the internet:
 2. Change the port mapping to `8080:8080` (or put it behind a reverse proxy).
 3. Terminate TLS at the reverse proxy. The app does not serve HTTPS itself.
 
+## Troubleshooting
+
+### The container runs, but <http://127.0.0.1:8080> does not respond
+
+Check that the port is actually published. The Compose file binds it
+explicitly, but a container started with a bare `docker run` has no port
+mapping:
+
+```bash
+docker compose ps
+docker compose port run 8080    # should print 127.0.0.1:8080
+```
+
+Start the stack through Compose instead of `docker run`:
+
+```bash
+docker compose up -d
+```
+
+If Docker requires `sudo` on your machine, run the same commands with
+`sudo` (or add your user to the `docker` group and log in again).
+
+Other common causes:
+
+- **Port 8080 is already in use.** `ss -ltn | grep 8080` shows the socket
+  holding it. Stop that process or change the published port in
+  `docker-compose.yml`.
+- **The container exits during startup.** `docker compose logs run` shows the
+  error; the usual culprit is a `/data` volume owned by another UID. With a
+  bind mount, run `sudo chown -R 1000:1000 data`.
+- **You are connecting from another device.** The default binding is
+  `127.0.0.1`, so only this machine can reach it. See
+  [Exposing the dashboard](#exposing-the-dashboard) before changing it.
+
+The image health check probes `/api/v1/health` from inside the container, so
+`docker compose ps` reporting `healthy` proves the app is up even when the
+published port is wrong.
+
 ## Development
 
 Requirements: Python 3.12+ and [Bun](https://bun.sh) 1.4+.
