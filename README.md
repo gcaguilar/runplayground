@@ -173,7 +173,7 @@ Before exposing it to a LAN or the internet:
 
 ## Development
 
-Requirements: Python 3.12+, [pnpm](https://pnpm.io) and Node 22+.
+Requirements: Python 3.12+ and [Bun](https://bun.sh) 1.4+.
 
 Backend:
 
@@ -190,12 +190,12 @@ Frontend (Vite dev server with API proxy):
 
 ```bash
 cd frontend
-pnpm install
-pnpm dev
+bun install
+bun run dev
 ```
 
 Open <http://127.0.0.1:5173>. To serve the built SPA from FastAPI instead,
-run `pnpm build` and start uvicorn with `STATIC_DIR=../frontend/dist`.
+run `bun run build` and start uvicorn with `STATIC_DIR=../frontend/dist`.
 
 Checks:
 
@@ -203,14 +203,14 @@ Checks:
 .venv/bin/pytest
 .venv/bin/ruff check backend
 .venv/bin/ruff format --check backend
-cd frontend && pnpm typecheck && pnpm build
+cd frontend && bun run typecheck && bun run build
 ```
 
 After changing the API schema, regenerate the checked-in contract and types:
 
 ```bash
 cd backend && ../.venv/bin/python -m app.cli export-openapi
-cd ../frontend && pnpm api:types
+cd ../frontend && bun run api:types
 ```
 
 ### Layout

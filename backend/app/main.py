@@ -136,5 +136,5 @@ else:
             "version": settings.app_version,
             "api": "/api/v1/health",
             "docs": "/docs",
-            "frontend": "not built; run `pnpm build` in frontend/",
+            "frontend": "not built; run `bun run build` in frontend/",
         }

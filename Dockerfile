@@ -3,15 +3,15 @@
 # ---------------------------------------------------------------------------
 # Frontend build
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS frontend
+FROM oven/bun:1.4.4-alpine AS frontend
 
 WORKDIR /build
 
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
-RUN npm install -g pnpm@12.15.0 && pnpm install --frozen-lockfile
+COPY frontend/package.json frontend/bun.lock ./
+RUN bun install --frozen-lockfile
 
 COPY frontend/ ./
-RUN pnpm build
+RUN bun run build
 
 # ---------------------------------------------------------------------------
 # Runtime

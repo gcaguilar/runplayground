@@ -4,11 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit",
-    "preview": "vite preview",
-    "api:types": "openapi-typescript openapi.json -o src/api/schema.ts"
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun tsc --noEmit && bunx --bun vite build",
+    "typecheck": "bunx --bun tsc --noEmit",
+    "preview": "bunx --bun vite preview",
+    "api:types": "bunx --bun openapi-typescript openapi.json -o src/api/schema.ts"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
@@ -31,5 +31,5 @@
     "typescript": "5.9.3",
     "vite": "^8.3.5"
   },
-  "packageManager": "pnpm@12.15.0"
+  "packageManager": "bun@1.4.4"
 }
