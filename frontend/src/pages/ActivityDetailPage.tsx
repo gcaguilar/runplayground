@@ -19,6 +19,7 @@ import {
 import { ApiError } from "@/api/client";
 import type { Lap, SourceOut } from "@/api/client";
 import { useActivity, usePatchActivity, useStreams } from "@/api/queries";
+import { ActivityClassificationCard } from "@/components/ActivityClassificationCard";
 import { ActivityStreamChart } from "@/components/Charts";
 import { RouteMap } from "@/components/RouteMap";
 import { SportGlyph } from "@/components/SportGlyph";
@@ -295,6 +296,8 @@ export function ActivityDetailPage() {
           value={data.calories ? `${formatNumber(data.calories, locale)} kcal` : "—"}
         />
       </section>
+
+      <ActivityClassificationCard activity={data} />
 
       <Card className="panel">
         <SectionHeading
