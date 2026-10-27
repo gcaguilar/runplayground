@@ -14,17 +14,31 @@ import {
   Mountain,
   RefreshCw,
   Route,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
   Upload,
+  type LucideIcon,
 } from "lucide-react";
 
 import {
   useActivities,
   useAudit,
+  useBriefing,
   useStartSync,
   useSyncStatus,
   useWeeklySummary,
 } from "@/api/queries";
-import type { Activity, AuditReport } from "@/api/client";
+import type {
+  Activity,
+  AuditReport,
+  BriefingDistance,
+  BriefingInsight,
+  BriefingTrend,
+  BriefingView,
+} from "@/api/client";
+import { DIMENSION_META } from "@/components/analysis";
 import { WeeklyVolumeChart } from "@/components/Charts";
 import { SportGlyph } from "@/components/SportGlyph";
 import {
@@ -42,12 +56,14 @@ import {
 import { useI18n, type Locale, type MessageKey } from "@/i18n";
 import {
   addDays,
+  formatClock,
   formatDate,
   formatDelta,
   formatDistance,
   formatDuration,
   formatElevation,
   formatPace,
+  formatPercent,
   formatWeekRange,
   localIsoDate,
   scoreBand,
@@ -61,6 +77,7 @@ export function DashboardPage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const selectedWeek = weekStartKey(weekOffset);
   const summary = useWeeklySummary(selectedWeek);
+  const briefing = useBriefing();
   const recent = useActivities({ limit: 5, sort: "date_desc" });
   const audit = useAudit();
   const sync = useSyncStatus();
@@ -116,50 +133,62 @@ export function DashboardPage() {
   const garminConfigured = sync.data?.garmin_configured ?? false;
   const FocusIcon = focus.icon;
 
+  const weekSwitcher = (
+    <div className="week-switcher" aria-label={t("dashboard.week.title")}>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setWeekOffset((value) => value - 1)}
+        aria-label={t("dashboard.previousWeek")}
+      >
+        <ChevronLeft size={18} aria-hidden="true" />
+      </Button>
+      <div className="week-switcher__label">
+        <span>
+          {weekOffset === 0
+            ? t("dashboard.thisWeek")
+            : formatWeekRange(selectedWeek, weekEnd, locale)}
+        </span>
+        {weekOffset === 0 ? (
+          <small>{formatWeekRange(selectedWeek, weekEnd, locale)}</small>
+        ) : (
+          <button type="button" onClick={() => setWeekOffset(0)}>
+            {t("dashboard.currentWeek")}
+          </button>
+        )}
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setWeekOffset((value) => Math.min(0, value + 1))}
+        disabled={weekOffset >= 0}
+        aria-label={t("dashboard.nextWeek")}
+      >
+        <ChevronRight size={18} aria-hidden="true" />
+      </Button>
+    </div>
+  );
+
   return (
     <div className="page-stack">
       <PageHeader
         eyebrow={
           <span className="eyebrow-inline">
-            <CalendarDays size={13} aria-hidden="true" />
-            {t("dashboard.eyebrow")}
-            <span className="eyebrow-sep" aria-hidden="true" />
-            {formatWeekRange(selectedWeek, weekEnd, locale)}
+            <Sparkles size={13} aria-hidden="true" />
+            {t("dashboard.page.eyebrow")}
           </span>
         }
-        title={t("dashboard.title")}
-        description={t("dashboard.subtitle")}
-        actions={
-          <div className="week-switcher" aria-label={t("dashboard.eyebrow")}>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setWeekOffset((value) => value - 1)}
-              aria-label={t("dashboard.previousWeek")}
-            >
-              <ChevronLeft size={18} aria-hidden="true" />
-            </Button>
-            <div className="week-switcher__label">
-              <span>{weekOffset === 0 ? t("dashboard.thisWeek") : formatWeekRange(selectedWeek, weekEnd, locale)}</span>
-              {weekOffset === 0 ? (
-                <small>{formatWeekRange(selectedWeek, weekEnd, locale)}</small>
-              ) : (
-                <button type="button" onClick={() => setWeekOffset(0)}>
-                  {t("dashboard.currentWeek")}
-                </button>
-              )}
-            </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setWeekOffset((value) => Math.min(0, value + 1))}
-              disabled={weekOffset >= 0}
-              aria-label={t("dashboard.nextWeek")}
-            >
-              <ChevronRight size={18} aria-hidden="true" />
-            </Button>
-          </div>
-        }
+        title={t("dashboard.page.title")}
+        description={t("dashboard.page.subtitle")}
+      />
+
+      <BriefingSection briefing={briefing} locale={locale} units={units} />
+
+      <SectionHeading
+        title={t("dashboard.week.title")}
+        subtitle={t("dashboard.week.subtitle")}
+        icon={CalendarDays}
+        action={weekSwitcher}
       />
 
       {summary.isError ? (
@@ -525,6 +554,364 @@ function RecentRow({
       </div>
       <ArrowRight size={15} className="recent-row__arrow" aria-hidden="true" />
     </Link>
+  );
+}
+
+const BRIEFING_DISTANCE_KEYS: Record<string, MessageKey> = {
+  "5k": "distance.5k",
+  "10k": "distance.10k",
+  half_marathon: "distance.half_marathon",
+  marathon: "distance.marathon",
+};
+
+function BriefingSection({
+  briefing,
+  locale,
+  units,
+}: {
+  briefing: ReturnType<typeof useBriefing>;
+  locale: Locale;
+  units: "metric" | "imperial";
+}) {
+  const { t } = useI18n();
+
+  if (briefing.isLoading) {
+    return (
+      <section className="dashboard-briefing">
+        <div className="briefing-hero">
+          <Card className="panel">
+            <Skeleton className="skeleton--line skeleton--short" />
+            <Skeleton className="skeleton--title" />
+            <Skeleton className="skeleton--block" />
+          </Card>
+          <Card className="panel">
+            <Skeleton className="skeleton--line" />
+            <Skeleton className="skeleton--block" />
+          </Card>
+        </div>
+      </section>
+    );
+  }
+
+  if (briefing.isError || !briefing.data) {
+    return (
+      <Card className="panel briefing-unavailable">
+        <CircleAlert size={18} aria-hidden="true" />
+        <p>
+          {briefing.error instanceof Error
+            ? briefing.error.message
+            : t("dashboard.briefing.error")}
+        </p>
+        <Button variant="secondary" size="sm" onClick={() => void briefing.refetch()}>
+          {t("common.retry")}
+        </Button>
+      </Card>
+    );
+  }
+
+  const data = briefing.data;
+  if (data.status === "insufficient" || !data.fitness_anchor) {
+    return (
+      <Card className="panel">
+        <EmptyState
+          icon={Sparkles}
+          title={t("dashboard.briefing.empty.title")}
+          description={t("dashboard.briefing.empty.body")}
+          action={
+            <Link to="/imports" className="button button--primary button--sm">
+              <Upload size={15} aria-hidden="true" />
+              {t("dashboard.briefing.empty.action")}
+            </Link>
+          }
+        />
+      </Card>
+    );
+  }
+
+  const anchor = data.fitness_anchor;
+  const signals = data.signals ?? [];
+  const distances = data.distances ?? [];
+  const trends = data.trends ?? [];
+
+  return (
+    <section className="dashboard-briefing">
+      <SectionHeading
+        title={t("dashboard.briefing.title")}
+        subtitle={t("dashboard.briefing.subtitle")}
+        icon={Sparkles}
+        action={<BriefingConfidence confidence={data.confidence} score={data.confidence_score} />}
+      />
+
+      <div className="briefing-hero">
+        <Card className="panel briefing-fitness">
+          <span className="eyebrow">{t("dashboard.briefing.anchor")}</span>
+          <div className="briefing-fitness__value">
+            <strong>{formatClock(anchor.time_s)}</strong>
+            <span>{formatPace(anchor.pace_s_per_km, units)}</span>
+          </div>
+          <div className="briefing-fitness__range">
+            <span>{t("dashboard.briefing.range")}</span>
+            <strong>
+              {formatClock(anchor.low_s)} – {formatClock(anchor.high_s)}
+            </strong>
+          </div>
+          <div className="briefing-trends">
+            {trends.map((trend) => (
+              <BriefingTrendPill key={trend.window_days} trend={trend} locale={locale} />
+            ))}
+          </div>
+        </Card>
+
+        <Card className="panel briefing-message">
+          <SectionHeading title={t("dashboard.briefing.headline.title")} icon={Sparkles} />
+          <p className="briefing-message__text">{briefingHeadline(data, locale, t)}</p>
+          <div className="briefing-evidence">
+            <span>{t("dashboard.briefing.headline.evidence")}</span>
+            <div>
+              {signals
+                .filter((signal) => signal.score !== null && signal.score !== undefined)
+                .slice(0, 4)
+                .map((signal) => (
+                  <span className="reason-chip" key={signal.key}>
+                    {dimensionLabel(signal.key, t)}: {Math.round(signal.score ?? 0)}
+                  </span>
+                ))}
+            </div>
+          </div>
+          <Link to="/diagnostics" className="text-link">
+            {t("dashboard.briefing.headline.link")}
+            <ArrowRight size={13} aria-hidden="true" />
+          </Link>
+        </Card>
+      </div>
+
+      <div className="briefing-conclusions">
+        <ConclusionCard
+          icon={TrendingUp}
+          title={
+            data.improvement?.key === "dimension_strength"
+              ? t("dashboard.briefing.strength.title")
+              : t("dashboard.briefing.improvement.title")
+          }
+          tone="success"
+        >
+          {briefingImprovement(data.improvement ?? null, locale, t)}
+        </ConclusionCard>
+        <ConclusionCard
+          icon={TrendingDown}
+          title={t("dashboard.briefing.limitation.title")}
+          tone="warning"
+        >
+          {briefingLimitation(data.limitation ?? null, t)}
+        </ConclusionCard>
+        <ConclusionCard
+          icon={Target}
+          title={t("dashboard.briefing.action.title")}
+          tone="accent"
+          to="/training"
+          linkLabel={t("dashboard.briefing.action.link")}
+        >
+          {briefingAction(data.action ?? null, t)}
+        </ConclusionCard>
+      </div>
+
+      <Card className="panel briefing-predictions">
+        <SectionHeading
+          title={t("dashboard.briefing.predictions")}
+          subtitle={t("dashboard.briefing.predictions.subtitle")}
+          icon={Gauge}
+        />
+        <div className="briefing-distance-grid">
+          {distances.map((distance) => (
+            <BriefingDistanceTile key={distance.distance_key} distance={distance} />
+          ))}
+        </div>
+      </Card>
+
+      <p className="analysis-note">{t("dashboard.briefing.notes")}</p>
+    </section>
+  );
+}
+
+function briefingHeadline(
+  data: BriefingView,
+  locale: Locale,
+  t: (key: MessageKey, values?: Record<string, string | number>) => string,
+): string {
+  const params = data.headline_params ?? {};
+  const change = formatPercent(Number(params.change_pct ?? 0), locale, 1);
+  const window = String(params.window_days ?? 28);
+  const limiterKey = params.limiter ? String(params.limiter) : "";
+  const limiter = limiterKey ? dimensionLabel(limiterKey, t) : t("common.unknown");
+  return t(`dashboard.briefing.headline.${data.headline}` as MessageKey, {
+    change,
+    window,
+    limiter,
+  });
+}
+
+function briefingImprovement(
+  improvement: BriefingInsight | null,
+  locale: Locale,
+  t: (key: MessageKey, values?: Record<string, string | number>) => string,
+): string {
+  if (!improvement) return t("dashboard.briefing.improvement.none");
+  if (improvement.key === "fitness_trend") {
+    return t("dashboard.briefing.improvement.fitness", {
+      change: formatPercent(improvement.value ?? 0, locale, 1),
+    });
+  }
+  return t("dashboard.briefing.improvement.dimension", {
+    dimension: dimensionLabel(improvement.dimension_key ?? "", t),
+    score: Math.round(improvement.value ?? 0),
+  });
+}
+
+function briefingLimitation(
+  limitation: BriefingInsight | null,
+  t: (key: MessageKey, values?: Record<string, string | number>) => string,
+): string {
+  if (!limitation) return t("dashboard.briefing.limitation.none");
+  return t("dashboard.briefing.limitation.body", {
+    dimension: dimensionLabel(limitation.dimension_key ?? "", t),
+    score: Math.round(limitation.value ?? 0),
+  });
+}
+
+function briefingAction(
+  action: { dimension_key: string; score?: number | null } | null,
+  t: (key: MessageKey, values?: Record<string, string | number>) => string,
+): string {
+  if (!action) return t("dashboard.briefing.action.none");
+  return t("dashboard.briefing.action.body", {
+    dimension: dimensionLabel(action.dimension_key, t),
+  });
+}
+
+function dimensionLabel(
+  key: string,
+  t: (key: MessageKey) => string,
+): string {
+  const meta = DIMENSION_META[key];
+  return meta ? t(meta.label) : key || t("common.unknown");
+}
+
+function BriefingTrendPill({ trend, locale }: { trend: BriefingTrend; locale: Locale }) {
+  const { t } = useI18n();
+  const statusKey = `dashboard.briefing.trend.${trend.status}` as MessageKey;
+  const tone =
+    trend.status === "improving"
+      ? "success"
+      : trend.status === "worsening"
+        ? "danger"
+        : "neutral";
+  return (
+    <div className="briefing-trend">
+      <span>{t("dashboard.briefing.weeks", { weeks: Math.round(trend.window_days / 7) })}</span>
+      <Badge tone={tone}>{t(statusKey)}</Badge>
+      <strong className={cn(trend.status === "improving" && "is-good", trend.status === "worsening" && "is-bad")}>
+        {trend.change_pct == null ? "—" : formatPercent(trend.change_pct, locale, 1)}
+      </strong>
+    </div>
+  );
+}
+
+function BriefingDistanceTile({ distance }: { distance: BriefingDistance }) {
+  const { t } = useI18n();
+  return (
+    <div className="briefing-distance">
+      <span className="briefing-distance__key">
+        {t(BRIEFING_DISTANCE_KEYS[distance.distance_key] ?? "distance.10k")}
+      </span>
+      <strong>{formatClock(distance.time_s)}</strong>
+      <small>
+        {formatClock(distance.low_s)} – {formatClock(distance.high_s)}
+      </small>
+      <GoalGap distance={distance} t={t} />
+    </div>
+  );
+}
+
+function GoalGap({
+  distance,
+  t,
+}: {
+  distance: BriefingDistance;
+  t: (key: MessageKey, values?: Record<string, string | number>) => string;
+}) {
+  const gap = distance.goal_gap_s;
+  if (distance.goal_time_s == null || gap == null) {
+    return <span className="briefing-distance__goal is-muted">{t("dashboard.briefing.prediction.noGoal")}</span>;
+  }
+  if (Math.abs(gap) < 0.5) {
+    return (
+      <span className="briefing-distance__goal">
+        {formatClock(distance.goal_time_s)} · {t("dashboard.briefing.prediction.goalMatch")}
+      </span>
+    );
+  }
+  return (
+    <span
+      className={cn(
+        "briefing-distance__goal",
+        gap > 0 ? "is-ahead" : "is-behind",
+      )}
+    >
+      {formatClock(distance.goal_time_s)} ·{" "}
+      {gap > 0
+        ? t("dashboard.briefing.prediction.goalAhead", { gap: formatClock(gap) })
+        : t("dashboard.briefing.prediction.goalBehind", { gap: formatClock(Math.abs(gap)) })}
+    </span>
+  );
+}
+
+function ConclusionCard({
+  icon: Icon,
+  title,
+  tone,
+  to,
+  linkLabel,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  tone: "success" | "warning" | "accent";
+  to?: "/training";
+  linkLabel?: string;
+  children: string;
+}) {
+  return (
+    <Card className={cn("panel briefing-conclusion", `briefing-conclusion--${tone}`)}>
+      <div className="briefing-conclusion__head">
+        <span className="briefing-conclusion__icon">
+          <Icon size={17} aria-hidden="true" />
+        </span>
+        <strong>{title}</strong>
+      </div>
+      <p>{children}</p>
+      {to && linkLabel ? (
+        <Link to={to} className="text-link">
+          {linkLabel}
+          <ArrowRight size={13} aria-hidden="true" />
+        </Link>
+      ) : null}
+    </Card>
+  );
+}
+
+function BriefingConfidence({ confidence, score }: { confidence: string; score: number }) {
+  const { t } = useI18n();
+  const label =
+    confidence === "high"
+      ? "performance.confidence.high"
+      : confidence === "medium"
+        ? "performance.confidence.medium"
+        : "performance.confidence.low";
+  const tone = confidence === "high" ? "success" : confidence === "medium" ? "warning" : "danger";
+  return (
+    <Badge tone={tone}>
+      {t("dashboard.briefing.confidence")} · {t(label)} · {Math.round(score * 100)}%
+    </Badge>
   );
 }
 

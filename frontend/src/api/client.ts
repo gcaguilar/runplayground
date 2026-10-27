@@ -91,6 +91,12 @@ export type GoalRevision = Schemas["GoalRevisionOut"];
 export type TrackedAction = Schemas["TrackedActionOut"];
 export type ActionUpsert = Schemas["ActionUpsert"];
 export type ActionSuggestion = Schemas["ActionSuggestionOut"];
+export type BriefingView = Schemas["BriefingView"];
+export type BriefingTrend = Schemas["BriefingTrendOut"];
+export type BriefingDistance = Schemas["BriefingDistanceOut"];
+export type BriefingSignal = Schemas["BriefingSignalOut"];
+export type BriefingInsight = Schemas["BriefingInsightOut"];
+export type BriefingAction = Schemas["BriefingActionOut"];
 
 const API_BASE = "/api/v1";
 
@@ -215,6 +221,12 @@ export const api = {
     }),
 
   audit: () => request<AuditReport>("/audit"),
+  briefing: () =>
+    request<BriefingView>(
+      `/briefing${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
 
   syncStatus: () => request<SyncStatus>("/sync/status"),
   startSync: (mode: "incremental" | "backfill") =>

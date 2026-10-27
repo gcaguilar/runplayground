@@ -40,6 +40,7 @@ export const queryKeys = {
   races: ["races"] as const,
   forecast: (weeks: 8 | 12) => ["forecast", weeks] as const,
   tracking: (days: number) => ["tracking", days] as const,
+  briefing: ["briefing"] as const,
 };
 
 function invalidatePlanData(queryClient: QueryClient) {
@@ -49,6 +50,7 @@ function invalidatePlanData(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.races });
   void queryClient.invalidateQueries({ queryKey: ["forecast"] });
   void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.briefing });
 }
 
 export function useAuthStatus() {
@@ -107,6 +109,14 @@ export function useAudit() {
     queryKey: queryKeys.audit,
     queryFn: api.audit,
     staleTime: 30_000,
+  });
+}
+
+export function useBriefing() {
+  return useQuery({
+    queryKey: queryKeys.briefing,
+    queryFn: api.briefing,
+    staleTime: 60_000,
   });
 }
 
