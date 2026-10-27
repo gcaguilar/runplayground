@@ -56,6 +56,23 @@ export type TrainingPlan = Schemas["TrainingPlan"];
 export type TrainingFocus = Schemas["TrainingFocusOut"];
 export type TrainingSession = Schemas["TrainingSessionOut"];
 export type TrainingLoadTarget = Schemas["TrainingLoadTargetOut"];
+export type ProgressOverview = Schemas["ProgressOverview"];
+export type ProgressTotals = Schemas["ProgressTotalsOut"];
+export type ProgressWeek = Schemas["ProgressWeekOut"];
+export type ProgressConsistency = Schemas["ConsistencyOut"];
+export type FitnessPoint = Schemas["FitnessPointOut"];
+export type PersonalBest = Schemas["PersonalBestOut"];
+export type GoalProgress = Schemas["GoalProgressOut"];
+export type ProgressHighlight = Schemas["ProgressHighlightOut"];
+export type PlannedRace = Schemas["PlannedRaceOut"];
+export type PlannedRaceCreate = Schemas["PlannedRaceCreate"];
+export type PlannedRaceUpdate = Schemas["PlannedRaceUpdate"];
+export type CalendarView = Schemas["CalendarView"];
+export type CalendarWeek = Schemas["CalendarWeekOut"];
+export type CalendarDay = Schemas["CalendarDayOut"];
+export type CalendarEntry = Schemas["CalendarEntryOut"];
+export type ReportPeriod = "week" | "month";
+export type Report = Schemas["ReportOut"];
 
 const API_BASE = "/api/v1";
 
@@ -230,4 +247,49 @@ export const api = {
         tz_offset_minutes: -new Date().getTimezoneOffset(),
       })}`,
     ),
+
+  progress: (days = 180) =>
+    request<ProgressOverview>(
+      `/progress${queryString({
+        days,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  calendar: (start?: string, weeks = 6) =>
+    request<CalendarView>(
+      `/calendar${queryString({
+        start,
+        weeks,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  report: (period: ReportPeriod, date?: string) =>
+    request<Report>(
+      `/reports${queryString({
+        period,
+        date,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  races: () =>
+    request<PlannedRace[]>(
+      `/races${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  createRace: (payload: PlannedRaceCreate) =>
+    request<PlannedRace>(
+      `/races${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+      { method: "POST", body: JSON.stringify(payload) },
+    ),
+  updateRace: (id: number, patch: PlannedRaceUpdate) =>
+    request<PlannedRace>(
+      `/races/${id}${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+      { method: "PATCH", body: JSON.stringify(patch) },
+    ),
+  deleteRace: (id: number) => request<void>(`/races/${id}`, { method: "DELETE" }),
 };

@@ -1,10 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 
 import {
   api,
   type ActivityListParams,
   type ActivityPatch,
   type GoalUpsert,
+  type PlannedRaceCreate,
+  type PlannedRaceUpdate,
+  type ReportPeriod,
 } from "./client";
 
 export const queryKeys = {
@@ -23,7 +31,20 @@ export const queryKeys = {
   performanceReference: ["performance", "reference"] as const,
   diagnostics: ["diagnostics"] as const,
   training: ["training"] as const,
+  progress: (days: number) => ["progress", days] as const,
+  calendar: (start: string | undefined, weeks: number) =>
+    ["calendar", start ?? "current", weeks] as const,
+  report: (period: ReportPeriod, date: string | undefined) =>
+    ["reports", period, date ?? "current"] as const,
+  races: ["races"] as const,
 };
+
+function invalidatePlanData(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: ["progress"] });
+  void queryClient.invalidateQueries({ queryKey: ["calendar"] });
+  void queryClient.invalidateQueries({ queryKey: ["reports"] });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.races });
+}
 
 export function useAuthStatus() {
   return useQuery({
@@ -119,6 +140,7 @@ export function usePatchActivity() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -145,6 +167,7 @@ export function useImportFiles() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -206,6 +229,7 @@ export function useRecomputePerformance() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -221,6 +245,7 @@ export function useUpsertGoal() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -235,6 +260,7 @@ export function useDeleteGoal() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -252,6 +278,7 @@ export function useImportGarminExport() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
     },
   });
 }
@@ -274,5 +301,62 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.clear();
     },
+  });
+}
+
+export function useProgress(days = 180) {
+  return useQuery({
+    queryKey: queryKeys.progress(days),
+    queryFn: () => api.progress(days),
+    staleTime: 60_000,
+  });
+}
+
+export function useCalendar(start?: string, weeks = 6) {
+  return useQuery({
+    queryKey: queryKeys.calendar(start, weeks),
+    queryFn: () => api.calendar(start, weeks),
+    staleTime: 30_000,
+  });
+}
+
+export function useReport(period: ReportPeriod, date?: string) {
+  return useQuery({
+    queryKey: queryKeys.report(period, date),
+    queryFn: () => api.report(period, date),
+    staleTime: 30_000,
+  });
+}
+
+export function useRaces() {
+  return useQuery({
+    queryKey: queryKeys.races,
+    queryFn: api.races,
+    staleTime: 30_000,
+  });
+}
+
+export function useCreateRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: PlannedRaceCreate) => api.createRace(payload),
+    onSuccess: () => invalidatePlanData(queryClient),
+  });
+}
+
+export function useUpdateRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: number; patch: PlannedRaceUpdate }) =>
+      api.updateRace(id, patch),
+    onSuccess: () => invalidatePlanData(queryClient),
+  });
+}
+
+export function useDeleteRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api.deleteRace(id),
+    onSuccess: () => invalidatePlanData(queryClient),
   });
 }
