@@ -42,7 +42,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("training_plans", schema=None) as batch_op:
-        batch_op.create_index(batch_op.f("ix_training_plans_start_date"), ["start_date"], unique=False)
+        batch_op.create_index(
+            batch_op.f("ix_training_plans_start_date"), ["start_date"], unique=False
+        )
         batch_op.create_index(batch_op.f("ix_training_plans_end_date"), ["end_date"], unique=False)
         batch_op.create_index(
             batch_op.f("ix_training_plans_goal_race_id"), ["goal_race_id"], unique=False
