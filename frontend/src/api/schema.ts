@@ -2991,6 +2991,31 @@ export interface components {
             conclusion_params?: {
                 [key: string]: number | string | null;
             };
+            /** Temperature C */
+            temperature_c?: number | null;
+            /**
+             * Temperature Sessions
+             * @default 0
+             */
+            temperature_sessions: number;
+            /** Temperature Coverage */
+            temperature_coverage?: number | null;
+            /** Avg Elevation Per Km M */
+            avg_elevation_per_km_m?: number | null;
+            /** Avg Terrain Adjustment S Per Km */
+            avg_terrain_adjustment_s_per_km?: number | null;
+            /** Avg Heat Adjustment S Per Km */
+            avg_heat_adjustment_s_per_km?: number | null;
+            /**
+             * Terrain Adjusted
+             * @default false
+             */
+            terrain_adjusted: boolean;
+            /**
+             * Temperature Adjusted
+             * @default false
+             */
+            temperature_adjusted: boolean;
             /** Warnings */
             warnings?: string[];
             /** Notes */
@@ -3030,6 +3055,41 @@ export interface components {
             change_s_per_km?: number | null;
             /** Change Pct */
             change_pct?: number | null;
+            /** Raw Early Pace S Per Km */
+            raw_early_pace_s_per_km?: number | null;
+            /** Raw Recent Pace S Per Km */
+            raw_recent_pace_s_per_km?: number | null;
+            /** Environment Early Pace S Per Km */
+            environment_early_pace_s_per_km?: number | null;
+            /** Environment Recent Pace S Per Km */
+            environment_recent_pace_s_per_km?: number | null;
+            /** Environment Change S Per Km */
+            environment_change_s_per_km?: number | null;
+            /** Temperature C */
+            temperature_c?: number | null;
+            /**
+             * Temperature Sessions
+             * @default 0
+             */
+            temperature_sessions: number;
+            /** Temperature Coverage */
+            temperature_coverage?: number | null;
+            /** Avg Elevation Per Km M */
+            avg_elevation_per_km_m?: number | null;
+            /** Avg Terrain Adjustment S Per Km */
+            avg_terrain_adjustment_s_per_km?: number | null;
+            /** Avg Heat Adjustment S Per Km */
+            avg_heat_adjustment_s_per_km?: number | null;
+            /**
+             * Terrain Adjusted
+             * @default false
+             */
+            terrain_adjusted: boolean;
+            /**
+             * Temperature Adjusted
+             * @default false
+             */
+            temperature_adjusted: boolean;
             /** Status */
             status: string;
             /** Confidence */
@@ -3069,10 +3129,33 @@ export interface components {
             pace_s_per_km: number;
             /** Adjusted Pace S Per Km */
             adjusted_pace_s_per_km?: number | null;
+            /** Environment Adjusted Pace S Per Km */
+            environment_adjusted_pace_s_per_km?: number | null;
+            /** Environment Hr Adjusted Pace S Per Km */
+            environment_hr_adjusted_pace_s_per_km?: number | null;
             /** Distance M */
             distance_m: number;
             /** Elevation Gain M */
             elevation_gain_m?: number | null;
+            /** Elevation Per Km M */
+            elevation_per_km_m?: number | null;
+            /**
+             * Terrain Adjustment S Per Km
+             * @default 0
+             */
+            terrain_adjustment_s_per_km: number;
+            /** Temperature C */
+            temperature_c?: number | null;
+            /**
+             * Temperature Samples
+             * @default 0
+             */
+            temperature_samples: number;
+            /**
+             * Heat Adjustment S Per Km
+             * @default 0
+             */
+            heat_adjustment_s_per_km: number;
             /** Period */
             period: string;
         };
