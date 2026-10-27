@@ -319,6 +319,58 @@ class PlannedRace(Base):
     )
 
 
+class GoalRevision(Base):
+    """One saved target for a standard distance, with the prediction in force.
+
+    ``race_goals`` holds only the current target. Every time the target or its
+    date changes we append a revision so the tracking view can show what was
+    asked for and what the model predicted at that moment. Re-saving an
+    identical target does not create noise.
+    """
+
+    __tablename__ = "goal_revisions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    distance_m: Mapped[float] = mapped_column(Float, nullable=False, index=True)
+    target_time_s: Mapped[float] = mapped_column(Float, nullable=False)
+    target_date: Mapped[date | None] = mapped_column(Date)
+    race_name: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
+    prediction_time_s: Mapped[float | None] = mapped_column(Float)
+    prediction_low_s: Mapped[float | None] = mapped_column(Float)
+    prediction_high_s: Mapped[float | None] = mapped_column(Float)
+    confidence: Mapped[str | None] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (Index("ix_goal_revisions_distance_created", "distance_m", "created_at"),)
+
+
+class TrackedAction(Base):
+    """User status for one training recommendation.
+
+    The recommendation itself is derived from diagnostics on every request;
+    this table only stores the decision (pending, in progress, completed), a
+    note and the baseline score captured when the athlete started tracking it.
+    That baseline turns a generic suggestion into a hypothesis we can check
+    later without claiming causality.
+    """
+
+    __tablename__ = "tracked_actions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dimension_key: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+    baseline_score: Mapped[float | None] = mapped_column(Float)
+    baseline_confidence: Mapped[str | None] = mapped_column(String(20))
+    baseline_metrics: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
 class PerformanceSnapshot(Base):
     """One prediction set per day, used to draw the evolution over time."""
 
