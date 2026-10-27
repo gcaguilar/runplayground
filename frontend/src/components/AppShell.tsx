@@ -113,10 +113,72 @@ export function AppShell() {
   const queryClient = useQueryClient();
   const wasRunning = useRef(false);
   const lastSyncSeen = useRef<{ id: number; status: string } | null>(readLastSyncSeen());
+  const mainRef = useRef<HTMLElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const pathnameRef = useRef(pathname);
+  const menuOpenedAt = useRef(pathname);
+  const firstRoute = useRef(true);
+  pathnameRef.current = pathname;
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  // Move focus to the page landmark after client-side navigation. The main
+  // element keeps tabIndex={-1} so it can receive programmatic focus without
+  // entering the normal tab order.
+  useEffect(() => {
+    if (firstRoute.current) {
+      firstRoute.current = false;
+      return;
+    }
+    mainRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
+
+  // The off-canvas navigation behaves as a modal dialog on small screens:
+  // focus moves inside, Escape closes it and focus returns to the trigger.
+  useEffect(() => {
+    if (!menuOpen) return;
+    menuOpenedAt.current = pathnameRef.current;
+    const previous =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Wait one frame so the sidebar is visible before moving focus into it.
+    const frame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = sidebarRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
+      // Only return focus when the menu closed in place (Escape, scrim or the
+      // close button). A navigation moves focus to the new page instead.
+      if (menuOpenedAt.current === pathnameRef.current) previous?.focus();
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const running = Boolean(sync.data?.running);
@@ -187,12 +249,22 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">
+        {t("a11y.skipToContent")}
+      </a>
       <div
         className={cn("sidebar-scrim", menuOpen && "is-visible")}
         onClick={() => setMenuOpen(false)}
         aria-hidden="true"
       />
-      <aside className={cn("sidebar", menuOpen && "is-open")}>
+      <aside
+        id="app-sidebar"
+        ref={sidebarRef}
+        className={cn("sidebar", menuOpen && "is-open")}
+        role={menuOpen ? "dialog" : undefined}
+        aria-modal={menuOpen ? true : undefined}
+        aria-label={menuOpen ? t("nav.menu") : undefined}
+      >
         <div className="sidebar__head">
           <Link to="/" className="brand" aria-label="Run — inicio">
             <span className="brand__mark">R</span>
@@ -202,6 +274,7 @@ export function AppShell() {
             </span>
           </Link>
           <button
+            ref={closeButtonRef}
             type="button"
             className="icon-button sidebar__close"
             onClick={() => setMenuOpen(false)}
@@ -262,10 +335,14 @@ export function AppShell() {
         <header className="topbar">
           <div className="topbar__left">
             <button
+              ref={menuButtonRef}
               type="button"
               className="icon-button topbar__menu"
               onClick={() => setMenuOpen(true)}
               aria-label={t("topbar.openMenu")}
+              aria-expanded={menuOpen}
+              aria-controls="app-sidebar"
+              aria-haspopup="dialog"
             >
               <Menu size={20} aria-hidden="true" />
             </button>
@@ -323,7 +400,7 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="page">
+        <main id="main-content" ref={mainRef} className="page" tabIndex={-1}>
           <Outlet />
         </main>
 

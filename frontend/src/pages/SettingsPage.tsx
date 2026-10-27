@@ -8,6 +8,7 @@ import {
   KeyRound,
   Languages,
   LogOut,
+  Palette,
   RefreshCw,
   Ruler,
   ShieldCheck,
@@ -28,6 +29,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { useI18n, type Locale, type MessageKey, type Units } from "@/i18n";
+import { useTheme, type ThemeMode } from "@/theme";
 import { cn } from "@/lib/cn";
 import {
   formatBytes,
@@ -37,6 +39,7 @@ import {
 
 export function SettingsPage() {
   const { locale, units, setLocale, setUnits, t } = useI18n();
+  const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const system = useSystemStatus();
   const sync = useSyncStatus();
   const auth = useAuthStatus();
@@ -307,6 +310,7 @@ export function SettingsPage() {
                   ]}
                   value={locale}
                   onChange={setLocale}
+                  ariaLabel={t("settings.preferences.language")}
                 />
               </div>
               <div className="preference-group">
@@ -321,8 +325,26 @@ export function SettingsPage() {
                   ]}
                   value={units}
                   onChange={setUnits}
+                  ariaLabel={t("settings.preferences.units")}
                 />
               </div>
+              <div className="preference-group">
+                <span className="preference-group__label">
+                  <Palette size={15} aria-hidden="true" />
+                  {t("settings.preferences.theme")}
+                </span>
+                <PreferenceToggle<ThemeMode>
+                  options={[
+                    { value: "dark", label: t("theme.dark") },
+                    { value: "light", label: t("theme.light") },
+                    { value: "system", label: t("theme.system") },
+                  ]}
+                  value={themeMode}
+                  onChange={setThemeMode}
+                  ariaLabel={t("settings.preferences.theme")}
+                />
+              </div>
+              <p className="settings-hint">{t("settings.preferences.themeHint")}</p>
               <p className="settings-hint">{t("settings.preferences.saved")}</p>
             </Card>
 
@@ -356,13 +378,15 @@ function PreferenceToggle<T extends string>({
   options,
   value,
   onChange,
+  ariaLabel,
 }: {
   options: Array<{ value: T; label: string }>;
   value: T;
   onChange: (value: T) => void;
+  ariaLabel?: string;
 }) {
   return (
-    <div className="preference-toggle" role="group">
+    <div className="preference-toggle" role="group" aria-label={ariaLabel}>
       {options.map((option) => (
         <button
           key={option.value}
