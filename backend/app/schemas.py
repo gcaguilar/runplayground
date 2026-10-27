@@ -6,7 +6,7 @@ from datetime import date, datetime
 from datetime import date as Date
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApiModel(BaseModel):
@@ -87,6 +87,8 @@ class ActivityOut(ApiModel):
     device_name: str | None = None
     manufacturer: str | None = None
     is_race: bool
+    intensity_override: str | None = None
+    rpe: int | None = None
     has_streams: bool
     has_gps: bool
     has_laps: bool
@@ -97,9 +99,20 @@ class ActivityOut(ApiModel):
     updated_at: datetime
 
 
+class ActivityClassificationOut(ApiModel):
+    key: str
+    auto_key: str
+    source: Literal["manual", "auto"]
+    overridden: bool
+    mode: Literal["auto", "pace", "hr"]
+    threshold_pace_s_per_km: float | None = None
+    hr_reference: float | None = None
+
+
 class ActivityDetail(ActivityOut):
     laps: list[LapOut] = Field(default_factory=list)
     sources: list[SourceOut] = Field(default_factory=list)
+    classification: ActivityClassificationOut | None = None
 
 
 class ActivityList(ApiModel):
@@ -198,6 +211,8 @@ class ComparisonView(ApiModel):
 class ActivityPatch(ApiModel):
     name: str | None = Field(default=None, max_length=255)
     is_race: bool | None = None
+    intensity_override: Literal["easy", "moderate", "hard"] | None = None
+    rpe: int | None = Field(default=None, ge=1, le=10)
 
 
 # ---------------------------------------------------------------------------
@@ -590,6 +605,50 @@ class TrainingLoadTargetOut(ApiModel):
     long_run_high_m: float
     quality_sessions_low: int
     quality_sessions_high: int
+
+
+ClassificationMode = Literal["auto", "pace", "hr"]
+
+
+class AnalysisSettingsValuesOut(ApiModel):
+    max_hr: int | None = None
+    resting_hr: int | None = None
+    threshold_hr: int | None = None
+    threshold_pace_s_per_km: float | None = None
+    classification_mode: ClassificationMode | None = None
+
+
+class AnalysisSettingsOut(ApiModel):
+    observed: AnalysisSettingsValuesOut
+    manual: AnalysisSettingsValuesOut
+    effective: AnalysisSettingsValuesOut
+    sources: dict[str, str] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    updated_at: datetime | None = None
+
+
+class AnalysisSettingsUpdate(ApiModel):
+    max_hr: int | None = Field(default=None, ge=100, le=230)
+    resting_hr: int | None = Field(default=None, ge=30, le=120)
+    threshold_hr: int | None = Field(default=None, ge=100, le=230)
+    threshold_pace_s_per_km: float | None = Field(default=None, ge=120, le=1200)
+    classification_mode: ClassificationMode | None = None
+
+    @model_validator(mode="after")
+    def _coherent(self) -> AnalysisSettingsUpdate:
+        if (
+            self.max_hr is not None
+            and self.threshold_hr is not None
+            and self.threshold_hr > self.max_hr
+        ):
+            raise ValueError("threshold_hr must be lower than or equal to max_hr")
+        if (
+            self.resting_hr is not None
+            and self.threshold_hr is not None
+            and self.resting_hr >= self.threshold_hr
+        ):
+            raise ValueError("resting_hr must be lower than threshold_hr")
+        return self
 
 
 class TrainingPlan(ApiModel):

@@ -41,6 +41,7 @@ from app.services.analysis import (
     target_weekly_distance,
     week_start,
 )
+from app.services.analysis_settings import get_analysis_settings
 from app.services.performance import build_overview, ensure_efforts
 from app.utils import as_utc, utcnow
 
@@ -99,6 +100,8 @@ def _records(
                     is_race=activity.is_race,
                     sub_sport=activity.sub_sport,
                     has_streams=activity.has_streams,
+                    intensity_override=activity.intensity_override,
+                    rpe=activity.rpe,
                 )
             )
     return output
@@ -109,13 +112,22 @@ def _actual_week(
     monday: date,
     threshold_pace: float | None,
     hr_reference: float | None,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> WeekActual:
     end = monday + timedelta(days=6)
     week_records = [record for record in records if monday <= record.local_date <= end]
     hard = sum(
         1
         for record in week_records
-        if classify_run(record, threshold_pace, hr_reference) == "hard"
+        if classify_run(
+            record,
+            threshold_pace,
+            hr_reference,
+            mode=mode,
+            threshold_hr=threshold_hr,
+        )
+        == "hard"
         and (record.duration_s >= 600 or record.distance_m >= 3000)
     )
     days = {record.local_date for record in week_records}
@@ -407,18 +419,28 @@ def build_adherence(
 
     ensure_efforts(db)
     overview = build_overview(db, reference)
-    threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold = analysis.threshold_pace_s_per_km
     records = _records(db, history_start, today, offset)
     all_records = _records(db, history_start - timedelta(days=14), today, offset)
     max_hrs = [record.max_hr for record in all_records if record.max_hr]
     avg_hrs = [record.avg_hr for record in all_records if record.avg_hr]
-    hr_reference = float(max(max_hrs)) if max_hrs else (max(avg_hrs) * 1.08 if avg_hrs else None)
+    hr_reference = analysis.max_hr or (
+        float(max(max_hrs)) if max_hrs else (max(avg_hrs) * 1.08 if avg_hrs else None)
+    )
     goals = list(db.scalars(select(RaceGoal)).all())
 
     items: list[AdherenceWeekOut] = []
     for index in range(weeks):
         monday = first_week + timedelta(weeks=index)
-        actual = _actual_week(records, monday, threshold, hr_reference)
+        actual = _actual_week(
+            records,
+            monday,
+            threshold,
+            hr_reference,
+            mode=analysis.mode,
+            threshold_hr=analysis.threshold_hr,
+        )
         base_weekly = _base_weekly(records, monday)
         goal = _goal_for_week(goals, monday)
         last_race = _last_race(all_records, monday)
@@ -492,6 +514,8 @@ def build_adherence(
         "classification_uses_current_anchor",
         "not_medical_advice",
     ]
+    if analysis.has_manual:
+        notes.append("manual_thresholds_applied")
 
     return AdherenceOverview(
         generated_at=reference,

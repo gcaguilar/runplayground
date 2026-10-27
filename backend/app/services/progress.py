@@ -58,6 +58,7 @@ from app.services.analysis import (
     target_weekly_distance,
     week_start,
 )
+from app.services.analysis_settings import get_analysis_settings
 from app.services.diagnostics import ACTION_BY_DIMENSION, build_diagnostics
 from app.services.performance import build_overview, ensure_efforts, store_snapshot
 from app.services.performance_models import (
@@ -132,6 +133,8 @@ def _records_for_range(
                     is_race=activity.is_race,
                     sub_sport=activity.sub_sport,
                     has_streams=activity.has_streams,
+                    intensity_override=activity.intensity_override,
+                    rpe=activity.rpe,
                 )
             )
     return records
@@ -630,7 +633,8 @@ def build_progress(
 
     ensure_efforts(db)
     overview = build_overview(db, reference)
-    threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold = analysis.threshold_pace_s_per_km
 
     current_records = _records_for_range(db, start, today, offset)
     previous_records = _records_for_range(db, previous_start, previous_end, offset)
@@ -716,7 +720,8 @@ def build_calendar(
 
     ensure_efforts(db)
     overview = build_overview(db, reference)
-    threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold = analysis.threshold_pace_s_per_km
     records = _records_for_range(db, grid_start - timedelta(days=28), grid_end, offset)
     base_weekly = round(
         sum(
@@ -1091,7 +1096,8 @@ def build_report(
     overview = build_overview(db, reference)
     store_snapshot(db, overview)
     diagnostics = build_diagnostics(db, reference, tz_offset_minutes)
-    threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold = analysis.threshold_pace_s_per_km
 
     current_records = _records_for_range(db, start, end, offset)
     previous_records = _records_for_range(db, previous_start, previous_end, offset)

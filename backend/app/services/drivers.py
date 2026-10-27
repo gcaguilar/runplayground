@@ -82,6 +82,8 @@ def _run_records(db: Session, start: date, end: date, offset: timedelta) -> list
                     is_race=activity.is_race,
                     sub_sport=activity.sub_sport,
                     has_streams=activity.has_streams,
+                    intensity_override=activity.intensity_override,
+                    rpe=activity.rpe,
                 )
             )
     return output
@@ -103,6 +105,8 @@ def _weekly_features(
     offset: timedelta,
     threshold_pace: float | None,
     hr_reference: float | None,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> list[WeekFeature]:
     first = week_start(start)
     last = week_start(end)
@@ -141,9 +145,13 @@ def _weekly_features(
         bucket.longest_m = max(bucket.longest_m, record.distance_m)
         bucket.load += session_load(record, threshold_pace)
         days[key].add(record.local_date)
-        if classify_run(record, threshold_pace, hr_reference) == "hard" and (
-            record.duration_s >= 600 or record.distance_m >= 3000
-        ):
+        if classify_run(
+            record,
+            threshold_pace,
+            hr_reference,
+            mode=mode,
+            threshold_hr=threshold_hr,
+        ) == "hard" and (record.duration_s >= 600 or record.distance_m >= 3000):
             bucket.quality_sessions += 1
     for key, bucket in weeks.items():
         bucket.active_days = len(days[key])
@@ -262,6 +270,8 @@ def build_drivers(
     *,
     threshold_pace: float | None,
     hr_reference: float | None,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> DriverAnalysisOut:
     weeks = _weekly_features(
         db,
@@ -270,6 +280,8 @@ def build_drivers(
         offset,
         threshold_pace,
         hr_reference,
+        mode=mode,
+        threshold_hr=threshold_hr,
     )
     pairs = _paired_weeks(weeks)
     drivers = [_driver(key, pairs) for key in FACTOR_KEYS]
@@ -308,6 +320,8 @@ def build_drivers(
         "classification_uses_current_anchor",
         "load_is_estimated",
     ]
+    if mode != "auto":
+        notes.append("manual_thresholds_applied")
     return DriverAnalysisOut(
         status=status,
         window_days=(end - start).days + 1,

@@ -197,6 +197,8 @@ def _recent_runs(db: Session, start: date, end: date, offset: timedelta) -> list
                     is_race=activity.is_race,
                     sub_sport=activity.sub_sport,
                     has_streams=activity.has_streams,
+                    intensity_override=activity.intensity_override,
+                    rpe=activity.rpe,
                 )
             )
     return output

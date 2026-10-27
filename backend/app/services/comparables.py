@@ -29,6 +29,7 @@ from app.schemas import (
     PaceHrPointOut,
 )
 from app.services.analysis import RunRecord, clamp, classify_run, confidence_label
+from app.services.analysis_settings import get_analysis_settings
 from app.services.performance import build_overview, ensure_efforts
 from app.utils import as_utc, utcnow
 
@@ -276,7 +277,8 @@ def build_pace_hr(
 
     ensure_efforts(db)
     overview = build_overview(db, reference)
-    threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold = analysis.threshold_pace_s_per_km
     rows = db.scalars(
         select(Activity)
         .where(
@@ -288,7 +290,7 @@ def build_pace_hr(
         )
         .order_by(Activity.start_time_utc)
     ).all()
-    hr_reference = _hr_reference(rows)
+    hr_reference = analysis.max_hr or _hr_reference(rows)
 
     excluded_races = 0
     excluded_hard = 0
@@ -327,8 +329,19 @@ def build_pace_hr(
             is_race=activity.is_race,
             sub_sport=activity.sub_sport,
             has_streams=activity.has_streams,
+            intensity_override=activity.intensity_override,
+            rpe=activity.rpe,
         )
-        if classify_run(record, threshold, hr_reference) == "hard":
+        if (
+            classify_run(
+                record,
+                threshold,
+                hr_reference,
+                mode=analysis.mode,
+                threshold_hr=analysis.threshold_hr,
+            )
+            == "hard"
+        ):
             excluded_hard += 1
             continue
         distance_band = _distance_band(activity.distance_m)
@@ -414,6 +427,8 @@ def build_pace_hr(
         notes.append("races_excluded")
     if excluded_hard:
         notes.append("hard_sessions_excluded")
+    if analysis.has_manual:
+        notes.append("manual_thresholds_applied")
 
     return PaceHrAnalysisOut(
         generated_at=reference,
