@@ -143,6 +143,45 @@ class ActivityStreams(ApiModel):
 
 
 # ---------------------------------------------------------------------------
+# Activity heart-rate zones (M17)
+
+
+class HrZoneOut(ApiModel):
+    key: Literal["z1", "z2", "z3", "z4", "z5"]
+    lower_bpm: int
+    upper_bpm: int
+    lower_pct: float | None = None
+    upper_pct: float | None = None
+    seconds: float
+    percentage: float
+
+
+class HrZonesOut(ApiModel):
+    activity_id: int
+    status: Literal["ok", "insufficient"]
+    method: Literal["max_hr", "threshold_hr"] | None = None
+    source: Literal["manual", "observed", "activity_fallback"] | None = None
+    reference_bpm: int | None = None
+    cuts_bpm: list[int] = Field(default_factory=list)
+    cuts_pct: list[float] = Field(default_factory=list)
+    zones: list[HrZoneOut] = Field(default_factory=list)
+    total_hr_s: float
+    activity_duration_s: float
+    samples_total: int
+    samples_timed: int
+    samples_with_hr: int
+    coverage: float
+    avg_hr: int | None = None
+    avg_hr_source: Literal["activity", "stream"] | None = None
+    max_hr: int | None = None
+    max_hr_source: Literal["activity", "stream"] | None = None
+    stream_max_hr: int | None = None
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+    model_version: str
+
+
+# ---------------------------------------------------------------------------
 # Workout comparison (M7)
 
 
