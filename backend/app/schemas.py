@@ -1045,6 +1045,67 @@ class BriefingView(ApiModel):
     notes: list[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Comparable pace–heart-rate analysis (M6)
+
+
+class PaceHrPointOut(ApiModel):
+    date: date
+    activity_id: int
+    activity_name: str
+    avg_hr: int
+    pace_s_per_km: float
+    adjusted_pace_s_per_km: float | None = None
+    distance_m: float
+    elevation_gain_m: float | None = None
+    period: str
+
+
+class PaceHrLineOut(ApiModel):
+    hr: float
+    pace_s_per_km: float
+
+
+class PaceHrGroupOut(ApiModel):
+    key: str
+    distance_band: str
+    terrain_band: str
+    sessions: int
+    start: date
+    end: date
+    reference_hr: float
+    hr_min: int
+    hr_max: int
+    early_pace_s_per_km: float | None = None
+    recent_pace_s_per_km: float | None = None
+    change_s_per_km: float | None = None
+    change_pct: float | None = None
+    status: str
+    confidence: str
+    confidence_score: float
+    reasons: list[str] = Field(default_factory=list)
+    points: list[PaceHrPointOut] = Field(default_factory=list)
+    early_line: list[PaceHrLineOut] = Field(default_factory=list)
+    recent_line: list[PaceHrLineOut] = Field(default_factory=list)
+
+
+class PaceHrAnalysisOut(ApiModel):
+    generated_at: datetime
+    model_version: str
+    window_days: int
+    status: str
+    sessions: int
+    excluded_races: int
+    excluded_hard: int
+    excluded_missing_hr: int
+    groups: list[PaceHrGroupOut] = Field(default_factory=list)
+    primary_group: str | None = None
+    conclusion: str
+    conclusion_params: dict[str, float | int | str | None] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime
