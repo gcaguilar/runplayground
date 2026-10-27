@@ -2517,6 +2517,35 @@ export interface components {
             /** Duration S */
             duration_s: number;
         };
+        /** ReportNarrativeOut */
+        ReportNarrativeOut: {
+            /** Key */
+            key: string;
+            /** Tone */
+            tone: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Improvement */
+            improvement?: string | null;
+            /** Limitation */
+            limitation?: string | null;
+            /** Action */
+            action?: string | null;
+            /** Fitness Change S */
+            fitness_change_s?: number | null;
+            /** Fitness Change Pct */
+            fitness_change_pct?: number | null;
+            /** Volume Delta Pct */
+            volume_delta_pct?: number | null;
+            /** Evidence */
+            evidence?: {
+                [key: string]: number | string | null;
+            };
+            /** Reasons */
+            reasons?: string[];
+        };
         /** ReportOut */
         ReportOut: {
             /**
@@ -2547,6 +2576,7 @@ export interface components {
             delta: {
                 [key: string]: number | null;
             };
+            narrative: components["schemas"]["ReportNarrativeOut"];
             /** Days */
             days?: components["schemas"]["WeeklyDay"][];
             /** Weeks */

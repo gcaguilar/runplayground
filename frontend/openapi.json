@@ -8779,6 +8779,127 @@
         ],
         "title": "RaceCandidate"
       },
+      "ReportNarrativeOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "tone": {
+            "type": "string",
+            "title": "Tone"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "improvement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Improvement"
+          },
+          "limitation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limitation"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "fitness_change_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fitness Change S"
+          },
+          "fitness_change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fitness Change Pct"
+          },
+          "volume_delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Volume Delta Pct"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Evidence"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "tone",
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "ReportNarrativeOut"
+      },
       "ReportOut": {
         "properties": {
           "generated_at": {
@@ -8827,6 +8948,9 @@
             },
             "type": "object",
             "title": "Delta"
+          },
+          "narrative": {
+            "$ref": "#/components/schemas/ReportNarrativeOut"
           },
           "days": {
             "items": {
@@ -8898,6 +9022,7 @@
           "totals",
           "previous",
           "delta",
+          "narrative",
           "load"
         ],
         "title": "ReportOut"
