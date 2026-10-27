@@ -1517,6 +1517,524 @@
           }
         }
       }
+    },
+    "/api/v1/progress": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Progress Overview",
+        "operationId": "progress_overview_api_v1_progress_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 730,
+              "minimum": 30,
+              "default": 180,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/calendar": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Calendar View",
+        "operationId": "calendar_view_api_v1_calendar_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "name": "weeks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 1,
+              "default": 6,
+              "title": "Weeks"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Report",
+        "operationId": "report_api_v1_reports_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "week",
+                "month"
+              ],
+              "type": "string",
+              "default": "week",
+              "title": "Period"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/races": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Races",
+        "operationId": "races_api_v1_races_get",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlannedRaceOut"
+                  },
+                  "title": "Response Races Api V1 Races Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Create Race",
+        "operationId": "create_race_api_v1_races_post",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlannedRaceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlannedRaceOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/races/{race_id}": {
+      "patch": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Patch Race",
+        "operationId": "patch_race_api_v1_races__race_id__patch",
+        "parameters": [
+          {
+            "name": "race_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Race Id"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlannedRaceUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlannedRaceOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Remove Race",
+        "operationId": "remove_race_api_v1_races__race_id__delete",
+        "parameters": [
+          {
+            "name": "race_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Race Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2682,6 +3200,279 @@
         ],
         "title": "Body_import_garmin_export_zip_api_v1_imports_garmin_export_post"
       },
+      "CalendarDayOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarEntryOut"
+            },
+            "type": "array",
+            "title": "Entries"
+          },
+          "actual_distance_m": {
+            "type": "number",
+            "title": "Actual Distance M",
+            "default": 0.0
+          },
+          "planned_distance_m": {
+            "type": "number",
+            "title": "Planned Distance M",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "title": "CalendarDayOut"
+      },
+      "CalendarEntryOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "activity",
+              "race",
+              "session"
+            ],
+            "title": "Kind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "sport": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sport"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "race_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Id"
+          },
+          "distance_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "intensity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intensity"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "is_race": {
+            "type": "boolean",
+            "title": "Is Race",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "kind",
+          "title"
+        ],
+        "title": "CalendarEntryOut"
+      },
+      "CalendarView": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "title": "End"
+          },
+          "today": {
+            "type": "string",
+            "format": "date",
+            "title": "Today"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarWeekOut"
+            },
+            "type": "array",
+            "title": "Weeks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "today",
+          "weeks"
+        ],
+        "title": "CalendarView"
+      },
+      "CalendarWeekOut": {
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Week Start"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarDayOut"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "actual_distance_m": {
+            "type": "number",
+            "title": "Actual Distance M"
+          },
+          "planned_distance_m": {
+            "type": "number",
+            "title": "Planned Distance M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week_start",
+          "days",
+          "actual_distance_m",
+          "planned_distance_m"
+        ],
+        "title": "CalendarWeekOut"
+      },
+      "ConsistencyOut": {
+        "properties": {
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "weeks_with_data": {
+            "type": "integer",
+            "title": "Weeks With Data"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          },
+          "current_streak_days": {
+            "type": "integer",
+            "title": "Current Streak Days"
+          },
+          "longest_streak_days": {
+            "type": "integer",
+            "title": "Longest Streak Days"
+          },
+          "weekly_average_m": {
+            "type": "number",
+            "title": "Weekly Average M"
+          },
+          "best_week_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Week Start"
+          },
+          "best_week_m": {
+            "type": "number",
+            "title": "Best Week M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window_days",
+          "weeks",
+          "weeks_with_data",
+          "active_days",
+          "current_streak_days",
+          "longest_streak_days",
+          "weekly_average_m",
+          "best_week_m"
+        ],
+        "title": "ConsistencyOut"
+      },
       "DiagnosticsOverview": {
         "properties": {
           "generated_at": {
@@ -3101,6 +3892,58 @@
         ],
         "title": "FitnessAnchorOut"
       },
+      "FitnessPointOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "time_s": {
+            "type": "number",
+            "title": "Time S"
+          },
+          "low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low S"
+          },
+          "high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High S"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "time_s"
+        ],
+        "title": "FitnessPointOut"
+      },
       "GarminExportResponse": {
         "properties": {
           "run_id": {
@@ -3368,6 +4211,140 @@
           "updated_at"
         ],
         "title": "GoalOut"
+      },
+      "GoalProgressOut": {
+        "properties": {
+          "distance_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "target_time_s": {
+            "type": "number",
+            "title": "Target Time S"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Name"
+          },
+          "current_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Time S"
+          },
+          "low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low S"
+          },
+          "high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High S"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap S"
+          },
+          "gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Pct"
+          },
+          "readiness_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness Pct"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_m",
+          "target_time_s",
+          "status"
+        ],
+        "title": "GoalProgressOut"
       },
       "GoalUpsert": {
         "properties": {
@@ -4260,6 +5237,542 @@
         ],
         "title": "PerformanceSnapshotOut"
       },
+      "PersonalBestOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "time_s": {
+            "type": "number",
+            "title": "Time S"
+          },
+          "pace_s_per_km": {
+            "type": "number",
+            "title": "Pace S Per Km"
+          },
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "type": "string",
+            "title": "Activity Name"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Date"
+          },
+          "is_race": {
+            "type": "boolean",
+            "title": "Is Race"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "time_s",
+          "pace_s_per_km",
+          "activity_id",
+          "activity_name",
+          "date",
+          "is_race"
+        ],
+        "title": "PersonalBestOut"
+      },
+      "PlannedRaceCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "race_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Race Date"
+          },
+          "distance_m": {
+            "type": "number",
+            "maximum": 500000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Distance M"
+          },
+          "goal_time_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 172800.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Time S"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ],
+            "title": "Priority",
+            "default": "B"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "default": "planned"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "race_date",
+          "distance_m"
+        ],
+        "title": "PlannedRaceCreate"
+      },
+      "PlannedRaceOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "race_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Race Date"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "goal_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Time S"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "days_to_race": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Race"
+          },
+          "weeks_to_race": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weeks To Race"
+          },
+          "phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phase"
+          },
+          "phase_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phase Reason"
+          },
+          "target_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Pace S Per Km"
+          },
+          "predicted_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Time S"
+          },
+          "predicted_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Low S"
+          },
+          "predicted_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted High S"
+          },
+          "prediction_confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Confidence"
+          },
+          "gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap S"
+          },
+          "gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Pct"
+          },
+          "readiness": {
+            "type": "string",
+            "title": "Readiness"
+          },
+          "weekly_distance_low_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Distance Low M"
+          },
+          "weekly_distance_high_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Distance High M"
+          },
+          "long_run_low_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Long Run Low M"
+          },
+          "long_run_high_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Long Run High M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "race_date",
+          "distance_m",
+          "priority",
+          "status",
+          "created_at",
+          "updated_at",
+          "readiness"
+        ],
+        "title": "PlannedRaceOut"
+      },
+      "PlannedRaceUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "race_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Date"
+          },
+          "distance_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 500000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance M"
+          },
+          "goal_time_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 172800.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Time S"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "C"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "planned",
+                  "completed",
+                  "cancelled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          }
+        },
+        "type": "object",
+        "title": "PlannedRaceUpdate"
+      },
       "PredictionEstimateOut": {
         "properties": {
           "time_s": {
@@ -4350,6 +5863,235 @@
         ],
         "title": "PreparationSummary"
       },
+      "ProgressHighlightOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "ProgressHighlightOut"
+      },
+      "ProgressOverview": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/ProgressTotalsOut"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/ProgressTotalsOut"
+          },
+          "delta": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Delta"
+          },
+          "consistency": {
+            "$ref": "#/components/schemas/ConsistencyOut"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressWeekOut"
+            },
+            "type": "array",
+            "title": "Weeks"
+          },
+          "fitness": {
+            "items": {
+              "$ref": "#/components/schemas/FitnessPointOut"
+            },
+            "type": "array",
+            "title": "Fitness"
+          },
+          "best_efforts": {
+            "items": {
+              "$ref": "#/components/schemas/PersonalBestOut"
+            },
+            "type": "array",
+            "title": "Best Efforts"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalProgressOut"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "races": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedRaceOut"
+            },
+            "type": "array",
+            "title": "Races"
+          },
+          "highlights": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressHighlightOut"
+            },
+            "type": "array",
+            "title": "Highlights"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "window_days",
+          "status",
+          "totals",
+          "previous",
+          "delta",
+          "consistency",
+          "weeks",
+          "fitness",
+          "best_efforts",
+          "goals",
+          "races",
+          "highlights"
+        ],
+        "title": "ProgressOverview"
+      },
+      "ProgressTotalsOut": {
+        "properties": {
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "elevation_gain_m": {
+            "type": "number",
+            "title": "Elevation Gain M"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          },
+          "load": {
+            "type": "number",
+            "title": "Load"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_m",
+          "duration_s",
+          "elevation_gain_m",
+          "sessions",
+          "active_days",
+          "load"
+        ],
+        "title": "ProgressTotalsOut"
+      },
+      "ProgressWeekOut": {
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Week Start"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "load": {
+            "type": "number",
+            "title": "Load"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week_start",
+          "distance_m",
+          "duration_s",
+          "load",
+          "sessions",
+          "active_days"
+        ],
+        "title": "ProgressWeekOut"
+      },
       "RaceCandidate": {
         "properties": {
           "id": {
@@ -4388,6 +6130,129 @@
           "duration_s"
         ],
         "title": "RaceCandidate"
+      },
+      "ReportOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "week",
+              "month"
+            ],
+            "title": "Period"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "title": "End"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/ProgressTotalsOut"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/ProgressTotalsOut"
+          },
+          "delta": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Delta"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyDay"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressWeekOut"
+            },
+            "type": "array",
+            "title": "Weeks"
+          },
+          "by_sport": {
+            "items": {
+              "$ref": "#/components/schemas/SportTotal"
+            },
+            "type": "array",
+            "title": "By Sport"
+          },
+          "load": {
+            "$ref": "#/components/schemas/LoadOut"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalProgressOut"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "races": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedRaceOut"
+            },
+            "type": "array",
+            "title": "Races"
+          },
+          "highlights": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressHighlightOut"
+            },
+            "type": "array",
+            "title": "Highlights"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "period",
+          "start",
+          "end",
+          "label",
+          "totals",
+          "previous",
+          "delta",
+          "load"
+        ],
+        "title": "ReportOut"
       },
       "SnapshotPredictionOut": {
         "properties": {

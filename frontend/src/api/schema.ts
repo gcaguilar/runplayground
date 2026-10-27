@@ -399,6 +399,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Progress Overview */
+        get: operations["progress_overview_api_v1_progress_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calendar View */
+        get: operations["calendar_view_api_v1_calendar_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report */
+        get: operations["report_api_v1_reports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/races": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Races */
+        get: operations["races_api_v1_races_get"];
+        put?: never;
+        /** Create Race */
+        post: operations["create_race_api_v1_races_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/races/{race_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Race */
+        delete: operations["remove_race_api_v1_races__race_id__delete"];
+        options?: never;
+        head?: never;
+        /** Patch Race */
+        patch: operations["patch_race_api_v1_races__race_id__patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -734,6 +821,117 @@ export interface components {
             /** File */
             file: string;
         };
+        /** CalendarDayOut */
+        CalendarDayOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Entries */
+            entries?: components["schemas"]["CalendarEntryOut"][];
+            /**
+             * Actual Distance M
+             * @default 0
+             */
+            actual_distance_m: number;
+            /**
+             * Planned Distance M
+             * @default 0
+             */
+            planned_distance_m: number;
+        };
+        /** CalendarEntryOut */
+        CalendarEntryOut: {
+            /** Id */
+            id: string;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "activity" | "race" | "session";
+            /** Title */
+            title: string;
+            /** Sport */
+            sport?: string | null;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Race Id */
+            race_id?: number | null;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Intensity */
+            intensity?: string | null;
+            /** Status */
+            status?: string | null;
+            /**
+             * Is Race
+             * @default false
+             */
+            is_race: boolean;
+        };
+        /** CalendarView */
+        CalendarView: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
+            /** Weeks */
+            weeks: components["schemas"]["CalendarWeekOut"][];
+        };
+        /** CalendarWeekOut */
+        CalendarWeekOut: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /** Days */
+            days: components["schemas"]["CalendarDayOut"][];
+            /** Actual Distance M */
+            actual_distance_m: number;
+            /** Planned Distance M */
+            planned_distance_m: number;
+        };
+        /** ConsistencyOut */
+        ConsistencyOut: {
+            /** Window Days */
+            window_days: number;
+            /** Weeks */
+            weeks: number;
+            /** Weeks With Data */
+            weeks_with_data: number;
+            /** Active Days */
+            active_days: number;
+            /** Current Streak Days */
+            current_streak_days: number;
+            /** Longest Streak Days */
+            longest_streak_days: number;
+            /** Weekly Average M */
+            weekly_average_m: number;
+            /** Best Week Start */
+            best_week_start?: string | null;
+            /** Best Week M */
+            best_week_m: number;
+        };
         /** DiagnosticsOverview */
         DiagnosticsOverview: {
             /**
@@ -872,6 +1070,22 @@ export interface components {
              */
             as_of: string;
         };
+        /** FitnessPointOut */
+        FitnessPointOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Time S */
+            time_s: number;
+            /** Low S */
+            low_s?: number | null;
+            /** High S */
+            high_s?: number | null;
+            /** Confidence */
+            confidence?: string | null;
+        };
         /** GarminExportResponse */
         GarminExportResponse: {
             /** Run Id */
@@ -956,6 +1170,35 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** GoalProgressOut */
+        GoalProgressOut: {
+            /** Distance Key */
+            distance_key?: string | null;
+            /** Distance M */
+            distance_m: number;
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Current Time S */
+            current_time_s?: number | null;
+            /** Low S */
+            low_s?: number | null;
+            /** High S */
+            high_s?: number | null;
+            /** Confidence */
+            confidence?: string | null;
+            /** Gap S */
+            gap_s?: number | null;
+            /** Gap Pct */
+            gap_pct?: number | null;
+            /** Readiness Pct */
+            readiness_pct?: number | null;
+            /** Status */
+            status: string;
         };
         /** GoalUpsert */
         GoalUpsert: {
@@ -1237,6 +1480,149 @@ export interface components {
             /** Predictions */
             predictions?: components["schemas"]["SnapshotPredictionOut"][];
         };
+        /** PersonalBestOut */
+        PersonalBestOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Time S */
+            time_s: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+            /** Activity Id */
+            activity_id: number;
+            /** Activity Name */
+            activity_name: string;
+            /**
+             * Date
+             * Format: date-time
+             */
+            date: string;
+            /** Is Race */
+            is_race: boolean;
+        };
+        /** PlannedRaceCreate */
+        PlannedRaceCreate: {
+            /** Name */
+            name: string;
+            /**
+             * Race Date
+             * Format: date
+             */
+            race_date: string;
+            /** Distance M */
+            distance_m: number;
+            /** Goal Time S */
+            goal_time_s?: number | null;
+            /**
+             * Priority
+             * @default B
+             * @enum {string}
+             */
+            priority: "A" | "B" | "C";
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Status
+             * @default planned
+             * @enum {string}
+             */
+            status: "planned" | "completed" | "cancelled";
+            /** Activity Id */
+            activity_id?: number | null;
+        };
+        /** PlannedRaceOut */
+        PlannedRaceOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /**
+             * Race Date
+             * Format: date
+             */
+            race_date: string;
+            /** Distance M */
+            distance_m: number;
+            /** Goal Time S */
+            goal_time_s?: number | null;
+            /** Priority */
+            priority: string;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Status */
+            status: string;
+            /** Activity Id */
+            activity_id?: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Days To Race */
+            days_to_race?: number | null;
+            /** Weeks To Race */
+            weeks_to_race?: number | null;
+            /** Phase */
+            phase?: string | null;
+            /** Phase Reason */
+            phase_reason?: string | null;
+            /** Target Pace S Per Km */
+            target_pace_s_per_km?: number | null;
+            /** Predicted Time S */
+            predicted_time_s?: number | null;
+            /** Predicted Low S */
+            predicted_low_s?: number | null;
+            /** Predicted High S */
+            predicted_high_s?: number | null;
+            /** Prediction Confidence */
+            prediction_confidence?: string | null;
+            /** Gap S */
+            gap_s?: number | null;
+            /** Gap Pct */
+            gap_pct?: number | null;
+            /** Readiness */
+            readiness: string;
+            /** Weekly Distance Low M */
+            weekly_distance_low_m?: number | null;
+            /** Weekly Distance High M */
+            weekly_distance_high_m?: number | null;
+            /** Long Run Low M */
+            long_run_low_m?: number | null;
+            /** Long Run High M */
+            long_run_high_m?: number | null;
+        };
+        /** PlannedRaceUpdate */
+        PlannedRaceUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Race Date */
+            race_date?: string | null;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Goal Time S */
+            goal_time_s?: number | null;
+            /** Priority */
+            priority?: ("A" | "B" | "C") | null;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Status */
+            status?: ("planned" | "completed" | "cancelled") | null;
+            /** Activity Id */
+            activity_id?: number | null;
+        };
         /** PredictionEstimateOut */
         PredictionEstimateOut: {
             /** Time S */
@@ -1269,6 +1655,87 @@ export interface components {
             /** Efforts 365D */
             efforts_365d: number;
         };
+        /** ProgressHighlightOut */
+        ProgressHighlightOut: {
+            /** Key */
+            key: string;
+            /** Date */
+            date?: string | null;
+            /** Value */
+            value: number;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Detail */
+            detail?: {
+                [key: string]: unknown;
+            };
+        };
+        /** ProgressOverview */
+        ProgressOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Window Days */
+            window_days: number;
+            /** Status */
+            status: string;
+            totals: components["schemas"]["ProgressTotalsOut"];
+            previous: components["schemas"]["ProgressTotalsOut"];
+            /** Delta */
+            delta: {
+                [key: string]: number | null;
+            };
+            consistency: components["schemas"]["ConsistencyOut"];
+            /** Weeks */
+            weeks: components["schemas"]["ProgressWeekOut"][];
+            /** Fitness */
+            fitness: components["schemas"]["FitnessPointOut"][];
+            /** Best Efforts */
+            best_efforts: components["schemas"]["PersonalBestOut"][];
+            /** Goals */
+            goals: components["schemas"]["GoalProgressOut"][];
+            /** Races */
+            races: components["schemas"]["PlannedRaceOut"][];
+            /** Highlights */
+            highlights: components["schemas"]["ProgressHighlightOut"][];
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** ProgressTotalsOut */
+        ProgressTotalsOut: {
+            /** Distance M */
+            distance_m: number;
+            /** Duration S */
+            duration_s: number;
+            /** Elevation Gain M */
+            elevation_gain_m: number;
+            /** Sessions */
+            sessions: number;
+            /** Active Days */
+            active_days: number;
+            /** Load */
+            load: number;
+        };
+        /** ProgressWeekOut */
+        ProgressWeekOut: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /** Distance M */
+            distance_m: number;
+            /** Duration S */
+            duration_s: number;
+            /** Load */
+            load: number;
+            /** Sessions */
+            sessions: number;
+            /** Active Days */
+            active_days: number;
+        };
         /** RaceCandidate */
         RaceCandidate: {
             /** Id */
@@ -1286,6 +1753,54 @@ export interface components {
             distance_m: number;
             /** Duration S */
             duration_s: number;
+        };
+        /** ReportOut */
+        ReportOut: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "week" | "month";
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Label */
+            label: string;
+            totals: components["schemas"]["ProgressTotalsOut"];
+            previous: components["schemas"]["ProgressTotalsOut"];
+            /** Delta */
+            delta: {
+                [key: string]: number | null;
+            };
+            /** Days */
+            days?: components["schemas"]["WeeklyDay"][];
+            /** Weeks */
+            weeks?: components["schemas"]["ProgressWeekOut"][];
+            /** By Sport */
+            by_sport?: components["schemas"]["SportTotal"][];
+            load: components["schemas"]["LoadOut"];
+            /** Goals */
+            goals?: components["schemas"]["GoalProgressOut"][];
+            /** Races */
+            races?: components["schemas"]["PlannedRaceOut"][];
+            /** Highlights */
+            highlights?: components["schemas"]["ProgressHighlightOut"][];
+            /** Notes */
+            notes?: string[];
+            /** Warnings */
+            warnings?: string[];
         };
         /** SnapshotPredictionOut */
         SnapshotPredictionOut: {
@@ -2485,6 +3000,250 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SystemStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    progress_overview_api_v1_progress_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProgressOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    calendar_view_api_v1_calendar_get: {
+        parameters: {
+            query?: {
+                start?: string | null;
+                weeks?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_api_v1_reports_get: {
+        parameters: {
+            query?: {
+                period?: "week" | "month";
+                date?: string | null;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    races_api_v1_races_get: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlannedRaceOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_race_api_v1_races_post: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlannedRaceCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlannedRaceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_race_api_v1_races__race_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                race_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_race_api_v1_races__race_id__patch: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path: {
+                race_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlannedRaceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlannedRaceOut"];
                 };
             };
             /** @description Validation Error */
