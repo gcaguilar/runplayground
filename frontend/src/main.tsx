@@ -6,6 +6,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import "@fontsource-variable/manrope";
 import "@fontsource-variable/jetbrains-mono";
 import "./styles.css";
+import "./styles/plan.css";
 
 import { I18nProvider } from "@/i18n";
 import { router } from "@/router";

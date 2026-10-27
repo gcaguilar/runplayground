@@ -5,6 +5,7 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronLeft,
+  ClipboardList,
   ChevronRight,
   Dumbbell,
   Flag,
@@ -42,6 +43,9 @@ const SESSION_KEYS: Record<string, MessageKey> = {
   long: "calendar.session.long",
   threshold: "calendar.session.threshold",
   race_pace: "calendar.session.race_pace",
+  strength: "plan.session.type.strength",
+  cross_training: "plan.session.type.cross_training",
+  other: "plan.session.type.other",
 };
 
 const INTENSITY_TONE: Record<string, "accent" | "warning" | "danger" | "neutral"> = {
@@ -120,7 +124,9 @@ export function CalendarPage() {
       week.days.reduce(
         (dayTotal, day) =>
           dayTotal +
-          (day.entries ?? []).filter((entry) => entry.kind === "session").length,
+          (day.entries ?? []).filter(
+            (entry) => entry.kind === "session" || entry.kind === "plan",
+          ).length,
         0,
       ),
     0,
@@ -205,11 +211,24 @@ export function CalendarPage() {
               <strong>{sessions}</strong>
             </div>
           </div>
+          {data.active_plan ? (
+            <Link to="/plan" className="calendar-plan-chip">
+              <ClipboardList size={14} aria-hidden="true" />
+              <span>
+                {t("calendar.plan.active", { name: data.active_plan.name })}
+                <small>
+                  {formatDate(data.active_plan.start_date, locale)} –{" "}
+                  {formatDate(data.active_plan.end_date, locale)}
+                </small>
+              </span>
+            </Link>
+          ) : null}
         </Card>
         <Card className="calendar-summary__legend">
           <LegendItem icon={Activity} label={t("calendar.legend.activity")} tone="activity" />
           <LegendItem icon={Flag} label={t("calendar.legend.race")} tone="race" />
           <LegendItem icon={Dumbbell} label={t("calendar.legend.session")} tone="session" />
+          <LegendItem icon={ClipboardList} label={t("calendar.legend.plan")} tone="plan" />
         </Card>
       </section>
 
@@ -356,8 +375,10 @@ function CalendarEntryItem({
 }) {
   const { t } = useI18n();
   const isSession = entry.kind === "session";
-  const title = isSession
-    ? t(SESSION_KEYS[entry.title] ?? "calendar.legend.session")
+  const isPlan = entry.kind === "plan";
+  const isPlanned = isSession || isPlan;
+  const title = isPlanned
+    ? t(SESSION_KEYS[entry.title] ?? (isPlan ? "calendar.legend.plan" : "calendar.legend.session"))
     : entry.title;
   const content = (
     <>
@@ -370,6 +391,8 @@ function CalendarEntryItem({
           )
         ) : entry.kind === "race" ? (
           <Flag size={12} aria-hidden="true" />
+        ) : isPlan ? (
+          <ClipboardList size={12} aria-hidden="true" />
         ) : (
           <Dumbbell size={12} aria-hidden="true" />
         )}
@@ -385,10 +408,13 @@ function CalendarEntryItem({
             {formatDuration(entry.duration_s, locale, true)}
           </span>
         ) : null}
-        {isSession && entry.intensity ? (
+        {isPlanned && entry.intensity ? (
           <Badge tone={INTENSITY_TONE[entry.intensity] ?? "neutral"}>
             {INTENSITY_KEYS[entry.intensity] ? t(INTENSITY_KEYS[entry.intensity]) : entry.intensity}
           </Badge>
+        ) : null}
+        {isPlan && entry.status ? (
+          <Badge tone="neutral">{t(calendarStatusKey(entry.status))}</Badge>
         ) : null}
       </span>
     </>
@@ -418,7 +444,20 @@ function CalendarEntryItem({
       </Link>
     );
   }
+  if (entry.kind === "plan") {
+    return (
+      <Link to="/plan" className={className}>
+        {content}
+      </Link>
+    );
+  }
   return <div className={className}>{content}</div>;
+}
+
+function calendarStatusKey(status: string): MessageKey {
+  if (status === "completed") return "plan.session.status.completed";
+  if (status === "skipped") return "plan.session.status.skipped";
+  return "plan.session.status.planned";
 }
 
 function LegendItem({
@@ -428,7 +467,7 @@ function LegendItem({
 }: {
   icon: typeof Activity;
   label: string;
-  tone: "activity" | "race" | "session";
+  tone: "activity" | "race" | "session" | "plan";
 }) {
   return (
     <span className={cn("calendar-legend-item", `calendar-legend-item--${tone}`)}>

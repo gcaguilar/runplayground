@@ -92,6 +92,9 @@ const SESSION_TYPE_KEYS: Record<string, MessageKey> = {
   threshold: "training.session.type.threshold",
   race_pace: "training.session.type.race_pace",
   rest: "training.session.type.rest",
+  strength: "plan.session.type.strength",
+  cross_training: "plan.session.type.cross_training",
+  other: "plan.session.type.other",
 };
 
 const PURPOSE_KEYS: Record<string, MessageKey> = {
@@ -163,12 +166,46 @@ const ADHERENCE_WARNING_KEYS: Record<string, MessageKey> = {
 
 const ADHERENCE_NOTE_KEYS: Record<string, MessageKey> = {
   suggested_plan_not_registered: "training.adherence.notes.suggested_plan_not_registered",
+  registered_plan_used: "training.adherence.notes.registered_plan_used",
+  mixed_registered_and_suggested: "training.adherence.notes.mixed_registered_and_suggested",
   adherence_is_heuristic: "training.adherence.notes.adherence_is_heuristic",
   current_week_excluded: "training.adherence.notes.current_week_excluded",
   rest_days_derived: "training.adherence.notes.rest_days_derived",
   classification_uses_current_anchor:
     "training.adherence.notes.classification_uses_current_anchor",
   not_medical_advice: "training.adherence.notes.not_medical_advice",
+};
+
+const ADHERENCE_BASIS_KEYS: Record<string, MessageKey> = {
+  registered: "training.adherence.basis.registered",
+  suggested: "training.adherence.basis.suggested",
+  mixed: "training.adherence.basis.mixed",
+};
+
+const ADHERENCE_BASIS_TONE: Record<
+  string,
+  "success" | "warning" | "danger" | "info" | "neutral"
+> = {
+  registered: "success",
+  suggested: "info",
+  mixed: "warning",
+};
+
+const ADHERENCE_OUTCOME_KEYS: Record<string, MessageKey> = {
+  completed: "training.adherence.outcome.completed",
+  skipped: "training.adherence.outcome.skipped",
+  missed: "training.adherence.outcome.missed",
+  pending: "training.adherence.outcome.pending",
+};
+
+const ADHERENCE_OUTCOME_TONE: Record<
+  string,
+  "success" | "warning" | "danger" | "info" | "neutral"
+> = {
+  completed: "success",
+  skipped: "neutral",
+  missed: "danger",
+  pending: "info",
 };
 
 const DISTANCE_LABELS: Array<[number, MessageKey]> = [
@@ -511,6 +548,27 @@ function AdherenceCard() {
         </div>
       ) : null}
 
+      <div className="adherence-basis">
+        <div>
+          <span>{t("training.adherence.plan")}</span>
+          <strong>{data.plan_name ?? t("training.adherence.noPlan")}</strong>
+        </div>
+        <div>
+          <span>{t("training.adherence.basis")}</span>
+          <Badge tone={ADHERENCE_BASIS_TONE[data.basis] ?? "neutral"}>
+            {t(ADHERENCE_BASIS_KEYS[data.basis] ?? "training.adherence.basis.suggested")}
+          </Badge>
+        </div>
+        <div>
+          <span>{t("training.adherence.registeredWeeks")}</span>
+          <strong>{data.registered_weeks}</strong>
+        </div>
+        <div>
+          <span>{t("training.adherence.suggestedWeeks")}</span>
+          <strong>{data.suggested_weeks}</strong>
+        </div>
+      </div>
+
       <div className="adherence-summary">
         <div className="adherence-score">
           <span>{data.summary.average_score == null ? "—" : Math.round(data.summary.average_score)}</span>
@@ -534,6 +592,28 @@ function AdherenceCard() {
           <Ratio label={t("training.adherence.quality")} value={data.summary.quality_ratio} />
           <Ratio label={t("training.adherence.rest")} value={data.summary.rest_ratio} />
         </div>
+      </div>
+
+      <div className="adherence-counts">
+        <span>
+          {t("training.adherence.completedCount", {
+            count: data.summary.sessions_completed,
+          })}
+        </span>
+        <span>
+          {t("training.adherence.skippedCount", { count: data.summary.sessions_skipped })}
+        </span>
+        <span>
+          {t("training.adherence.missedCount", { count: data.summary.sessions_missed })}
+        </span>
+        <strong>
+          {t("training.adherence.completion", {
+            value:
+              data.summary.completion_rate == null
+                ? "—"
+                : `${Math.round(data.summary.completion_rate * 100)}%`,
+          })}
+        </strong>
       </div>
 
       <div className="adherence-weeks">
@@ -611,6 +691,9 @@ function AdherenceRow({
           <small>{PHASE_KEYS[item.phase] ? t(PHASE_KEYS[item.phase]) : item.phase}</small>
         </div>
         <div className="adherence-week__badges">
+          {item.basis === "registered" ? (
+            <Badge tone="success">{t("training.adherence.basis.registered")}</Badge>
+          ) : null}
           <AdherenceStatusBadge status={item.status} />
           <span className="adherence-week__score">{score == null ? "—" : Math.round(score)}</span>
         </div>
@@ -659,11 +742,73 @@ function AdherenceRow({
             actual: item.sessions_actual,
             planned: item.sessions_planned,
           })}
+          {item.basis === "registered"
+            ? ` · ${t("training.adherence.completedCount", {
+                count: item.sessions_completed,
+              })} · ${t("training.adherence.skippedCount", {
+                count: item.sessions_skipped,
+              })} · ${t("training.adherence.missedCount", {
+                count: item.sessions_missed,
+              })}`
+            : ""}
         </span>
         {score != null ? (
           <ProgressBar value={score} tone={tone} label={t("training.adherence.score")} />
         ) : null}
       </div>
+
+      {(item.session_items ?? []).length ? (
+        <div className="adherence-sessions">
+          <span className="adherence-sessions__title">
+            {t("training.adherence.sessionBreakdown")}
+          </span>
+          {(item.session_items ?? []).map((session) => (
+            <div key={session.session_id ?? `${session.date}-${session.type}`} className="adherence-session">
+              <span className="adherence-session__date">
+                {formatDate(session.date, locale)}
+              </span>
+              <span className="adherence-session__type">
+                {SESSION_TYPE_KEYS[session.type] ? t(SESSION_TYPE_KEYS[session.type]) : session.type}
+              </span>
+              <Badge tone={ADHERENCE_OUTCOME_TONE[session.outcome] ?? "neutral"}>
+                {t(
+                  ADHERENCE_OUTCOME_KEYS[session.outcome] ??
+                    "training.adherence.outcome.pending",
+                )}
+              </Badge>
+              <span className="adherence-session__target">
+                {session.distance_low_m
+                  ? formatDistance(session.distance_low_m, units, locale, { digits: 1 })
+                  : session.duration_low_s
+                    ? `${Math.round(session.duration_low_s / 60)} min`
+                    : "—"}
+              </span>
+              <span className="adherence-session__actual">
+                {session.actual_distance_m
+                  ? formatDistance(session.actual_distance_m, units, locale, { digits: 1 })
+                  : session.actual_duration_s
+                    ? `${Math.round(session.actual_duration_s / 60)} min`
+                    : "—"}
+              </span>
+              {session.compliance_pct != null ? (
+                <span className="adherence-session__compliance">
+                  {Math.round(session.compliance_pct)}%
+                </span>
+              ) : null}
+              {session.activity_id ? (
+                <Link
+                  to="/activities/$activityId"
+                  params={{ activityId: String(session.activity_id) }}
+                  className="text-link"
+                >
+                  <Activity size={12} aria-hidden="true" />
+                  {t("training.adherence.sessionActivity")}
+                </Link>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

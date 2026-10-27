@@ -18,6 +18,7 @@ import { ImportsPage } from "@/pages/ImportsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PerformancePage } from "@/pages/PerformancePage";
+import { PlanPage } from "@/pages/PlanPage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -144,6 +145,12 @@ const trainingRoute = createRoute({
   component: TrainingPage,
 });
 
+const planRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/plan",
+  component: PlanPage,
+});
+
 const activitiesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/activities",
@@ -196,6 +203,7 @@ const routeTree = rootRoute.addChildren([
   reportsRoute,
   diagnosticsRoute,
   trainingRoute,
+  planRoute,
   activitiesRoute,
   activityDetailRoute,
   compareRoute,

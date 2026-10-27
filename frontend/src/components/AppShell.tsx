@@ -5,6 +5,7 @@ import {
   Activity,
   ArrowLeftRight,
   CalendarDays,
+  ClipboardList,
   Database,
   Dumbbell,
   FileText,
@@ -45,6 +46,7 @@ type NavItem = {
     | "/reports"
     | "/diagnostics"
     | "/training"
+    | "/plan"
     | "/activities"
     | "/compare"
     | "/imports"
@@ -66,6 +68,7 @@ const primaryNav: NavItem[] = [
   { to: "/reports", label: "nav.reports", icon: FileText },
   { to: "/diagnostics", label: "nav.diagnostics", icon: Stethoscope },
   { to: "/training", label: "nav.training", icon: Dumbbell },
+  { to: "/plan", label: "nav.plan", icon: ClipboardList },
 ];
 
 const libraryNav: NavItem[] = [
@@ -90,6 +93,7 @@ function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/reports")) return "nav.reports";
   if (pathname.startsWith("/diagnostics")) return "nav.diagnostics";
   if (pathname.startsWith("/training")) return "nav.training";
+  if (pathname.startsWith("/plan")) return "nav.plan";
   return "nav.overview";
 }
 
