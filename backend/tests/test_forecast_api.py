@@ -76,6 +76,7 @@ def test_forecast_empty_database(client):
     assert payload["weeks"] == 8
     assert payload["focus_distance_key"] == "10k"
     assert payload["focus_source"] == "default"
+    assert payload["goal"] is None
     assert payload["baseline"]["anchor_time_s"] is None
     assert len(payload["scenarios"]) == 4
     assert all(item["anchor_time_s"] is None for item in payload["scenarios"])
@@ -97,6 +98,16 @@ def test_forecast_returns_four_explicit_scenarios(client):
     assert payload["training"]["weekly_avg_m"] > 0
     assert "no_anchor" not in payload["warnings"]
 
+    goal = payload["goal"]
+    assert goal is not None
+    assert goal["distance_key"] == "10k"
+    assert goal["source"] == "goal"
+    assert goal["target_time_s"] == 2940
+    assert goal["days_to_target"] == 70
+    assert goal["baseline_gap_s"] is not None
+    assert goal["baseline_status"] in {"ahead", "close", "behind"}
+    assert "horizon_before_goal" in payload["warnings"]
+
     scenarios = {item["key"]: item for item in payload["scenarios"]}
     assert set(scenarios) == {"maintain", "consistency", "specificity", "recovery"}
 
@@ -105,6 +116,8 @@ def test_forecast_returns_four_explicit_scenarios(client):
     assert maintain["effect_pct"] == 0
     assert "current_training" in maintain["assumptions"]
     assert maintain["anchor_time_s"] == payload["baseline"]["anchor_time_s"]
+    assert maintain["goal_gap_s"] is not None
+    assert maintain["goal_status"] in {"ahead", "close", "behind"}
 
     consistency = scenarios["consistency"]
     assert "more_regular_weeks" in consistency["assumptions"]
@@ -148,6 +161,8 @@ def test_forecast_horizon_is_bounded_and_validated(client):
 
     assert eight["weeks"] == 8
     assert twelve["weeks"] == 12
+    assert "horizon_before_goal" in eight["warnings"]
+    assert "horizon_before_goal" not in twelve["warnings"]
     eight_specificity = next(item for item in eight["scenarios"] if item["key"] == "specificity")
     twelve_specificity = next(item for item in twelve["scenarios"] if item["key"] == "specificity")
     assert abs(twelve_specificity["effect_pct"]) >= abs(eight_specificity["effect_pct"])

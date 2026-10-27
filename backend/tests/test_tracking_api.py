@@ -169,6 +169,12 @@ def test_tracking_matches_predictions_with_actual_results(client):
     assert goal["trend"] in {"improving", "stable", "worsening", "unknown"}
     assert len(goal["history"]) >= 3
     assert goal["last_reviewed_at"]
+    results = goal["results"]
+    assert results
+    race = next(item for item in results if item["activity_id"] == ids["ten_k"])
+    assert race["time_s"] == 3000
+    assert race["is_race"] is True
+    assert race["source"] == "race"
     assert "training_efforts_counted" in payload["accuracy"]["notes"]
 
 
