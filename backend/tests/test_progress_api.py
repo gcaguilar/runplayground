@@ -234,6 +234,20 @@ def test_weekly_and_monthly_reports(client):
     }
     assert "load_is_estimated" in payload["notes"]
     assert "not_medical_advice" in payload["notes"]
+    assert "narrative_is_derived" in payload["notes"]
+    narrative = payload["narrative"]
+    assert narrative["key"] in {
+        "fitness_up",
+        "fitness_down",
+        "volume_up",
+        "volume_down",
+        "stable",
+        "insufficient",
+    }
+    assert narrative["tone"] in {"positive", "neutral", "warning", "danger"}
+    assert narrative["action"]
+    assert narrative["confidence"] in {"low", "medium", "high"}
+    assert narrative["reasons"]
     assert payload["goals"]
 
     month = client.get(f"/api/v1/reports?period=month&date={today.isoformat()}")

@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
+from app.db import get_session_factory
+from app.models import PerformanceSnapshot
 from app.services.analysis import RunRecord
 from app.services.progress import (
     _distance_key,
     _percent_change,
     _streaks,
     _weekly_series,
+    build_report,
 )
 from app.utils import utcnow
 
@@ -49,6 +52,58 @@ def test_streaks_track_current_and_longest_runs():
     # A missed today should not break a streak that ended yesterday.
     assert _streaks(days - {today}, today) == (2, 2)
     assert _streaks(set(), today) == (0, 0)
+
+
+def test_report_narrative_reads_fitness_snapshots(client):
+    session = get_session_factory()()
+    start = date(2026, 3, 2)
+    try:
+        session.add_all(
+            [
+                PerformanceSnapshot(
+                    snapshot_date=start + timedelta(days=1),
+                    computed_at=datetime(2026, 3, 3, 8),
+                    model_version="m1.0",
+                    fitness_anchor_s=3000.0,
+                    fitness_anchor_low_s=2950.0,
+                    fitness_anchor_high_s=3050.0,
+                    fitness_confidence="medium",
+                    predictions=[],
+                ),
+                PerformanceSnapshot(
+                    snapshot_date=start + timedelta(days=4),
+                    computed_at=datetime(2026, 3, 6, 8),
+                    model_version="m1.0",
+                    fitness_anchor_s=2940.0,
+                    fitness_anchor_low_s=2890.0,
+                    fitness_anchor_high_s=2990.0,
+                    fitness_confidence="high",
+                    predictions=[],
+                ),
+            ]
+        )
+        session.commit()
+
+        report = build_report(
+            session,
+            "week",
+            start + timedelta(days=2),
+            now=datetime(2026, 3, 8, 12),
+        )
+    finally:
+        session.close()
+
+    narrative = report.narrative
+    assert narrative.key == "fitness_up"
+    assert narrative.tone == "positive"
+    assert narrative.improvement == "fitness"
+    assert narrative.fitness_change_s == 60.0
+    assert narrative.fitness_change_pct == 2.0
+    assert narrative.limitation is None
+    assert narrative.action == "maintain_balance"
+    assert narrative.confidence == "high"
+    assert "fitness_from_snapshots" in narrative.reasons
+    assert "no_measurable_improvement" not in narrative.reasons
 
 
 def test_weekly_series_buckets_by_monday_and_fills_gaps():
