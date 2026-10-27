@@ -1266,6 +1266,9 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
       value: [point.avg_hr, point.pace_s_per_km],
       name: point.activity_name,
       date: point.date,
+      envPace: point.environment_adjusted_pace_s_per_km,
+      envHrPace: point.environment_hr_adjusted_pace_s_per_km,
+      temperature: point.temperature_c,
     }));
   const recent = points
     .filter((point) => point.period === "recent")
@@ -1273,6 +1276,9 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
       value: [point.avg_hr, point.pace_s_per_km],
       name: point.activity_name,
       date: point.date,
+      envPace: point.environment_adjusted_pace_s_per_km,
+      envHrPace: point.environment_hr_adjusted_pace_s_per_km,
+      temperature: point.temperature_c,
     }));
 
   const option = useMemo<EChartsOption>(
@@ -1291,10 +1297,38 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
         formatter: (params: unknown) => {
           const item = (Array.isArray(params) ? params[0] : params) as TooltipItem | undefined;
           const data = item?.data as
-            | { name?: string; value?: [number, number]; date?: string }
+            | {
+                name?: string;
+                value?: [number, number];
+                date?: string;
+                envPace?: number | null;
+                envHrPace?: number | null;
+                temperature?: number | null;
+              }
             | undefined;
           if (!item || !data || !Array.isArray(data.value)) return "";
           const [hr, pace] = data.value;
+          const environmentRow =
+            data.envPace != null && Math.abs(data.envPace - pace) >= 0.5
+              ? `<div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
+              <span style="color:${palette.textMuted}">${t("progress.paceHr.chartEnvironmentPace")}</span>
+              <strong>${formatPace(data.envPace, units)}</strong>
+            </div>`
+              : "";
+          const environmentHrRow =
+            data.envHrPace != null && Math.abs(data.envHrPace - pace) >= 0.5
+              ? `<div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
+              <span style="color:${palette.textMuted}">${t("progress.paceHr.chartEnvironmentHrPace")}</span>
+              <strong>${formatPace(data.envHrPace, units)}</strong>
+            </div>`
+              : "";
+          const temperatureRow =
+            data.temperature != null
+              ? `<div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
+              <span style="color:${palette.textMuted}">${t("progress.paceHr.environment.temperature")}</span>
+              <strong>${formatNumber(data.temperature, locale, 1)} °C</strong>
+            </div>`
+              : "";
           return `<div style="font-weight:700;margin-bottom:3px">${data.name ?? ""}</div>
             <div style="color:${palette.textMuted}">${formatDate(data.date, locale)}</div>
             <div style="display:flex;justify-content:space-between;gap:16px;margin-top:5px">
@@ -1304,7 +1338,8 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
             <div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
               <span style="color:${palette.textMuted}">${t("progress.paceHr.chartPace")}</span>
               <strong>${formatPace(pace, units)}</strong>
-            </div>`;
+            </div>
+            ${environmentRow}${environmentHrRow}${temperatureRow}`;
         },
       },
       xAxis: {
