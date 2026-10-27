@@ -555,6 +555,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/adherence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Adherence */
+        get: operations["adherence_api_v1_adherence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/recovery": {
         parameters: {
             query?: never;
@@ -892,6 +909,105 @@ export interface components {
             downsampled: boolean;
             /** Points */
             points: components["schemas"]["StreamPoint"][];
+        };
+        /** AdherenceOverview */
+        AdherenceOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Weeks */
+            weeks: number;
+            /** Status */
+            status: string;
+            /**
+             * Current Week Start
+             * Format: date
+             */
+            current_week_start: string;
+            summary: components["schemas"]["AdherenceSummaryOut"];
+            /** Items */
+            items?: components["schemas"]["AdherenceWeekOut"][];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
+        /** AdherenceSummaryOut */
+        AdherenceSummaryOut: {
+            /** Weeks */
+            weeks: number;
+            /** Scored Weeks */
+            scored_weeks: number;
+            /** Average Score */
+            average_score?: number | null;
+            /** Current Score */
+            current_score?: number | null;
+            /** Trend */
+            trend: string;
+            /** Volume Ratio */
+            volume_ratio?: number | null;
+            /** Long Run Ratio */
+            long_run_ratio?: number | null;
+            /** Quality Ratio */
+            quality_ratio?: number | null;
+            /** Rest Ratio */
+            rest_ratio?: number | null;
+        };
+        /** AdherenceWeekOut */
+        AdherenceWeekOut: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /** Phase */
+            phase: string;
+            /** Status */
+            status: string;
+            /** Score */
+            score?: number | null;
+            /** Volume Actual M */
+            volume_actual_m: number;
+            /** Volume Low M */
+            volume_low_m: number;
+            /** Volume High M */
+            volume_high_m: number;
+            /** Volume Status */
+            volume_status: string;
+            /** Longest Actual M */
+            longest_actual_m: number;
+            /** Long Run Low M */
+            long_run_low_m: number;
+            /** Long Run High M */
+            long_run_high_m: number;
+            /** Long Run Status */
+            long_run_status: string;
+            /** Quality Actual */
+            quality_actual: number;
+            /** Quality Low */
+            quality_low: number;
+            /** Quality High */
+            quality_high: number;
+            /** Quality Status */
+            quality_status: string;
+            /** Rest Actual */
+            rest_actual: number;
+            /** Rest Planned */
+            rest_planned: number;
+            /** Rest Status */
+            rest_status: string;
+            /** Sessions Actual */
+            sessions_actual: number;
+            /** Sessions Planned */
+            sessions_planned: number;
+            /** Active Days */
+            active_days: number;
+            /** Reasons */
+            reasons?: string[];
         };
         /** AnalysisCoverageOut */
         AnalysisCoverageOut: {
@@ -4414,6 +4530,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    adherence_api_v1_adherence_get: {
+        parameters: {
+            query?: {
+                weeks?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdherenceOverview"];
+                };
             };
             /** @description Validation Error */
             422: {

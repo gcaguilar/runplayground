@@ -2378,6 +2378,77 @@
         }
       }
     },
+    "/api/v1/adherence": {
+      "get": {
+        "tags": [
+          "adherence"
+        ],
+        "summary": "Adherence",
+        "operationId": "adherence_api_v1_adherence_get",
+        "parameters": [
+          {
+            "name": "weeks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 8,
+              "title": "Weeks"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdherenceOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/recovery": {
       "get": {
         "tags": [
@@ -3551,6 +3622,287 @@
           "points"
         ],
         "title": "ActivityStreams"
+      },
+      "AdherenceOverview": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Current Week Start"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AdherenceSummaryOut"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdherenceWeekOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "weeks",
+          "status",
+          "current_week_start",
+          "summary"
+        ],
+        "title": "AdherenceOverview"
+      },
+      "AdherenceSummaryOut": {
+        "properties": {
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "scored_weeks": {
+            "type": "integer",
+            "title": "Scored Weeks"
+          },
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "current_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Score"
+          },
+          "trend": {
+            "type": "string",
+            "title": "Trend"
+          },
+          "volume_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Volume Ratio"
+          },
+          "long_run_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Long Run Ratio"
+          },
+          "quality_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Ratio"
+          },
+          "rest_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rest Ratio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weeks",
+          "scored_weeks",
+          "trend"
+        ],
+        "title": "AdherenceSummaryOut"
+      },
+      "AdherenceWeekOut": {
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Week Start"
+          },
+          "phase": {
+            "type": "string",
+            "title": "Phase"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "volume_actual_m": {
+            "type": "number",
+            "title": "Volume Actual M"
+          },
+          "volume_low_m": {
+            "type": "number",
+            "title": "Volume Low M"
+          },
+          "volume_high_m": {
+            "type": "number",
+            "title": "Volume High M"
+          },
+          "volume_status": {
+            "type": "string",
+            "title": "Volume Status"
+          },
+          "longest_actual_m": {
+            "type": "number",
+            "title": "Longest Actual M"
+          },
+          "long_run_low_m": {
+            "type": "number",
+            "title": "Long Run Low M"
+          },
+          "long_run_high_m": {
+            "type": "number",
+            "title": "Long Run High M"
+          },
+          "long_run_status": {
+            "type": "string",
+            "title": "Long Run Status"
+          },
+          "quality_actual": {
+            "type": "integer",
+            "title": "Quality Actual"
+          },
+          "quality_low": {
+            "type": "integer",
+            "title": "Quality Low"
+          },
+          "quality_high": {
+            "type": "integer",
+            "title": "Quality High"
+          },
+          "quality_status": {
+            "type": "string",
+            "title": "Quality Status"
+          },
+          "rest_actual": {
+            "type": "integer",
+            "title": "Rest Actual"
+          },
+          "rest_planned": {
+            "type": "integer",
+            "title": "Rest Planned"
+          },
+          "rest_status": {
+            "type": "string",
+            "title": "Rest Status"
+          },
+          "sessions_actual": {
+            "type": "integer",
+            "title": "Sessions Actual"
+          },
+          "sessions_planned": {
+            "type": "integer",
+            "title": "Sessions Planned"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week_start",
+          "phase",
+          "status",
+          "volume_actual_m",
+          "volume_low_m",
+          "volume_high_m",
+          "volume_status",
+          "longest_actual_m",
+          "long_run_low_m",
+          "long_run_high_m",
+          "long_run_status",
+          "quality_actual",
+          "quality_low",
+          "quality_high",
+          "quality_status",
+          "rest_actual",
+          "rest_planned",
+          "rest_status",
+          "sessions_actual",
+          "sessions_planned",
+          "active_days"
+        ],
+        "title": "AdherenceWeekOut"
       },
       "AnalysisCoverageOut": {
         "properties": {
