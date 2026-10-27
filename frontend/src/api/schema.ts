@@ -1279,6 +1279,32 @@ export interface components {
             /** Distances */
             distances?: components["schemas"]["ScenarioProjectionOut"][];
         };
+        /** ForecastGoalOut */
+        ForecastGoalOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Name */
+            name?: string | null;
+            /** Source */
+            source: string;
+            /** Target Time S */
+            target_time_s?: number | null;
+            /** Target Date */
+            target_date?: string | null;
+            /** Days To Target */
+            days_to_target?: number | null;
+            /** Baseline Gap S */
+            baseline_gap_s?: number | null;
+            /** Baseline Gap Pct */
+            baseline_gap_pct?: number | null;
+            /**
+             * Baseline Status
+             * @default unknown
+             */
+            baseline_status: string;
+        };
         /** ForecastView */
         ForecastView: {
             /**
@@ -1298,6 +1324,7 @@ export interface components {
             focus_distance_m: number;
             /** Focus Source */
             focus_source: string;
+            goal?: components["schemas"]["ForecastGoalOut"] | null;
             baseline: components["schemas"]["ForecastBaselineOut"];
             /** Scenarios */
             scenarios?: components["schemas"]["ScenarioOut"][];
@@ -1436,6 +1463,24 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** GoalResultOut */
+        GoalResultOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Time S */
+            time_s: number;
+            /** Activity Id */
+            activity_id: number;
+            /** Activity Name */
+            activity_name: string;
+            /** Is Race */
+            is_race: boolean;
+            /** Source */
+            source: string;
+        };
         /** GoalRevisionOut */
         GoalRevisionOut: {
             /**
@@ -1503,6 +1548,8 @@ export interface components {
             last_reviewed_at: string;
             /** History */
             history?: components["schemas"]["GoalHistoryPointOut"][];
+            /** Results */
+            results?: components["schemas"]["GoalResultOut"][];
             /** Revisions */
             revisions?: components["schemas"]["GoalRevisionOut"][];
         };
@@ -2142,6 +2189,15 @@ export interface components {
             delta_s?: number | null;
             /** Delta Pct */
             delta_pct?: number | null;
+            /** Goal Gap S */
+            goal_gap_s?: number | null;
+            /** Goal Gap Pct */
+            goal_gap_pct?: number | null;
+            /**
+             * Goal Status
+             * @default unknown
+             */
+            goal_status: string;
             /** Confidence */
             confidence: string;
             /** Confidence Score */

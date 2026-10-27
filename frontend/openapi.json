@@ -4635,6 +4635,101 @@
         ],
         "title": "ForecastBaselineOut"
       },
+      "ForecastGoalOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Time S"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "days_to_target": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Target"
+          },
+          "baseline_gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Gap S"
+          },
+          "baseline_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Gap Pct"
+          },
+          "baseline_status": {
+            "type": "string",
+            "title": "Baseline Status",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "source"
+        ],
+        "title": "ForecastGoalOut"
+      },
       "ForecastView": {
         "properties": {
           "generated_at": {
@@ -4665,6 +4760,16 @@
           "focus_source": {
             "type": "string",
             "title": "Focus Source"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ForecastGoalOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "baseline": {
             "$ref": "#/components/schemas/ForecastBaselineOut"
@@ -5159,6 +5264,45 @@
         ],
         "title": "GoalProgressOut"
       },
+      "GoalResultOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "time_s": {
+            "type": "number",
+            "title": "Time S"
+          },
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "type": "string",
+            "title": "Activity Name"
+          },
+          "is_race": {
+            "type": "boolean",
+            "title": "Is Race"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "time_s",
+          "activity_id",
+          "activity_name",
+          "is_race",
+          "source"
+        ],
+        "title": "GoalResultOut"
+      },
       "GoalRevisionOut": {
         "properties": {
           "created_at": {
@@ -5422,6 +5566,13 @@
             },
             "type": "array",
             "title": "History"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/GoalResultOut"
+            },
+            "type": "array",
+            "title": "Results"
           },
           "revisions": {
             "items": {
@@ -7495,6 +7646,33 @@
               }
             ],
             "title": "Delta Pct"
+          },
+          "goal_gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Gap S"
+          },
+          "goal_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Gap Pct"
+          },
+          "goal_status": {
+            "type": "string",
+            "title": "Goal Status",
+            "default": "unknown"
           },
           "confidence": {
             "type": "string",
