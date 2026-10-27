@@ -915,12 +915,36 @@ class ActionSuggestionOut(ApiModel):
     tracked: bool = False
 
 
+class DriverOut(ApiModel):
+    key: str
+    correlation: float | None = None
+    direction: str
+    strength: str
+    samples: int
+    improvement_high_pct: float | None = None
+    improvement_low_pct: float | None = None
+    difference_pct: float | None = None
+    confidence: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class DriverAnalysisOut(ApiModel):
+    status: str
+    window_days: int
+    weeks: int
+    samples: int
+    drivers: list[DriverOut] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class TrackingOverview(ApiModel):
     generated_at: datetime
     model_version: str
     days: int
     status: str
     accuracy: PredictionAccuracyOut
+    drivers: DriverAnalysisOut
     goals: list[GoalTrackingOut] = Field(default_factory=list)
     actions: list[TrackedActionOut] = Field(default_factory=list)
     suggestions: list[ActionSuggestionOut] = Field(default_factory=list)

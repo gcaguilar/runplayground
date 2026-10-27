@@ -46,6 +46,7 @@ from app.schemas import (
 )
 from app.services.analysis import DIMENSION_WEIGHTS, clamp
 from app.services.diagnostics import ACTION_BY_DIMENSION, build_diagnostics
+from app.services.drivers import build_drivers
 from app.services.performance import build_overview, ensure_efforts, store_snapshot
 from app.services.performance_models import STANDARD_DISTANCES, round_prediction_time
 from app.utils import as_utc, utcnow
@@ -98,6 +99,23 @@ def _snapshot_predictions(snapshot: PerformanceSnapshot) -> dict[str, dict[str, 
         if key and item.get("planning_s") is not None:
             output[key] = item
     return output
+
+
+def _hr_reference(db: Session, start: date, end: date, offset: timedelta) -> float | None:
+    rows = db.scalars(
+        select(Activity).where(
+            Activity.sport == "running",
+            Activity.start_time_utc
+            >= datetime(start.year, start.month, start.day) - offset - timedelta(days=2),
+            Activity.start_time_utc
+            <= datetime(end.year, end.month, end.day) - offset + timedelta(days=3),
+        )
+    ).all()
+    maximums = [float(activity.max_hr) for activity in rows if activity.max_hr]
+    if maximums:
+        return max(maximums)
+    averages = [float(activity.avg_hr) for activity in rows if activity.avg_hr]
+    return max(averages) * 1.08 if averages else None
 
 
 def _accuracy(db: Session, start: date, end: date, offset: timedelta) -> PredictionAccuracyOut:
@@ -474,6 +492,14 @@ def build_tracking(
     overview = build_overview(db, reference)
     store_snapshot(db, overview)
     accuracy = _accuracy(db, start, today, offset)
+    drivers = build_drivers(
+        db,
+        start,
+        today,
+        offset,
+        threshold_pace=(overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None),
+        hr_reference=_hr_reference(db, start, today, offset),
+    )
 
     snapshots = db.scalars(
         select(PerformanceSnapshot)
@@ -536,11 +562,15 @@ def build_tracking(
         warnings.append("small_accuracy_sample")
     if len(snapshots) < 2:
         warnings.append("short_history")
+    for warning in drivers.warnings:
+        if warning not in warnings:
+            warnings.append(warning)
 
     notes = [
         "snapshots_are_daily",
         "accuracy_is_observational",
         "actions_do_not_claim_causality",
+        "association_not_causation",
         "not_medical_advice",
     ]
     status = "ok" if accuracy.samples or goal_out else "insufficient"
@@ -550,6 +580,7 @@ def build_tracking(
         days=days,
         status=status,
         accuracy=accuracy,
+        drivers=drivers,
         goals=goal_out,
         actions=tracked_out,
         suggestions=suggestions,
