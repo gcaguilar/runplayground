@@ -83,6 +83,74 @@ LOAD_KEYS = {
     "ctl": "chronic_training_load",
 }
 
+SLEEP_DURATION_KEYS = {
+    "sleeptimeseconds",
+    "sleepdurationseconds",
+    "sleeptimeinseconds",
+    "sleepdurationinseconds",
+    "totalsleepseconds",
+    "totalsleepdurationseconds",
+    "sleepseconds",
+}
+SLEEP_MINUTE_KEYS = {
+    "sleeptimeminutes",
+    "sleepdurationminutes",
+    "sleeptimeinminutes",
+    "sleepdurationinminutes",
+    "totalsleepminutes",
+}
+SLEEP_HOUR_KEYS = {
+    "sleeptimehours",
+    "sleepdurationhours",
+    "sleeptimeinhours",
+    "sleepdurationinhours",
+}
+SLEEP_SCORE_KEYS = {
+    "sleepscore",
+    "sleepscorevalue",
+    "overallsleepscore",
+    "overallscore",
+}
+HRV_KEYS = {
+    "lastnightavg",
+    "lastnightaverage",
+    "nightlyaverage",
+    "hrv",
+    "hrvvalue",
+    "hrvrmssd",
+    "averagehrv",
+    "hrvlastnight",
+}
+RESTING_HR_KEYS = {
+    "restingheartrate",
+    "restingheartratevalue",
+    "restinghr",
+    "rhr",
+}
+WEIGHT_KG_KEYS = {
+    "weightkg",
+    "weightinkg",
+    "weight",
+}
+WEIGHT_GRAM_KEYS = {
+    "weightingrams",
+    "weightgrams",
+}
+WEIGHT_POUND_KEYS = {
+    "weightinpounds",
+    "weightpounds",
+    "weightlb",
+}
+BODY_BATTERY_KEYS = (
+    "bodybatterymostrecentvalue",
+    "bodybatterycurrent",
+    "bodybattery",
+    "mostrecentvalue",
+    "bodybatterylevel",
+    "value",
+    "level",
+)
+
 DATE_KEYS = (
     "calendardate",
     "metricdate",
@@ -256,22 +324,25 @@ def _walk(
     filename: str,
     hint: str,
     samples: dict[tuple[str, date, float], MetricSample],
+    inherited_date: date | None = None,
 ) -> None:
     if isinstance(node, list):
         for item in node:
-            _walk(item, filename, hint, samples)
+            _walk(item, filename, hint, samples, inherited_date)
         return
     if not isinstance(node, dict):
         return
 
+    record_date = _record_date(node) or inherited_date
     _extract_vo2max(node, filename, hint, samples)
     _extract_readiness(node, filename, hint, samples)
     _extract_load(node, filename, hint, samples)
     _extract_race_predictions(node, filename, hint, samples)
+    _extract_wellness(node, filename, hint, samples, record_date)
 
     for value in node.values():
         if isinstance(value, (dict, list)):
-            _walk(value, filename, hint, samples)
+            _walk(value, filename, hint, samples, record_date)
 
 
 def _extract_vo2max(
@@ -374,6 +445,230 @@ def _extract_load(
                 raw=_raw_record(record),
             ),
         )
+
+
+def _extract_wellness(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    context_date: date | None,
+) -> None:
+    metric_date = _record_date(record) or context_date
+    if metric_date is None:
+        return
+    _extract_sleep(record, filename, hint, samples, metric_date)
+    _extract_hrv(record, filename, hint, samples, metric_date)
+    _extract_resting_hr(record, filename, hint, samples, metric_date)
+    _extract_body_battery(record, filename, hint, samples, metric_date)
+    _extract_weight(record, filename, hint, samples, metric_date)
+
+
+def _extract_sleep(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    metric_date: date,
+) -> None:
+    for keys, factor in (
+        (SLEEP_DURATION_KEYS, 1.0),
+        (SLEEP_MINUTE_KEYS, 60.0),
+        (SLEEP_HOUR_KEYS, 3600.0),
+    ):
+        found = _first_key(record, keys)
+        if found is None:
+            continue
+        key, value = found
+        number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+        if number is None:
+            continue
+        seconds = number * factor
+        if not 1800 <= seconds <= 86400:
+            continue
+        _store(
+            samples,
+            MetricSample(
+                metric="sleep_duration",
+                metric_date=metric_date,
+                value=round(seconds, 1),
+                unit="s",
+                source_file=filename,
+                source_key=key,
+                raw=_raw_record(record),
+            ),
+        )
+        break
+
+    for key, value in record.items():
+        normalised = _normalise(key)
+        if normalised not in SLEEP_SCORE_KEYS:
+            continue
+        if normalised == "overallscore" and "sleep" not in hint:
+            continue
+        number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+        if number is None or not 0 <= number <= 100:
+            continue
+        _store(
+            samples,
+            MetricSample(
+                metric="sleep_score",
+                metric_date=metric_date,
+                value=round(number, 1),
+                unit="score",
+                source_file=filename,
+                source_key=key,
+                raw=_raw_record(record),
+            ),
+        )
+        break
+
+
+def _extract_hrv(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    metric_date: date,
+) -> None:
+    keys = list(HRV_KEYS)
+    if "hrv" in hint:
+        keys.extend(("value", "average", "rmssd"))
+    found = _first_key(record, tuple(keys))
+    if found is None:
+        return
+    key, value = found
+    number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+    if number is None or not 5 <= number <= 250:
+        return
+    _store(
+        samples,
+        MetricSample(
+            metric="hrv",
+            metric_date=metric_date,
+            value=round(number, 1),
+            unit="ms",
+            source_file=filename,
+            source_key=key,
+            raw=_raw_record(record),
+        ),
+    )
+
+
+def _extract_resting_hr(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    metric_date: date,
+) -> None:
+    keys = list(RESTING_HR_KEYS)
+    if "resting" in hint:
+        keys.extend(("value", "heartrate", "hr"))
+    found = _first_key(record, tuple(keys))
+    if found is None:
+        return
+    key, value = found
+    number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+    if number is None or not 25 <= number <= 150:
+        return
+    _store(
+        samples,
+        MetricSample(
+            metric="resting_hr",
+            metric_date=metric_date,
+            value=round(number, 1),
+            unit="bpm",
+            source_file=filename,
+            source_key=key,
+            raw=_raw_record(record),
+        ),
+    )
+
+
+def _extract_body_battery(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    metric_date: date,
+) -> None:
+    if "bodybattery" not in hint and not any("bodybattery" in _normalise(key) for key in record):
+        return
+    found = _first_key(record, BODY_BATTERY_KEYS)
+    if found is None:
+        return
+    key, value = found
+    number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+    if number is None or not 0 <= number <= 100:
+        return
+    _store(
+        samples,
+        MetricSample(
+            metric="body_battery",
+            metric_date=metric_date,
+            value=round(number, 1),
+            unit="score",
+            source_file=filename,
+            source_key=key,
+            raw=_raw_record(record),
+        ),
+    )
+
+
+def _extract_weight(
+    record: dict,
+    filename: str,
+    hint: str,
+    samples: dict[tuple[str, date, float], MetricSample],
+    metric_date: date,
+) -> None:
+    if (
+        "weight" not in hint
+        and "bodycomposition" not in hint
+        and not any("weight" in _normalise(key) for key in record)
+    ):
+        return
+    found = _first_key(record, WEIGHT_KG_KEYS)
+    factor = 1.0
+    if found is None:
+        found = _first_key(record, WEIGHT_GRAM_KEYS)
+        factor = 0.001
+    if found is None:
+        found = _first_key(record, WEIGHT_POUND_KEYS)
+        factor = 0.45359237
+    if found is None:
+        return
+    key, value = found
+    number = _as_float(value if not isinstance(value, dict) else _dict_value(value))
+    if number is None:
+        return
+    if key == "weight" and 300 < number <= 300_000:
+        # Some export versions name the field ``weight`` but store grams.
+        factor = 0.001
+    kilograms = number * factor
+    if not 30 <= kilograms <= 300:
+        return
+    _store(
+        samples,
+        MetricSample(
+            metric="weight",
+            metric_date=metric_date,
+            value=round(kilograms, 2),
+            unit="kg",
+            source_file=filename,
+            source_key=key,
+            raw=_raw_record(record),
+        ),
+    )
+
+
+def _first_key(record: dict, keys: tuple[str, ...]) -> tuple[str, Any] | None:
+    normalised = {_normalise(key): (key, value) for key, value in record.items()}
+    for key in keys:
+        if key in normalised:
+            return normalised[key]
+    return None
 
 
 def _extract_race_predictions(
