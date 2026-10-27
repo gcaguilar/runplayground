@@ -22,6 +22,7 @@ from app.api import (
     imports,
     performance,
     progress,
+    recovery,
     summary,
     sync,
     system,
@@ -118,6 +119,7 @@ api.include_router(imports.router)
 api.include_router(system.router)
 api.include_router(progress.router)
 api.include_router(tracking.router)
+api.include_router(recovery.router)
 api.include_router(comparables.router)
 api.include_router(briefing.router)
 app.include_router(api)

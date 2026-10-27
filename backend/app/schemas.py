@@ -1188,6 +1188,40 @@ class PaceHrAnalysisOut(ApiModel):
     notes: list[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Recovery context from the Garmin export (M9)
+
+
+class RecoveryMetricPointOut(ApiModel):
+    date: date
+    value: float
+
+
+class RecoveryMetricOut(ApiModel):
+    key: str
+    unit: str
+    latest_value: float | None = None
+    latest_date: date | None = None
+    avg_7d: float | None = None
+    avg_28d: float | None = None
+    change_28d: float | None = None
+    change_28d_pct: float | None = None
+    samples: int = 0
+    coverage_days: int = 0
+    points: list[RecoveryMetricPointOut] = Field(default_factory=list)
+
+
+class RecoveryOverview(ApiModel):
+    generated_at: datetime
+    model_version: str
+    days: int
+    status: str
+    imported_at: datetime | None = None
+    metrics: list[RecoveryMetricOut] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime
