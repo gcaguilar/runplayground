@@ -8616,6 +8616,48 @@ progress {
   color: var(--orange);
 }
 
+.pace-hr-environment {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: rgb(var(--overlay-rgb) / 0.025);
+}
+
+.pace-hr-environment-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.pace-hr-environment-title {
+  color: var(--text-faint);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pace-hr-environment-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pace-hr-environment-stats .pace-hr-stat {
+  padding: 8px 10px;
+  background: transparent;
+}
+
+.pace-hr-environment-note {
+  margin: 9px 0 0;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
 .pace-hr-groups {
   display: flex;
   flex-wrap: wrap;
@@ -8727,16 +8769,28 @@ progress {
   .pace-hr-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .pace-hr-environment-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
   .pace-hr-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .pace-hr-environment-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
   .pace-hr-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .pace-hr-environment-stats {
     grid-template-columns: 1fr;
   }
 }

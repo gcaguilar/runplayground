@@ -23,6 +23,7 @@ const WARNING_KEYS: Record<string, MessageKey> = {
   few_sessions: "progress.paceHr.warning.few_sessions",
   short_span: "progress.paceHr.warning.short_span",
   narrow_hr_range: "progress.paceHr.warning.narrow_hr_range",
+  temperature_not_available: "progress.paceHr.warning.temperature_not_available",
 };
 
 const NOTE_KEYS: Record<string, MessageKey> = {
@@ -30,6 +31,12 @@ const NOTE_KEYS: Record<string, MessageKey> = {
   same_distance_and_terrain: "progress.paceHr.note.same_distance_and_terrain",
   hr_adjusted_line: "progress.paceHr.note.hr_adjusted_line",
   temperature_not_controlled: "progress.paceHr.note.temperature_not_controlled",
+  environment_adjusted_pace: "progress.paceHr.note.environment_adjusted_pace",
+  terrain_adjustment_estimated: "progress.paceHr.note.terrain_adjustment_estimated",
+  environment_context_only: "progress.paceHr.note.environment_context_only",
+  temperature_from_streams: "progress.paceHr.note.temperature_from_streams",
+  temperature_not_available: "progress.paceHr.note.temperature_not_available",
+  heat_adjustment_applied: "progress.paceHr.note.heat_adjustment_applied",
   load_is_estimated: "progress.paceHr.note.load_is_estimated",
   not_medical_advice: "progress.paceHr.note.not_medical_advice",
   races_excluded: "progress.paceHr.note.races_excluded",
@@ -42,6 +49,7 @@ const REASON_KEYS: Record<string, MessageKey> = {
   narrow_hr_range: "progress.paceHr.reason.narrow_hr_range",
   no_regression: "progress.paceHr.reason.no_regression",
   temperature_not_controlled: "progress.paceHr.reason.temperature_not_controlled",
+  temperature_not_available: "progress.paceHr.reason.temperature_not_available",
 };
 
 const CONCLUSION_KEYS: Record<string, MessageKey> = {
@@ -205,6 +213,70 @@ export function PaceHrPanel({ days }: { days: number }) {
             />
           </div>
 
+          <div className="pace-hr-environment">
+            <div className="pace-hr-environment-head">
+              <span className="pace-hr-environment-title">
+                {t("progress.paceHr.environment.title")}
+              </span>
+              <Badge
+                tone={
+                  group.temperature_adjusted || group.terrain_adjusted ? "warning" : "neutral"
+                }
+                dot
+              >
+                {group.temperature_adjusted
+                  ? t("progress.paceHr.environment.applied")
+                  : group.terrain_adjusted
+                    ? t("progress.paceHr.environment.estimated")
+                    : t("progress.paceHr.environment.none")}
+              </Badge>
+            </div>
+            <div className="pace-hr-environment-stats">
+              <PaceHrStat
+                label={t("progress.paceHr.environment.terrainPerKm")}
+                value={
+                  group.avg_elevation_per_km_m == null
+                    ? "—"
+                    : `${formatNumber(group.avg_elevation_per_km_m, locale, 1)} m/km`
+                }
+              />
+              <PaceHrStat
+                label={t("progress.paceHr.environment.temperature")}
+                value={
+                  group.temperature_c == null
+                    ? t("progress.paceHr.environment.noTemperature")
+                    : `${formatNumber(group.temperature_c, locale, 1)} °C`
+                }
+              />
+              <PaceHrStat
+                label={t("progress.paceHr.environment.temperatureSessions")}
+                value={t("progress.paceHr.environment.sessionsValue", {
+                  withTemperature: group.temperature_sessions,
+                  sessions: group.sessions,
+                })}
+              />
+              <PaceHrStat
+                label={t("progress.paceHr.environment.terrainAdjustment")}
+                value={
+                  group.avg_terrain_adjustment_s_per_km == null
+                    ? "—"
+                    : `${formatNumber(group.avg_terrain_adjustment_s_per_km, locale, 1)} s/km`
+                }
+              />
+              <PaceHrStat
+                label={t("progress.paceHr.environment.heatAdjustment")}
+                value={
+                  group.temperature_sessions === 0
+                    ? "—"
+                    : `${formatNumber(group.avg_heat_adjustment_s_per_km ?? 0, locale, 1)} s/km`
+                }
+              />
+            </div>
+            <p className="pace-hr-environment-note">
+              {t("progress.paceHr.environment.explanation")}
+            </p>
+          </div>
+
           <PaceHrChart group={group} />
 
           <div className="pace-hr-reasons">
@@ -241,6 +313,7 @@ export function PaceHrPanel({ days }: { days: number }) {
               <i className="pace-hr-dot pace-hr-dot--recent" /> {t("progress.paceHr.recent")}
             </span>
             <span>{t("progress.paceHr.chartNote")}</span>
+            <span>{t("progress.paceHr.environment.chartHint")}</span>
           </div>
 
           <div className="pace-hr-exclusions">

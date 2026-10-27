@@ -10767,6 +10767,76 @@
             "type": "object",
             "title": "Conclusion Params"
           },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "temperature_sessions": {
+            "type": "integer",
+            "title": "Temperature Sessions",
+            "default": 0
+          },
+          "temperature_coverage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Coverage"
+          },
+          "avg_elevation_per_km_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Elevation Per Km M"
+          },
+          "avg_terrain_adjustment_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Terrain Adjustment S Per Km"
+          },
+          "avg_heat_adjustment_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Heat Adjustment S Per Km"
+          },
+          "terrain_adjusted": {
+            "type": "boolean",
+            "title": "Terrain Adjusted",
+            "default": false
+          },
+          "temperature_adjusted": {
+            "type": "boolean",
+            "title": "Temperature Adjusted",
+            "default": false
+          },
           "warnings": {
             "items": {
               "type": "string"
@@ -10880,6 +10950,131 @@
             ],
             "title": "Change Pct"
           },
+          "raw_early_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Early Pace S Per Km"
+          },
+          "raw_recent_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Recent Pace S Per Km"
+          },
+          "environment_early_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Early Pace S Per Km"
+          },
+          "environment_recent_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Recent Pace S Per Km"
+          },
+          "environment_change_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Change S Per Km"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "temperature_sessions": {
+            "type": "integer",
+            "title": "Temperature Sessions",
+            "default": 0
+          },
+          "temperature_coverage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Coverage"
+          },
+          "avg_elevation_per_km_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Elevation Per Km M"
+          },
+          "avg_terrain_adjustment_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Terrain Adjustment S Per Km"
+          },
+          "avg_heat_adjustment_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Heat Adjustment S Per Km"
+          },
+          "terrain_adjusted": {
+            "type": "boolean",
+            "title": "Terrain Adjusted",
+            "default": false
+          },
+          "temperature_adjusted": {
+            "type": "boolean",
+            "title": "Temperature Adjusted",
+            "default": false
+          },
           "status": {
             "type": "string",
             "title": "Status"
@@ -10990,6 +11185,28 @@
             ],
             "title": "Adjusted Pace S Per Km"
           },
+          "environment_adjusted_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Adjusted Pace S Per Km"
+          },
+          "environment_hr_adjusted_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Hr Adjusted Pace S Per Km"
+          },
           "distance_m": {
             "type": "number",
             "title": "Distance M"
@@ -11004,6 +11221,43 @@
               }
             ],
             "title": "Elevation Gain M"
+          },
+          "elevation_per_km_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elevation Per Km M"
+          },
+          "terrain_adjustment_s_per_km": {
+            "type": "number",
+            "title": "Terrain Adjustment S Per Km",
+            "default": 0.0
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "temperature_samples": {
+            "type": "integer",
+            "title": "Temperature Samples",
+            "default": 0
+          },
+          "heat_adjustment_s_per_km": {
+            "type": "number",
+            "title": "Heat Adjustment S Per Km",
+            "default": 0.0
           },
           "period": {
             "type": "string",

@@ -5,13 +5,16 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M15 — final planned milestone, plus optional M16 analysis windows
-> and M17 heart-rate zones.**
+> **Status: M15 — final planned milestone, plus optional M16 analysis windows,
+> M17 heart-rate zones and M18 environmental context.**
 > M15 delivered the light theme, accessibility and print output. M16 adds
 > explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows and a
 > read-only diagnostics trend by dimension. M17 adds optional heart-rate zones
 > to the running activity detail: five zones with time, share, explicit cuts,
-> coverage and the reference used, with no database migration. The dashboard
+> coverage and the reference used, with no database migration. M18 adds
+> optional terrain and temperature context to the pace–heart-rate comparison:
+> stream temperature aggregated per activity, conservative elevation and heat
+> adjustments, and an environment-adjusted change, with no database migration. The dashboard
 > opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -152,8 +155,11 @@ metric dump.
 - **Pace–heart-rate comparison**: aerobic runs are grouped by distance band
   and terrain. Each group removes the within-group heart-rate effect, compares
   the earlier and recent halves, and reports the pace change at the same heart
-  rate with a confidence score. Hard sessions and races are excluded; narrow
-  HR ranges or small samples lower confidence instead of producing a trend.
+  rate with a confidence score. Stream temperature and elevation add a
+  conservative, clearly estimated environmental adjustment; with no
+  temperature the raw comparison is kept and flagged. Hard sessions and races
+  are excluded; narrow HR ranges or small samples lower confidence instead of
+  producing a trend.
 - **Calendar and race planning**: real activities, suggested sessions from the
   current plan and several named races in one Monday–Sunday grid. Races carry
   priority A/B/C, an optional time goal, a location, notes, a
@@ -272,11 +278,14 @@ the comparison as a controlled test.
 
 The pace–heart-rate comparison only uses aerobic runs of at least 4 km, groups
 them by distance and terrain, and fits pace against heart rate inside each
-group. It then compares the median heart-rate-adjusted pace of the earlier and
-recent halves. Races and hard sessions are excluded because they answer a
-different question. A narrow heart-rate range, fewer than six sessions or a
-span under four weeks lowers confidence; the panel shows a provisional
-sentence instead of a definitive gain.
+group. It then compares the median environment- and heart-rate-adjusted pace
+of the earlier and recent halves. Races and hard sessions are excluded because
+they answer a different question. A narrow heart-rate range, fewer than six
+sessions or a span under four weeks lowers confidence; the panel shows a
+provisional sentence instead of a definitive gain. Since M18 the panel also
+reads stream temperature and reports the estimated elevation and heat costs;
+when temperature is missing the change keeps the terrain adjustment only and
+says so.
 
 The dashboard briefing is deliberately rule-based. It compares the current 10K
 anchor with the closest snapshot before the 4-, 8- and 12-week cutoffs, picks
@@ -354,6 +363,33 @@ the endpoint returns `insufficient` with empty zones instead of inventing them.
 Low coverage, sparse samples, filtered heart rates and an estimated maximum are
 warnings. Zones are context and never a medical diagnosis; they do not feed
 predictions, diagnostics or load.
+
+### Environmental context in the pace–heart-rate comparison
+
+M18 adds an optional environmental reading to each comparable run. Elevation
+per kilometre comes from the activity summary. Runs below 5 m/km are treated as
+flat; above that the estimated terrain cost is 1 s/km for every metre gained per
+kilometre, capped at 25 s/km. Average temperature comes from the activity's
+streams in one aggregate query per request. Only samples between −20 and 50 °C
+are considered; the heat cost is 0.3 % of pace per degree above 15 °C, capped
+at 6 %. With no stream temperature there is no heat adjustment and the response
+says `temperature_not_available` instead of guessing.
+
+The existing raw pace, `adjusted_pace_s_per_km` (heart rate only) and group
+change fields stay for compatibility. The headline `early_pace_s_per_km`,
+`recent_pace_s_per_km` and `change_s_per_km` now use the environment- plus
+heart-rate-adjusted pace. The response also exposes raw and environment-only
+medians, per-point `environment_adjusted_pace_s_per_km` and
+`environment_hr_adjusted_pace_s_per_km`, temperature coverage and mean
+terrain/heat adjustments. Groups and the global payload carry
+`terrain_adjusted` and `temperature_adjusted` flags. Notes are explicit:
+`terrain_adjustment_estimated`, `temperature_from_streams` or
+`temperature_not_available`, `heat_adjustment_applied` and
+`environment_context_only`. `temperature_not_controlled` remains only when no
+temperature data exists. The adjustment never raises confidence: missing
+temperature adds a `temperature_not_available` reason and the score formula is
+unchanged. The panel shows the context row and the chart tooltip shows the
+adjusted pace when it differs from raw pace.
 
 ### Suggested-plan adherence
 
@@ -767,14 +803,14 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Final.** |
 | **M16** | Optional enhancement: explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows, plus a read-only diagnostics trend by dimension across 4, 8 and 12 weeks. No migration. |
 | **M17** | Optional enhancement: heart-rate zones in the running activity detail, with five zones, explicit bpm cuts, per-zone time and share, coverage, warnings and the max/threshold reference from Settings. No migration. |
+| **M18** | Optional enhancement: environmental context in the pace–heart-rate comparison, with elevation per km, conservative terrain and heat adjustments, stream temperature aggregation, explicit notes/flags and the change computed on adjusted pace. No migration. |
 
-M15 closes the planned roadmap. M16 and M17 are optional enhancements rather
-than gaps in the current scope. Further additions remain optional product work:
-automatic wellness sync (sleep/HRV/weight still come from the Garmin export),
-temperature/terrain adjustment in pace–heart-rate comparisons, and plan import
-from CSV. The core promise — own the data, understand the numbers, see their
-provenance and confidence, and decide what to train next — is implemented
-without sending anything to a third party.
+M15 closes the planned roadmap. M16, M17 and M18 are optional enhancements
+rather than gaps in the current scope. Further additions remain optional
+product work: automatic wellness sync (sleep/HRV/weight still come from the
+Garmin export) and plan import from CSV. The core promise — own the data,
+understand the numbers, see their provenance and confidence, and decide what to
+train next — is implemented without sending anything to a third party.
 
 ## License and disclaimer
 

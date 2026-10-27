@@ -1387,9 +1387,19 @@ class PaceHrPointOut(ApiModel):
     activity_name: str
     avg_hr: int
     pace_s_per_km: float
+    # HR-adjusted raw pace, kept for backwards compatibility.
     adjusted_pace_s_per_km: float | None = None
+    # Raw pace minus estimated terrain and heat costs.
+    environment_adjusted_pace_s_per_km: float | None = None
+    # Environment-adjusted pace additionally corrected to the reference HR.
+    environment_hr_adjusted_pace_s_per_km: float | None = None
     distance_m: float
     elevation_gain_m: float | None = None
+    elevation_per_km_m: float | None = None
+    terrain_adjustment_s_per_km: float = 0.0
+    temperature_c: float | None = None
+    temperature_samples: int = 0
+    heat_adjustment_s_per_km: float = 0.0
     period: str
 
 
@@ -1408,10 +1418,25 @@ class PaceHrGroupOut(ApiModel):
     reference_hr: float
     hr_min: int
     hr_max: int
+    # Headline: environment + heart-rate adjusted medians and change.
     early_pace_s_per_km: float | None = None
     recent_pace_s_per_km: float | None = None
     change_s_per_km: float | None = None
     change_pct: float | None = None
+    # Same comparison without the environment correction.
+    raw_early_pace_s_per_km: float | None = None
+    raw_recent_pace_s_per_km: float | None = None
+    environment_early_pace_s_per_km: float | None = None
+    environment_recent_pace_s_per_km: float | None = None
+    environment_change_s_per_km: float | None = None
+    temperature_c: float | None = None
+    temperature_sessions: int = 0
+    temperature_coverage: float | None = None
+    avg_elevation_per_km_m: float | None = None
+    avg_terrain_adjustment_s_per_km: float | None = None
+    avg_heat_adjustment_s_per_km: float | None = None
+    terrain_adjusted: bool = False
+    temperature_adjusted: bool = False
     status: str
     confidence: str
     confidence_score: float
@@ -1434,6 +1459,14 @@ class PaceHrAnalysisOut(ApiModel):
     primary_group: str | None = None
     conclusion: str
     conclusion_params: dict[str, float | int | str | None] = Field(default_factory=dict)
+    temperature_c: float | None = None
+    temperature_sessions: int = 0
+    temperature_coverage: float | None = None
+    avg_elevation_per_km_m: float | None = None
+    avg_terrain_adjustment_s_per_km: float | None = None
+    avg_heat_adjustment_s_per_km: float | None = None
+    terrain_adjusted: bool = False
+    temperature_adjusted: bool = False
     warnings: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
