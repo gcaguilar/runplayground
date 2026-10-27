@@ -159,6 +159,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/activities/{activity_id}/zones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Zones */
+        get: operations["get_zones_api_v1_activities__activity_id__zones_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/backups/export": {
         parameters: {
             query?: never;
@@ -2693,6 +2710,76 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** HrZoneOut */
+        HrZoneOut: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "z1" | "z2" | "z3" | "z4" | "z5";
+            /** Lower Bpm */
+            lower_bpm: number;
+            /** Upper Bpm */
+            upper_bpm: number;
+            /** Lower Pct */
+            lower_pct?: number | null;
+            /** Upper Pct */
+            upper_pct?: number | null;
+            /** Seconds */
+            seconds: number;
+            /** Percentage */
+            percentage: number;
+        };
+        /** HrZonesOut */
+        HrZonesOut: {
+            /** Activity Id */
+            activity_id: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "insufficient";
+            /** Method */
+            method?: ("max_hr" | "threshold_hr") | null;
+            /** Source */
+            source?: ("manual" | "observed" | "activity_fallback") | null;
+            /** Reference Bpm */
+            reference_bpm?: number | null;
+            /** Cuts Bpm */
+            cuts_bpm?: number[];
+            /** Cuts Pct */
+            cuts_pct?: number[];
+            /** Zones */
+            zones?: components["schemas"]["HrZoneOut"][];
+            /** Total Hr S */
+            total_hr_s: number;
+            /** Activity Duration S */
+            activity_duration_s: number;
+            /** Samples Total */
+            samples_total: number;
+            /** Samples Timed */
+            samples_timed: number;
+            /** Samples With Hr */
+            samples_with_hr: number;
+            /** Coverage */
+            coverage: number;
+            /** Avg Hr */
+            avg_hr?: number | null;
+            /** Avg Hr Source */
+            avg_hr_source?: ("activity" | "stream") | null;
+            /** Max Hr */
+            max_hr?: number | null;
+            /** Max Hr Source */
+            max_hr_source?: ("activity" | "stream") | null;
+            /** Stream Max Hr */
+            stream_max_hr?: number | null;
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+            /** Model Version */
+            model_version: string;
+        };
         /** ImportFileResult */
         ImportFileResult: {
             /** Filename */
@@ -4642,6 +4729,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActivityStreams"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_zones_api_v1_activities__activity_id__zones_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HrZonesOut"];
                 };
             };
             /** @description Validation Error */

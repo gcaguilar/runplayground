@@ -624,6 +624,64 @@
         }
       }
     },
+    "/api/v1/activities/{activity_id}/zones": {
+      "get": {
+        "tags": [
+          "activities"
+        ],
+        "summary": "Get Zones",
+        "operationId": "get_zones_api_v1_activities__activity_id__zones_get",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Activity Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrZonesOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/backups/export": {
       "get": {
         "tags": [
@@ -9800,6 +9858,265 @@
           "version"
         ],
         "title": "HealthResponse"
+      },
+      "HrZoneOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "z1",
+              "z2",
+              "z3",
+              "z4",
+              "z5"
+            ],
+            "title": "Key"
+          },
+          "lower_bpm": {
+            "type": "integer",
+            "title": "Lower Bpm"
+          },
+          "upper_bpm": {
+            "type": "integer",
+            "title": "Upper Bpm"
+          },
+          "lower_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lower Pct"
+          },
+          "upper_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upper Pct"
+          },
+          "seconds": {
+            "type": "number",
+            "title": "Seconds"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "lower_bpm",
+          "upper_bpm",
+          "seconds",
+          "percentage"
+        ],
+        "title": "HrZoneOut"
+      },
+      "HrZonesOut": {
+        "properties": {
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "insufficient"
+            ],
+            "title": "Status"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "max_hr",
+                  "threshold_hr"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "manual",
+                  "observed",
+                  "activity_fallback"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "reference_bpm": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Bpm"
+          },
+          "cuts_bpm": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Cuts Bpm"
+          },
+          "cuts_pct": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Cuts Pct"
+          },
+          "zones": {
+            "items": {
+              "$ref": "#/components/schemas/HrZoneOut"
+            },
+            "type": "array",
+            "title": "Zones"
+          },
+          "total_hr_s": {
+            "type": "number",
+            "title": "Total Hr S"
+          },
+          "activity_duration_s": {
+            "type": "number",
+            "title": "Activity Duration S"
+          },
+          "samples_total": {
+            "type": "integer",
+            "title": "Samples Total"
+          },
+          "samples_timed": {
+            "type": "integer",
+            "title": "Samples Timed"
+          },
+          "samples_with_hr": {
+            "type": "integer",
+            "title": "Samples With Hr"
+          },
+          "coverage": {
+            "type": "number",
+            "title": "Coverage"
+          },
+          "avg_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Hr"
+          },
+          "avg_hr_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "activity",
+                  "stream"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Hr Source"
+          },
+          "max_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Hr"
+          },
+          "max_hr_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "activity",
+                  "stream"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Hr Source"
+          },
+          "stream_max_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stream Max Hr"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activity_id",
+          "status",
+          "total_hr_s",
+          "activity_duration_s",
+          "samples_total",
+          "samples_timed",
+          "samples_with_hr",
+          "coverage",
+          "model_version"
+        ],
+        "title": "HrZonesOut"
       },
       "ImportFileResult": {
         "properties": {
