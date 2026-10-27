@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     database_url: str | None = None
     max_upload_mb: int = 50
     garmin_export_max_mb: int = 500
+    max_backup_mb: int = 4096
+    max_restore_mb: int = 1024
 
     # --- web --------------------------------------------------------------
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
@@ -71,6 +73,22 @@ class Settings(BaseSettings):
         return self.data_dir / "raw"
 
     @property
+    def tmp_dir(self) -> Path:
+        return self.data_dir / "tmp"
+
+    @property
+    def restore_dir(self) -> Path:
+        return self.data_dir / "restore"
+
+    @property
+    def restore_pending_dir(self) -> Path:
+        return self.restore_dir / "pending"
+
+    @property
+    def restore_marker_path(self) -> Path:
+        return self.restore_dir / "last-restore.json"
+
+    @property
     def garmin_configured(self) -> bool:
         if not self.garmin_personal_api_key:
             return False
@@ -94,6 +112,7 @@ class Settings(BaseSettings):
     def ensure_dirs(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.raw_dir.mkdir(parents=True, exist_ok=True)
+        self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache(maxsize=1)
