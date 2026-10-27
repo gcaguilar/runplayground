@@ -486,10 +486,148 @@ export interface paths {
         patch: operations["patch_race_api_v1_races__race_id__patch"];
         trace?: never;
     };
+    "/api/v1/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Forecast */
+        get: operations["forecast_api_v1_forecast_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tracking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tracking */
+        get: operations["tracking_api_v1_tracking_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tracking/actions/{dimension_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Action */
+        put: operations["put_action_api_v1_tracking_actions__dimension_key__put"];
+        post?: never;
+        /** Remove Action */
+        delete: operations["remove_action_api_v1_tracking_actions__dimension_key__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AccuracySampleOut */
+        AccuracySampleOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /**
+             * Predicted On
+             * Format: date
+             */
+            predicted_on: string;
+            /**
+             * Actual On
+             * Format: date
+             */
+            actual_on: string;
+            /** Horizon Days */
+            horizon_days: number;
+            /** Predicted S */
+            predicted_s: number;
+            /** Predicted Low S */
+            predicted_low_s?: number | null;
+            /** Predicted High S */
+            predicted_high_s?: number | null;
+            /** Actual S */
+            actual_s: number;
+            /** Activity Id */
+            activity_id: number;
+            /** Activity Name */
+            activity_name: string;
+            /** Is Race */
+            is_race: boolean;
+            /** Error S */
+            error_s: number;
+            /** Error Pct */
+            error_pct: number;
+            /** Within Range */
+            within_range: boolean;
+        };
+        /** AccuracySummaryOut */
+        AccuracySummaryOut: {
+            /** Scope */
+            scope: string;
+            /** Key */
+            key: string;
+            /** Samples */
+            samples: number;
+            /** Mean Bias S */
+            mean_bias_s: number;
+            /** Mean Bias Pct */
+            mean_bias_pct: number;
+            /** Mae S */
+            mae_s: number;
+            /** Mape Pct */
+            mape_pct: number;
+            /** Within Range Pct */
+            within_range_pct: number;
+        };
+        /** ActionSuggestionOut */
+        ActionSuggestionOut: {
+            /** Dimension Key */
+            dimension_key: string;
+            /** Score */
+            score?: number | null;
+            /** Priority */
+            priority?: number | null;
+            /** Action */
+            action: string;
+            /** Reasons */
+            reasons?: string[];
+            /**
+             * Tracked
+             * @default false
+             */
+            tracked: boolean;
+        };
+        /** ActionUpsert */
+        ActionUpsert: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "in_progress" | "completed";
+            /** Note */
+            note?: string | null;
+        };
         /** ActivityDetail */
         ActivityDetail: {
             /** Id */
@@ -1086,6 +1224,52 @@ export interface components {
             /** Confidence */
             confidence?: string | null;
         };
+        /** ForecastBaselineOut */
+        ForecastBaselineOut: {
+            /** Anchor Time S */
+            anchor_time_s?: number | null;
+            /** Anchor Low S */
+            anchor_low_s?: number | null;
+            /** Anchor High S */
+            anchor_high_s?: number | null;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Distances */
+            distances?: components["schemas"]["ScenarioProjectionOut"][];
+        };
+        /** ForecastView */
+        ForecastView: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Weeks */
+            weeks: number;
+            /** Status */
+            status: string;
+            /** Focus Distance Key */
+            focus_distance_key: string;
+            /** Focus Distance M */
+            focus_distance_m: number;
+            /** Focus Source */
+            focus_source: string;
+            baseline: components["schemas"]["ForecastBaselineOut"];
+            /** Scenarios */
+            scenarios?: components["schemas"]["ScenarioOut"][];
+            /** Training */
+            training?: {
+                [key: string]: number | null;
+            };
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
         /** GarminExportResponse */
         GarminExportResponse: {
             /** Run Id */
@@ -1153,6 +1337,18 @@ export interface components {
             /** Expires In Seconds */
             expires_in_seconds?: number | null;
         };
+        /** GoalHistoryPointOut */
+        GoalHistoryPointOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Predicted S */
+            predicted_s?: number | null;
+            /** Gap S */
+            gap_s?: number | null;
+        };
         /** GoalOut */
         GoalOut: {
             /** Distance M */
@@ -1199,6 +1395,76 @@ export interface components {
             readiness_pct?: number | null;
             /** Status */
             status: string;
+        };
+        /** GoalRevisionOut */
+        GoalRevisionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Prediction Time S */
+            prediction_time_s?: number | null;
+            /** Prediction Low S */
+            prediction_low_s?: number | null;
+            /** Prediction High S */
+            prediction_high_s?: number | null;
+            /** Confidence */
+            confidence?: string | null;
+            /** Change S */
+            change_s?: number | null;
+        };
+        /** GoalTrackingOut */
+        GoalTrackingOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Current Time S */
+            current_time_s?: number | null;
+            /** Low S */
+            low_s?: number | null;
+            /** High S */
+            high_s?: number | null;
+            /** Confidence */
+            confidence?: string | null;
+            /** Gap S */
+            gap_s?: number | null;
+            /** Gap Pct */
+            gap_pct?: number | null;
+            /** Readiness Pct */
+            readiness_pct?: number | null;
+            /** Status */
+            status: string;
+            /** Trend */
+            trend: string;
+            /** Change 28D S */
+            change_28d_s?: number | null;
+            /** Change 28D Pct */
+            change_28d_pct?: number | null;
+            /** Days To Target */
+            days_to_target?: number | null;
+            /**
+             * Last Reviewed At
+             * Format: date-time
+             */
+            last_reviewed_at: string;
+            /** History */
+            history?: components["schemas"]["GoalHistoryPointOut"][];
+            /** Revisions */
+            revisions?: components["schemas"]["GoalRevisionOut"][];
         };
         /** GoalUpsert */
         GoalUpsert: {
@@ -1623,6 +1889,18 @@ export interface components {
             /** Activity Id */
             activity_id?: number | null;
         };
+        /** PredictionAccuracyOut */
+        PredictionAccuracyOut: {
+            /** Samples */
+            samples?: components["schemas"]["AccuracySampleOut"][];
+            overall?: components["schemas"]["AccuracySummaryOut"] | null;
+            /** By Distance */
+            by_distance?: components["schemas"]["AccuracySummaryOut"][];
+            /** By Horizon */
+            by_horizon?: components["schemas"]["AccuracySummaryOut"][];
+            /** Notes */
+            notes?: string[];
+        };
         /** PredictionEstimateOut */
         PredictionEstimateOut: {
             /** Time S */
@@ -1802,6 +2080,62 @@ export interface components {
             /** Warnings */
             warnings?: string[];
         };
+        /** ScenarioOut */
+        ScenarioOut: {
+            /** Key */
+            key: string;
+            /** Assumptions */
+            assumptions?: string[];
+            /** Evidence */
+            evidence?: {
+                [key: string]: number | string | boolean | null;
+            };
+            /** Effect Pct */
+            effect_pct?: number | null;
+            /** Anchor Time S */
+            anchor_time_s?: number | null;
+            /** Anchor Low S */
+            anchor_low_s?: number | null;
+            /** Anchor High S */
+            anchor_high_s?: number | null;
+            /** Delta S */
+            delta_s?: number | null;
+            /** Delta Pct */
+            delta_pct?: number | null;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Confidence Reasons */
+            confidence_reasons?: string[];
+            /** Notes */
+            notes?: string[];
+            /** Distances */
+            distances?: components["schemas"]["ScenarioProjectionOut"][];
+        };
+        /** ScenarioProjectionOut */
+        ScenarioProjectionOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Time S */
+            time_s?: number | null;
+            /** Low S */
+            low_s?: number | null;
+            /** High S */
+            high_s?: number | null;
+            /** Pace S Per Km */
+            pace_s_per_km?: number | null;
+            /** Delta S */
+            delta_s?: number | null;
+            /** Delta Pct */
+            delta_pct?: number | null;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+        };
         /** SnapshotPredictionOut */
         SnapshotPredictionOut: {
             /** Distance Key */
@@ -1974,6 +2308,64 @@ export interface components {
             } | null;
             /** Supported Formats */
             supported_formats: string[];
+        };
+        /** TrackedActionOut */
+        TrackedActionOut: {
+            /** Dimension Key */
+            dimension_key: string;
+            /** Status */
+            status: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Completed At */
+            completed_at?: string | null;
+            /** Baseline Score */
+            baseline_score?: number | null;
+            /** Baseline Confidence */
+            baseline_confidence?: string | null;
+            /** Current Score */
+            current_score?: number | null;
+            /** Delta */
+            delta?: number | null;
+            /** Verdict */
+            verdict: string;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** TrackingOverview */
+        TrackingOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Days */
+            days: number;
+            /** Status */
+            status: string;
+            accuracy: components["schemas"]["PredictionAccuracyOut"];
+            /** Goals */
+            goals?: components["schemas"]["GoalTrackingOut"][];
+            /** Actions */
+            actions?: components["schemas"]["TrackedActionOut"][];
+            /** Suggestions */
+            suggestions?: components["schemas"]["ActionSuggestionOut"][];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
         };
         /** TrainingFocusOut */
         TrainingFocusOut: {
@@ -3245,6 +3637,144 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlannedRaceOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    forecast_api_v1_forecast_get: {
+        parameters: {
+            query?: {
+                weeks?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tracking_api_v1_tracking_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackingOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_action_api_v1_tracking_actions__dimension_key__put: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path: {
+                dimension_key: string;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionUpsert"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackedActionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_action_api_v1_tracking_actions__dimension_key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dimension_key: string;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

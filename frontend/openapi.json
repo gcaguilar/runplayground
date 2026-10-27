@@ -2035,10 +2035,510 @@
           }
         }
       }
+    },
+    "/api/v1/forecast": {
+      "get": {
+        "tags": [
+          "tracking"
+        ],
+        "summary": "Forecast",
+        "operationId": "forecast_api_v1_forecast_get",
+        "parameters": [
+          {
+            "name": "weeks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 8,
+              "title": "Weeks"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tracking": {
+      "get": {
+        "tags": [
+          "tracking"
+        ],
+        "summary": "Tracking",
+        "operationId": "tracking_api_v1_tracking_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 730,
+              "minimum": 30,
+              "default": 180,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tracking/actions/{dimension_key}": {
+      "put": {
+        "tags": [
+          "tracking"
+        ],
+        "summary": "Put Action",
+        "operationId": "put_action_api_v1_tracking_actions__dimension_key__put",
+        "parameters": [
+          {
+            "name": "dimension_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dimension Key"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionUpsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackedActionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tracking"
+        ],
+        "summary": "Remove Action",
+        "operationId": "remove_action_api_v1_tracking_actions__dimension_key__delete",
+        "parameters": [
+          {
+            "name": "dimension_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dimension Key"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AccuracySampleOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "predicted_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Predicted On"
+          },
+          "actual_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Actual On"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "title": "Horizon Days"
+          },
+          "predicted_s": {
+            "type": "number",
+            "title": "Predicted S"
+          },
+          "predicted_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Low S"
+          },
+          "predicted_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted High S"
+          },
+          "actual_s": {
+            "type": "number",
+            "title": "Actual S"
+          },
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "type": "string",
+            "title": "Activity Name"
+          },
+          "is_race": {
+            "type": "boolean",
+            "title": "Is Race"
+          },
+          "error_s": {
+            "type": "number",
+            "title": "Error S"
+          },
+          "error_pct": {
+            "type": "number",
+            "title": "Error Pct"
+          },
+          "within_range": {
+            "type": "boolean",
+            "title": "Within Range"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "predicted_on",
+          "actual_on",
+          "horizon_days",
+          "predicted_s",
+          "actual_s",
+          "activity_id",
+          "activity_name",
+          "is_race",
+          "error_s",
+          "error_pct",
+          "within_range"
+        ],
+        "title": "AccuracySampleOut"
+      },
+      "AccuracySummaryOut": {
+        "properties": {
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "samples": {
+            "type": "integer",
+            "title": "Samples"
+          },
+          "mean_bias_s": {
+            "type": "number",
+            "title": "Mean Bias S"
+          },
+          "mean_bias_pct": {
+            "type": "number",
+            "title": "Mean Bias Pct"
+          },
+          "mae_s": {
+            "type": "number",
+            "title": "Mae S"
+          },
+          "mape_pct": {
+            "type": "number",
+            "title": "Mape Pct"
+          },
+          "within_range_pct": {
+            "type": "number",
+            "title": "Within Range Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scope",
+          "key",
+          "samples",
+          "mean_bias_s",
+          "mean_bias_pct",
+          "mae_s",
+          "mape_pct",
+          "within_range_pct"
+        ],
+        "title": "AccuracySummaryOut"
+      },
+      "ActionSuggestionOut": {
+        "properties": {
+          "dimension_key": {
+            "type": "string",
+            "title": "Dimension Key"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "tracked": {
+            "type": "boolean",
+            "title": "Tracked",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "dimension_key",
+          "action"
+        ],
+        "title": "ActionSuggestionOut"
+      },
+      "ActionUpsert": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ActionUpsert"
+      },
       "ActivityDetail": {
         "properties": {
           "id": {
@@ -3944,6 +4444,150 @@
         ],
         "title": "FitnessPointOut"
       },
+      "ForecastBaselineOut": {
+        "properties": {
+          "anchor_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Time S"
+          },
+          "anchor_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Low S"
+          },
+          "anchor_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor High S"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "distances": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioProjectionOut"
+            },
+            "type": "array",
+            "title": "Distances"
+          }
+        },
+        "type": "object",
+        "required": [
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "ForecastBaselineOut"
+      },
+      "ForecastView": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "focus_distance_key": {
+            "type": "string",
+            "title": "Focus Distance Key"
+          },
+          "focus_distance_m": {
+            "type": "number",
+            "title": "Focus Distance M"
+          },
+          "focus_source": {
+            "type": "string",
+            "title": "Focus Source"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/ForecastBaselineOut"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioOut"
+            },
+            "type": "array",
+            "title": "Scenarios"
+          },
+          "training": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Training"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "weeks",
+          "status",
+          "focus_distance_key",
+          "focus_distance_m",
+          "focus_source",
+          "baseline"
+        ],
+        "title": "ForecastView"
+      },
       "GarminExportResponse": {
         "properties": {
           "run_id": {
@@ -4154,6 +4798,42 @@
         ],
         "title": "GarminTokenStatus"
       },
+      "GoalHistoryPointOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "predicted_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted S"
+          },
+          "gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "title": "GoalHistoryPointOut"
+      },
       "GoalOut": {
         "properties": {
           "distance_m": {
@@ -4345,6 +5025,289 @@
           "status"
         ],
         "title": "GoalProgressOut"
+      },
+      "GoalRevisionOut": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "target_time_s": {
+            "type": "number",
+            "title": "Target Time S"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Name"
+          },
+          "prediction_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Time S"
+          },
+          "prediction_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Low S"
+          },
+          "prediction_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction High S"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "change_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "target_time_s"
+        ],
+        "title": "GoalRevisionOut"
+      },
+      "GoalTrackingOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "target_time_s": {
+            "type": "number",
+            "title": "Target Time S"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Name"
+          },
+          "current_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Time S"
+          },
+          "low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low S"
+          },
+          "high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High S"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap S"
+          },
+          "gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Pct"
+          },
+          "readiness_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness Pct"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "trend": {
+            "type": "string",
+            "title": "Trend"
+          },
+          "change_28d_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change 28D S"
+          },
+          "change_28d_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change 28D Pct"
+          },
+          "days_to_target": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Target"
+          },
+          "last_reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Reviewed At"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/GoalHistoryPointOut"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "revisions": {
+            "items": {
+              "$ref": "#/components/schemas/GoalRevisionOut"
+            },
+            "type": "array",
+            "title": "Revisions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "target_time_s",
+          "status",
+          "trend",
+          "last_reviewed_at"
+        ],
+        "title": "GoalTrackingOut"
       },
       "GoalUpsert": {
         "properties": {
@@ -5773,6 +6736,50 @@
         "type": "object",
         "title": "PlannedRaceUpdate"
       },
+      "PredictionAccuracyOut": {
+        "properties": {
+          "samples": {
+            "items": {
+              "$ref": "#/components/schemas/AccuracySampleOut"
+            },
+            "type": "array",
+            "title": "Samples"
+          },
+          "overall": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccuracySummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "by_distance": {
+            "items": {
+              "$ref": "#/components/schemas/AccuracySummaryOut"
+            },
+            "type": "array",
+            "title": "By Distance"
+          },
+          "by_horizon": {
+            "items": {
+              "$ref": "#/components/schemas/AccuracySummaryOut"
+            },
+            "type": "array",
+            "title": "By Horizon"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "PredictionAccuracyOut"
+      },
       "PredictionEstimateOut": {
         "properties": {
           "time_s": {
@@ -6253,6 +7260,240 @@
           "load"
         ],
         "title": "ReportOut"
+      },
+      "ScenarioOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Evidence"
+          },
+          "effect_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effect Pct"
+          },
+          "anchor_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Time S"
+          },
+          "anchor_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Low S"
+          },
+          "anchor_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor High S"
+          },
+          "delta_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta S"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "confidence_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Confidence Reasons"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "distances": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioProjectionOut"
+            },
+            "type": "array",
+            "title": "Distances"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "ScenarioOut"
+      },
+      "ScenarioProjectionOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time S"
+          },
+          "low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low S"
+          },
+          "high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High S"
+          },
+          "pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pace S Per Km"
+          },
+          "delta_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta S"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "ScenarioProjectionOut"
       },
       "SnapshotPredictionOut": {
         "properties": {
@@ -6843,6 +8084,183 @@
           "supported_formats"
         ],
         "title": "SystemStatus"
+      },
+      "TrackedActionOut": {
+        "properties": {
+          "dimension_key": {
+            "type": "string",
+            "title": "Dimension Key"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "baseline_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Score"
+          },
+          "baseline_confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Confidence"
+          },
+          "current_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Score"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "verdict": {
+            "type": "string",
+            "title": "Verdict"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dimension_key",
+          "status",
+          "created_at",
+          "updated_at",
+          "verdict"
+        ],
+        "title": "TrackedActionOut"
+      },
+      "TrackingOverview": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "accuracy": {
+            "$ref": "#/components/schemas/PredictionAccuracyOut"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalTrackingOut"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/TrackedActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/ActionSuggestionOut"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "days",
+          "status",
+          "accuracy"
+        ],
+        "title": "TrackingOverview"
       },
       "TrainingFocusOut": {
         "properties": {
