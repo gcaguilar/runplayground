@@ -16,8 +16,8 @@
   align-items: center;
   gap: 12px;
   padding: 13px 16px;
-  border-color: rgba(201, 245, 106, 0.22);
-  background: rgba(201, 245, 106, 0.05);
+  border-color: rgb(var(--accent-rgb) / 0.22);
+  background: rgb(var(--accent-rgb) / 0.05);
 }
 
 .plan-active-banner__icon {
@@ -81,7 +81,7 @@
   padding: 10px 11px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.018);
+  background: rgb(var(--overlay-rgb) / 0.018);
   color: var(--text);
   text-align: left;
   cursor: pointer;
@@ -90,12 +90,12 @@
 
 .plan-list__item:hover {
   border-color: var(--line-strong);
-  background: rgba(255, 255, 255, 0.035);
+  background: rgb(var(--overlay-rgb) / 0.035);
 }
 
 .plan-list__item.is-selected {
-  border-color: rgba(201, 245, 106, 0.4);
-  background: rgba(201, 245, 106, 0.06);
+  border-color: rgb(var(--accent-rgb) / 0.4);
+  background: rgb(var(--accent-rgb) / 0.06);
 }
 
 .plan-list__head {
@@ -157,7 +157,7 @@
   padding: 7px 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--overlay-rgb) / 0.015);
 }
 
 .plan-summary__meta span,
@@ -280,7 +280,7 @@
   padding: 11px 12px;
   border: 1px solid var(--line-strong);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--overlay-rgb) / 0.02);
 }
 
 .plan-bulk-form {
@@ -336,11 +336,11 @@
   padding: 7px 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--overlay-rgb) / 0.015);
 }
 
 .plan-session-row.is-completed {
-  border-color: rgba(201, 245, 106, 0.2);
+  border-color: rgb(var(--accent-rgb) / 0.2);
 }
 
 .plan-session-row.is-skipped {
@@ -471,7 +471,7 @@
   padding: 7px 9px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--overlay-rgb) / 0.015);
 }
 
 .adherence-basis span {
@@ -579,5 +579,189 @@
 
   .adherence-counts strong {
     margin-left: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Print / PDF                                                        */
+
+@media print {
+  html[data-theme],
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-soft: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --surface-3: #f4f4f4;
+    --line: #cccccc;
+    --line-strong: #999999;
+    --text: #111111;
+    --muted: #333333;
+    --faint: #444444;
+    --text-dim: #333333;
+    --text-faint: #444444;
+    --accent: #2f5a00;
+    --accent-strong: #234400;
+    --accent-dim: #eef5e6;
+    --accent-contrast: #ffffff;
+    --accent-rgb: 47 90 0;
+    --overlay-rgb: 0 0 0;
+    --orange: #8a3b00;
+    --red: #a31212;
+    --blue: #064e7a;
+    --violet: #4f2d9e;
+    --gold: #6b5200;
+    --teal: #005f59;
+    --shadow: none;
+    --shell-bg: #ffffff;
+    --sidebar-bg: #ffffff;
+    --inset: #f7f7f7;
+    --selection-text: #111111;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+    font-size: 11.5pt;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .sidebar,
+  .topbar,
+  .app-footer,
+  .sidebar-scrim,
+  .skip-link,
+  .toast-stack,
+  .locale-switch,
+  .page-header__actions,
+  .performance-actions,
+  .progress-actions,
+  .forecast-actions,
+  .tracking-actions,
+  .plan-actions,
+  .calendar-nav,
+  .segmented,
+  .pagination,
+  .filters,
+  .filter-bar,
+  .button,
+  .icon-button {
+    display: none !important;
+  }
+
+  .main-column,
+  .page,
+  .page-stack {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .page-stack > * + * {
+    margin-top: 8mm;
+  }
+
+  .reports-duo,
+  .stat-grid,
+  .settings-grid,
+  .performance-hero,
+  .forecast-baseline,
+  .plan-layout,
+  .calendar-grid {
+    display: block !important;
+  }
+
+  .reports-duo > * + *,
+  .stat-grid > * + *,
+  .settings-grid > * + *,
+  .performance-hero > * + *,
+  .forecast-baseline > * + *,
+  .plan-layout > * + *,
+  .calendar-grid > * + * {
+    margin-top: 6mm;
+  }
+
+  .page-header {
+    margin-bottom: 8mm;
+    break-after: avoid;
+  }
+
+  .card,
+  .panel,
+  .report-hero,
+  .stat-card,
+  .stat-grid > *,
+  .training-card,
+  .plan-card,
+  .session-card,
+  .goal-card,
+  .race-card,
+  .definition-row,
+  .recent-row {
+    break-inside: avoid;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-color: #cccccc !important;
+  }
+
+  .definition-row {
+    border-bottom: 1px solid #dddddd;
+  }
+
+  a {
+    color: #111111 !important;
+    text-decoration: none;
+  }
+
+  .badge {
+    border-color: #999999 !important;
+    background: #ffffff !important;
+    color: #222222 !important;
+  }
+
+  .badge--danger,
+  .badge--warning {
+    color: #8a1c00 !important;
+  }
+
+  .text-link,
+  .inline-link {
+    color: #111111 !important;
+  }
+
+  .route-map__legend {
+    background: #ffffff !important;
+    border-color: #cccccc !important;
+  }
+
+  .skeleton {
+    display: none !important;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100% !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  @page {
+    size: auto;
+    margin: 14mm;
   }
 }

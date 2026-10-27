@@ -51,7 +51,7 @@ export const DIMENSION_META: Record<
   load: {
     label: "diagnostics.dimension.load",
     icon: Activity,
-    color: "#e3c56b",
+    color: "var(--gold)",
     weight: 20,
   },
   recovery: {

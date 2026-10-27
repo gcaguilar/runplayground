@@ -5,8 +5,8 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M14 — goal lifecycle and archive.** The dashboard opens with the
-> current 10K fitness anchor, its 4/8/12-week evolution, the four distance
+> **Status: M15 — light theme, accessibility and print output.** The dashboard
+> opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
 > work. Performance turns your efforts into 5K/10K/half/marathon predictions
@@ -43,8 +43,10 @@ metric dump.
 > for the next startup and reports pending status. A goal can now be closed as
 > achieved, missed or cancelled with its actual time and activity; the closure
 > keeps the target and the prediction in force in an archive and frees the
-> distance for a new goal. Polite in-app notifications
-> announce completed syncs and imports.
+> distance for a new goal. Polite in-app notifications announce completed
+> syncs and imports. The interface now has light, dark and system themes, a
+> keyboard-accessible shell with skip link and modal mobile navigation,
+> theme-aware charts and a print/PDF layout.
 
 ## What works today
 
@@ -172,6 +174,20 @@ metric dump.
   actions, with links to Data quality or Settings and the last seen run stored
   in the browser.
 - **Bilingual UI** (Spanish default, English) and metric/imperial units.
+- **Light, dark and system themes**: the choice is stored as `run.theme` in
+  the browser, applied before the first paint, reflected in the browser
+  `theme-color` and follows `prefers-color-scheme` while in system mode.
+  Charts derive axes, grids, tooltips and series from the resolved theme.
+- **Keyboard and screen-reader access**: a skip link to the main landmark,
+  focus moved to the page after client-side navigation, visible focus rings,
+  labelled preference groups, ARIA chart descriptions and a mobile navigation
+  dialog that traps focus, closes with Escape and returns focus to its trigger.
+  `prefers-reduced-motion` disables transitions and chart animation.
+- **Print and PDF output**: a dedicated print stylesheet removes navigation and
+  actions, forces a white background with readable colours, keeps cards from
+  being split across pages and sets the page margins. Reports, Performance and
+  Progress expose an **Imprimir / PDF** button; charts switch to the light
+  palette for printing.
 - **Optional password login** and a localhost-only Docker Compose setup.
 
 ### Scenarios and tracking
@@ -365,6 +381,40 @@ schema version is rejected instead of being silently migrated. Keep the ZIP off
 the server; it is a portable copy, not a substitute for a snapshot of the whole
 Docker volume. If a restore is interrupted, the pre-restore database and the
 pending metadata remain available for manual recovery.
+
+### Theme, accessibility and printing
+
+The interface ships with three theme modes: **dark** (the original look),
+**light** and **system**. The preference lives only in the browser under
+`run.theme`, so it is per device and never sent to the backend. An inline
+script in `index.html` applies it before React mounts to avoid a flash, the
+provider keeps `data-theme` on `<html>` in sync, updates the
+`<meta name="theme-color">` value and listens to `prefers-color-scheme` while the
+mode is `system`. Changing the theme does not touch language, units or any
+stored data.
+
+Both themes define their own surfaces, text, lines, accent, danger, warning and
+info colours. `--faint` and `--muted` keep at least AA contrast against the
+cards they sit on, native checkboxes and radios use `accent-color`, and
+`prefers-reduced-motion` removes transitions, pulses and chart animation.
+Charts read a resolved-theme palette for text, grids, tooltips and series, so
+the same component works in both modes; ECharts also exposes an ARIA
+description for each chart.
+
+The shell includes a keyboard skip link to `#main-content`, moves focus to the
+main landmark after a client-side navigation and keeps a visible focus ring.
+On narrow screens the menu behaves as a modal dialog: `aria-expanded` and
+`aria-controls` describe it, focus enters the panel, Tab stays inside, Escape
+closes it and focus returns to the menu button. Navigating from the panel moves
+focus to the new page instead.
+
+The print stylesheet (`@media print`) forces white paper, dark text and light
+chart colours, hides the sidebar, top bar, footer, filters and action buttons,
+and uses `break-inside: avoid` on cards plus explicit `@page` margins. **Reports
+→ Imprimir / PDF**, **Performance** and **Progress** call the browser print
+dialog; the PDF is produced by the browser, never by the backend. The layout is
+card-atomic on purpose, so a long report may span several pages instead of
+cutting a card in half.
 
 ## Quick start
 
@@ -647,7 +697,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M11** | Analysis settings and manual corrections: persistent heart-rate/pace thresholds, classification mode and per-activity intensity override with RPE. |
 | **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. |
 | **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. |
-| **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. **Current.** |
+| **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. |
+| **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Current.** |
 
 ## License and disclaimer
 

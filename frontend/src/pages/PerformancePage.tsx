@@ -11,6 +11,7 @@ import {
   Gauge,
   HeartPulse,
   Info,
+  Printer,
   RefreshCw,
   Target,
   Timer,
@@ -164,6 +165,10 @@ export function PerformancePage() {
               {recompute.isPending
                 ? t("performance.actions.recomputing")
                 : t("performance.actions.recompute")}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => window.print()}>
+              <Printer size={15} aria-hidden="true" />
+              {t("common.print")}
             </Button>
             <Link to="/imports" className="button button--primary button--sm">
               <Upload size={15} aria-hidden="true" />

@@ -10,6 +10,7 @@ import {
   MapPin,
   Pencil,
   Plus,
+  Printer,
   RefreshCw,
   Route,
   Sparkles,
@@ -220,6 +221,10 @@ export function ProgressPage() {
             >
               <RefreshCw size={15} aria-hidden="true" />
               {t("analysis.actions.refresh")}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => window.print()}>
+              <Printer size={15} aria-hidden="true" />
+              {t("common.print")}
             </Button>
             <Link to="/calendar" className="button button--secondary button--sm">
               <CalendarDays size={15} aria-hidden="true" />

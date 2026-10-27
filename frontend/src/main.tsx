@@ -9,6 +9,7 @@ import "./styles.css";
 import "./styles/plan.css";
 
 import { I18nProvider } from "@/i18n";
+import { ThemeProvider } from "@/theme";
 import { router } from "@/router";
 
 const queryClient = new QueryClient({
@@ -26,9 +27,11 @@ if (!container) throw new Error("Root element not found");
 createRoot(container).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <RouterProvider router={router} />
-      </I18nProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <RouterProvider router={router} />
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 );
