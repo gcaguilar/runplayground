@@ -5641,3 +5641,1180 @@ svg {
     grid-template-columns: 84px minmax(0, 1fr);
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* M3: progress, calendar, reports and race planning                   */
+
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+
+.segmented button {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.segmented button:hover {
+  color: var(--text);
+}
+
+.segmented button.is-active {
+  background: var(--accent-dim);
+  color: var(--accent-strong);
+}
+
+.progress-actions,
+.calendar-actions,
+.reports-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.progress-delta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.progress-delta.is-up {
+  color: var(--accent);
+}
+
+.progress-delta.is-down {
+  color: var(--orange);
+}
+
+.progress-delta.is-neutral {
+  color: var(--faint);
+}
+
+.progress-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.progress-chart-card,
+.progress-consistency,
+.progress-goals,
+.progress-bests,
+.progress-highlights,
+.progress-races {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.progress-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.progress-metric span {
+  color: var(--faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.progress-metric strong {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.progress-consistency__bar {
+  padding-top: 2px;
+}
+
+.progress-consistency__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.progress-consistency__head span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.progress-consistency__head strong {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.goal-progress-list,
+.best-effort-list,
+.highlight-list,
+.race-plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goal-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.goal-progress__head,
+.goal-progress__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.goal-progress__head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.goal-progress__head strong {
+  font-size: 13px;
+}
+
+.goal-progress__head span,
+.goal-progress__foot span {
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.goal-progress__times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.goal-progress__times div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-progress__times span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.goal-progress__times strong {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.goal-progress__gap {
+  font-size: 10.5px;
+}
+
+.goal-progress__gap.is-ahead,
+.race-plan__goal .is-ahead,
+.report-metric__delta.is-up {
+  color: var(--accent);
+}
+
+.goal-progress__gap.is-behind,
+.race-plan__goal .is-behind,
+.report-metric__delta.is-down {
+  color: var(--orange);
+}
+
+.goal-progress__foot strong {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.best-effort {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.9fr) auto auto minmax(120px, 1.2fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.best-effort__distance {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.best-effort__distance strong {
+  font-size: 12px;
+}
+
+.best-effort__time {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.best-effort__pace {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.best-effort__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  min-width: 0;
+  text-align: right;
+}
+
+.best-effort__meta a {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 10.5px;
+}
+
+.best-effort__meta a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.best-effort__meta span {
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.highlight-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.highlight-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.highlight-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.highlight-row span {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.highlight-row small {
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.highlight-row strong {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.race-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 14px 15px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.race-plan--a {
+  border-left-color: var(--accent);
+}
+
+.race-plan--b {
+  border-left-color: var(--blue);
+}
+
+.race-plan--c {
+  border-left-color: var(--faint);
+}
+
+.race-plan__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.race-plan__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+}
+
+.race-plan__priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  border: 1px solid rgba(201, 245, 106, 0.3);
+  background: var(--accent-dim);
+  color: var(--accent-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.race-plan--b .race-plan__priority {
+  border-color: rgba(123, 200, 255, 0.3);
+  background: rgba(123, 200, 255, 0.1);
+  color: var(--blue);
+}
+
+.race-plan--c .race-plan__priority {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+}
+
+.race-plan__title > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.race-plan__title strong {
+  font-size: 13.5px;
+}
+
+.race-plan__title span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.race-plan__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.race-plan__countdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.race-plan__countdown > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.race-plan__countdown span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.race-plan__countdown small {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.race-plan__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.race-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.race-metric svg {
+  color: var(--accent);
+}
+
+.race-metric span {
+  color: var(--faint);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.race-metric strong {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.race-plan__goal {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.race-plan__goal strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.race-plan__notes {
+  margin: 0;
+  color: var(--faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.race-plan__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.race-plan__actions .badge {
+  margin-right: auto;
+}
+
+.race-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid rgba(201, 245, 106, 0.22);
+  border-radius: 12px;
+  background: rgba(201, 245, 106, 0.03);
+}
+
+.race-form__head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.race-form__head strong {
+  font-size: 12.5px;
+}
+
+.race-form__head span {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.race-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.race-form label > span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.race-form input,
+.race-form select,
+.race-form textarea {
+  width: 100%;
+  font-size: 11.5px;
+  padding: 7px 9px;
+}
+
+.race-form textarea {
+  resize: vertical;
+}
+
+.race-form__notes {
+  grid-column: span 2;
+}
+
+.race-form .form-error {
+  grid-column: 1 / -1;
+}
+
+.race-form__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.calendar-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+  gap: 14px;
+}
+
+.calendar-summary__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.calendar-summary__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.calendar-summary__metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-summary__metrics span {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.calendar-summary__metrics strong {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.calendar-summary__legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 18px;
+}
+
+.calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.calendar-legend-item--activity svg {
+  color: var(--blue);
+}
+
+.calendar-legend-item--race svg {
+  color: var(--orange);
+}
+
+.calendar-legend-item--session svg {
+  color: var(--accent);
+}
+
+.calendar-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.calendar-grid__head,
+.calendar-week__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+  gap: 6px;
+  min-width: 800px;
+}
+
+.calendar-grid__head span {
+  padding: 0 6px 2px;
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-week {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendar-week__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 800px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.calendar-week__summary > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.calendar-week__summary > strong {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.calendar-week__summary small {
+  color: var(--faint);
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+}
+
+.calendar-day {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 116px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.014);
+}
+
+.calendar-day.is-today {
+  border-color: rgba(201, 245, 106, 0.38);
+  background: rgba(201, 245, 106, 0.035);
+}
+
+.calendar-day__head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.calendar-day__weekday {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.calendar-day__number {
+  margin-left: auto;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.calendar-day.is-today .calendar-day__number {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.calendar-day__today {
+  color: var(--accent);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-day__entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.calendar-day__empty {
+  color: var(--faint);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.calendar-day__total {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-align: right;
+}
+
+.calendar-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 9.5px;
+  line-height: 1.25;
+  color: var(--muted);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.calendar-entry:hover {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.calendar-entry--activity {
+  border-color: rgba(123, 200, 255, 0.16);
+  background: rgba(123, 200, 255, 0.055);
+}
+
+.calendar-entry--race {
+  border-color: rgba(255, 171, 107, 0.3);
+  background: rgba(255, 171, 107, 0.08);
+}
+
+.calendar-entry--session {
+  border-color: rgba(201, 245, 106, 0.13);
+  background: rgba(201, 245, 106, 0.035);
+  border-style: dashed;
+}
+
+.calendar-entry__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.calendar-entry__head svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.calendar-entry__head span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.calendar-entry__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+}
+
+.calendar-entry__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.calendar-entry .badge {
+  height: 16px;
+  padding: 0 5px;
+  font-size: 7.5px;
+}
+
+.reports-page .report-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-hero__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.report-hero__head h2 {
+  margin-top: 6px;
+  font-size: clamp(21px, 2.4vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.report-hero__head p {
+  margin-top: 4px;
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.report-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.report-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.017);
+}
+
+.report-metric__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  margin-bottom: 3px;
+  border-radius: 7px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--accent);
+}
+
+.report-metric__label {
+  color: var(--faint);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.report-metric strong {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.report-metric__delta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.report-hero__previous {
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.reports-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.report-chart-card,
+.report-load-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-sport-list,
+.report-goal-list,
+.report-race-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-sport,
+.report-goal,
+.report-race {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.017);
+}
+
+.report-sport__head,
+.report-goal,
+.report-race {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.report-sport__head strong,
+.report-goal strong,
+.report-race strong {
+  font-size: 11.5px;
+}
+
+.report-sport__head span,
+.report-goal span,
+.report-race span {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.report-sport__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.report-goal > div,
+.report-race > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.report-race__meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.report-race__meta small {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.report-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 1180px) {
+  .report-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .race-plan__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .progress-actions,
+  .calendar-actions,
+  .reports-actions {
+    justify-content: flex-start;
+  }
+
+  .progress-duo,
+  .reports-duo,
+  .calendar-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .race-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .race-form__notes {
+    grid-column: 1 / -1;
+  }
+
+  .best-effort {
+    grid-template-columns: minmax(80px, 1fr) auto auto;
+  }
+
+  .best-effort__meta {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+}
+
+@media (max-width: 700px) {
+  .progress-stats,
+  .report-metrics,
+  .progress-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .race-form {
+    grid-template-columns: 1fr;
+  }
+
+  .race-form__notes {
+    grid-column: auto;
+  }
+
+  .race-plan__head {
+    flex-direction: column;
+  }
+
+  .race-plan__badges {
+    justify-content: flex-start;
+  }
+
+  .race-plan__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-hero__head {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .progress-stats,
+  .report-metrics,
+  .progress-metrics,
+  .goal-progress__times {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-summary__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .best-effort {
+    grid-template-columns: 1fr auto;
+  }
+
+  .best-effort__pace {
+    grid-column: 1 / -1;
+  }
+
+  .segmented {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .segmented button {
+    flex: 1;
+  }
+}
+
+@media print {
+  .sidebar,
+  .topbar,
+  .sidebar-scrim,
+  .app-footer,
+  .page-header__actions,
+  .segmented,
+  .calendar-nav {
+    display: none !important;
+  }
+
+  .main-column,
+  .page,
+  .page-stack {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
