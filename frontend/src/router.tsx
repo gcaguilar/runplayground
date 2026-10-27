@@ -21,6 +21,7 @@ import { PerformancePage } from "@/pages/PerformancePage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { RecoveryPage } from "@/pages/RecoveryPage";
 import { TrackingPage } from "@/pages/TrackingPage";
 import { TrainingPage } from "@/pages/TrainingPage";
 
@@ -113,6 +114,12 @@ const trackingRoute = createRoute({
   component: TrackingPage,
 });
 
+const recoveryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/recovery",
+  component: RecoveryPage,
+});
+
 const calendarRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/calendar",
@@ -184,6 +191,7 @@ const routeTree = rootRoute.addChildren([
   forecastRoute,
   progressRoute,
   trackingRoute,
+  recoveryRoute,
   calendarRoute,
   reportsRoute,
   diagnosticsRoute,

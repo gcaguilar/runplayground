@@ -44,6 +44,7 @@ export const queryKeys = {
   tracking: (days: number) => ["tracking", days] as const,
   briefing: ["briefing"] as const,
   paceHr: (days: number) => ["comparables", "pace-hr", days] as const,
+  recovery: (days: number) => ["recovery", days] as const,
 };
 
 function invalidatePlanData(queryClient: QueryClient) {
@@ -313,6 +314,7 @@ export function useImportGarminExport() {
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      void queryClient.invalidateQueries({ queryKey: ["recovery"] });
       invalidatePlanData(queryClient);
     },
   });
@@ -439,6 +441,14 @@ export function usePaceHr(days = 180) {
   return useQuery({
     queryKey: queryKeys.paceHr(days),
     queryFn: () => api.paceHr(days),
+    staleTime: 60_000,
+  });
+}
+
+export function useRecovery(days = 90) {
+  return useQuery({
+    queryKey: queryKeys.recovery(days),
+    queryFn: () => api.recovery(days),
     staleTime: 60_000,
   });
 }

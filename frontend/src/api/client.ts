@@ -92,6 +92,9 @@ export type GoalRevision = Schemas["GoalRevisionOut"];
 export type TrackedAction = Schemas["TrackedActionOut"];
 export type ActionUpsert = Schemas["ActionUpsert"];
 export type ActionSuggestion = Schemas["ActionSuggestionOut"];
+export type RecoveryOverview = Schemas["RecoveryOverview"];
+export type RecoveryMetric = Schemas["RecoveryMetricOut"];
+export type RecoveryMetricPoint = Schemas["RecoveryMetricPointOut"];
 export type ComparisonView = Schemas["ComparisonView"];
 export type ComparisonSide = Schemas["ComparisonSideOut"];
 export type ComparisonMetric = Schemas["ComparisonMetricOut"];
@@ -366,6 +369,13 @@ export const api = {
   paceHr: (days = 180) =>
     request<PaceHrAnalysis>(
       `/comparables/pace-hr${queryString({
+        days,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  recovery: (days = 90) =>
+    request<RecoveryOverview>(
+      `/recovery${queryString({
         days,
         tz_offset_minutes: -new Date().getTimezoneOffset(),
       })}`,

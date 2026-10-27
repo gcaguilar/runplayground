@@ -19,13 +19,14 @@ import type {
   GarminMetricPoint,
   GoalHistoryPoint,
   GoalResult,
+  RecoveryMetric,
   PaceHrGroup,
   PerformanceSnapshot,
   ProgressWeek,
   StreamPoint,
   WeeklyDay,
 } from "@/api/client";
-import { useI18n } from "@/i18n";
+import { useI18n, type MessageKey } from "@/i18n";
 import { EmptyState } from "@/components/ui";
 import {
   formatClock,
@@ -33,6 +34,7 @@ import {
   formatDistance,
   formatNumber,
   formatPace,
+  formatRecoveryValue,
   parseUtc,
   weekdayKeys,
 } from "@/lib/format";
@@ -1330,6 +1332,135 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
       option={option}
       opts={chartOpts}
       style={{ height: 240, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
+  const { locale, units, t } = useI18n();
+  const points = metric.points ?? [];
+  const labels = points.map((point) =>
+    formatDate(point.date, locale, { day: "numeric", month: "short" }),
+  );
+  const values = points.map((point) => point.value);
+
+  const axisValue = (value: number) => {
+    if (metric.key === "sleep_duration") {
+      return `${formatNumber(value / 3600, locale, 1)}h`;
+    }
+    if (metric.key === "weight") {
+      const shown = units === "imperial" ? value * 2.2046226218 : value;
+      return formatNumber(shown, locale, 1);
+    }
+    return formatNumber(value, locale, 0);
+  };
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const item = list[0];
+          if (!item) return "";
+          const index = item.dataIndex ?? 0;
+          const point = points[index];
+          if (!point) return "";
+          return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
+            point.date,
+            locale,
+            { day: "numeric", month: "short", year: "numeric" },
+          )}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${EARLY};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t(`recovery.metric.${metric.key}` as MessageKey)}</span>
+              <strong style="margin-left:auto">${formatRecoveryValue(
+                metric.key,
+                point.value,
+                units,
+                locale,
+              )}</strong>
+            </div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        scale: true,
+        splitNumber: 4,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => axisValue(value),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          type: "line",
+          data: values,
+          showSymbol: values.length <= 45,
+          symbolSize: 4,
+          smooth: 0.2,
+          lineStyle: { color: EARLY, width: 2.2 },
+          itemStyle: { color: EARLY },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(123, 200, 255, 0.20)" },
+                { offset: 1, color: "rgba(123, 200, 255, 0)" },
+              ],
+            },
+          },
+        },
+      ],
+    }),
+    [labels, locale, metric.key, points, t, units, values],
+  );
+
+  if (points.length < 2) {
+    return (
+      <EmptyState
+        compact
+        icon={TrendingUp}
+        title={t("recovery.chart.empty")}
+        description={t("recovery.chart.emptyBody")}
+      />
+    );
+  }
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 260, width: "100%" }}
       notMerge
       lazyUpdate
     />

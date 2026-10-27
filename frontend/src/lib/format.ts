@@ -275,6 +275,53 @@ export function weekdayKeys() {
   ] as const;
 }
 
+export function formatRecoveryValue(
+  key: string,
+  value: number | null | undefined,
+  units: Units,
+  locale: Locale,
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  if (key === "sleep_duration") return formatDuration(value, locale, true);
+  if (key === "weight") {
+    if (units === "imperial") {
+      return `${formatNumber(value * 2.2046226218, locale, 1)} lb`;
+    }
+    return `${formatNumber(value, locale, 1)} kg`;
+  }
+  if (key === "hrv") return `${formatNumber(value, locale, 0)} ms`;
+  if (key === "resting_hr") return `${formatNumber(value, locale, 0)} bpm`;
+  if (key === "sleep_score" || key === "body_battery") {
+    return `${formatNumber(value, locale, 0)}/100`;
+  }
+  return formatNumber(value, locale, 1);
+}
+
+export function formatRecoveryDelta(
+  key: string,
+  value: number | null | undefined,
+  units: Units,
+  locale: Locale,
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  if (key === "sleep_duration") {
+    return `${sign}${formatDuration(Math.abs(value), locale, true)}`;
+  }
+  if (key === "weight") {
+    if (units === "imperial") {
+      return `${sign}${formatNumber(Math.abs(value) * 2.2046226218, locale, 1)} lb`;
+    }
+    return `${sign}${formatNumber(Math.abs(value), locale, 1)} kg`;
+  }
+  if (key === "hrv") return `${sign}${formatNumber(Math.abs(value), locale, 0)} ms`;
+  if (key === "resting_hr") return `${sign}${formatNumber(Math.abs(value), locale, 0)} bpm`;
+  if (key === "sleep_score" || key === "body_battery") {
+    return `${sign}${formatNumber(Math.abs(value), locale, 0)}`;
+  }
+  return `${sign}${formatNumber(Math.abs(value), locale, 1)}`;
+}
+
 export function scoreBand(score: number): "excellent" | "good" | "fair" | "poor" {
   if (score >= 88) return "excellent";
   if (score >= 70) return "good";

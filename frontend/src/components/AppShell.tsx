@@ -9,6 +9,7 @@ import {
   Dumbbell,
   FileText,
   Gauge,
+  HeartPulse,
   History,
   LayoutDashboard,
   Menu,
@@ -39,6 +40,7 @@ type NavItem = {
     | "/forecast"
     | "/progress"
     | "/tracking"
+    | "/recovery"
     | "/calendar"
     | "/reports"
     | "/diagnostics"
@@ -59,6 +61,7 @@ const primaryNav: NavItem[] = [
   { to: "/forecast", label: "nav.forecast", icon: Sparkles },
   { to: "/progress", label: "nav.progress", icon: TrendingUp },
   { to: "/tracking", label: "nav.tracking", icon: History },
+  { to: "/recovery", label: "nav.recovery", icon: HeartPulse },
   { to: "/calendar", label: "nav.calendar", icon: CalendarDays },
   { to: "/reports", label: "nav.reports", icon: FileText },
   { to: "/diagnostics", label: "nav.diagnostics", icon: Stethoscope },
@@ -82,6 +85,7 @@ function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/forecast")) return "nav.forecast";
   if (pathname.startsWith("/progress")) return "nav.progress";
   if (pathname.startsWith("/tracking")) return "nav.tracking";
+  if (pathname.startsWith("/recovery")) return "nav.recovery";
   if (pathname.startsWith("/calendar")) return "nav.calendar";
   if (pathname.startsWith("/reports")) return "nav.reports";
   if (pathname.startsWith("/diagnostics")) return "nav.diagnostics";
@@ -119,6 +123,7 @@ export function AppShell() {
       void queryClient.invalidateQueries({ queryKey: ["reports"] });
       void queryClient.invalidateQueries({ queryKey: ["forecast"] });
       void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+      void queryClient.invalidateQueries({ queryKey: ["recovery"] });
       void queryClient.invalidateQueries({ queryKey: ["briefing"] });
     }
     wasRunning.current = running;
