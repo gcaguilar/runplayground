@@ -5,12 +5,14 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M2 — diagnostics and training.** Sync, import, activities,
-> weekly summary and data audit work. Performance turns your efforts into
-> 5K/10K/half/marathon predictions with ranges and confidence. Diagnostics
-> scores six training dimensions and explains every limiter; Training turns
-> that reading and your goal into a conservative seven-day plan. Progress
-> remains a placeholder for M3.
+> **Status: M3 — progress, calendar, reports and race planning.** Sync,
+> import, activities, weekly summary and data audit work. Performance turns
+> your efforts into 5K/10K/half/marathon predictions with ranges and
+> confidence. Diagnostics scores six training dimensions and explains every
+> limiter; Training turns that reading and your goal into a conservative
+> seven-day plan. Progress adds trends, personal bests, goals and named races;
+> the calendar merges real activities, suggested sessions and planned races;
+> reports are generated on demand for any week or month.
 
 ## What works today
 
@@ -34,6 +36,18 @@ metric dump.
   seven-day plan for the current phase (maintenance, base, build, peak, taper or
   recovery), and weekly volume, long-run and quality targets. Garmin readiness
   and load remain reference-only and never change the diagnostics score.
+- **Progress and consistency**: weekly distance and estimated load, the daily
+  10K fitness trend with its 80% range, streak and active-day stats, personal
+  bests per standard distance, goal progress against the B forecast, and
+  period highlights.
+- **Calendar and race planning**: real activities, suggested sessions from the
+  current plan and several named races in one Monday–Sunday grid. Races carry
+  priority A/B/C, an optional time goal, a location, notes and an optional link
+  to the activity that completed them. Planned races are the only stored M3
+  input; the calendar and its sessions are derived.
+- **Weekly and monthly reports**: totals, deltas, daily/weekly volume, load,
+  sessions by sport, goal gaps, races and period highlights. Reports are built
+  when requested and never persisted.
 - **Deduplication and provenance**: every activity records where it came
   from, when it was imported, its raw file hash and the parser version.
   Cross-format duplicates are merged instead of double-counted.
@@ -306,8 +320,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | --- | --- |
 | **M0** | Infrastructure, Garmin sync, FIT/TCX/GPX import, activities, weekly summary, audit, Docker. |
 | **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. |
-| **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. **Current.** |
-| **M3** | Progress views, goals, calendar, reports and race planning. |
+| **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
+| **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. **Current.** |
 | **M4** | Future scenarios, continuous tracking of predictions and goals. |
 
 ## License and disclaimer
