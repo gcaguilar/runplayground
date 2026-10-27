@@ -10,12 +10,14 @@ import * as echarts from "echarts/core";
 import type { EChartsOption } from "echarts";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/esm/core";
-import { BarChart3, HeartPulse } from "lucide-react";
+import { BarChart3, HeartPulse, TrendingUp } from "lucide-react";
 
 import type {
   AnalysisLoad,
+  FitnessPoint,
   GarminMetricPoint,
   PerformanceSnapshot,
+  ProgressWeek,
   StreamPoint,
   WeeklyDay,
 } from "@/api/client";
@@ -673,6 +675,272 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
       option={option}
       opts={chartOpts}
       style={{ height: 248, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
+  const { locale, t, units } = useI18n();
+  const labels = weeks.map((week) =>
+    formatDate(week.week_start, locale, { day: "numeric", month: "short" }),
+  );
+  const distances = weeks.map((week) => week.distance_m);
+  const loads = weeks.map((week) => week.load);
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(255,255,255,0.025)" } },
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const index = list[0]?.dataIndex ?? 0;
+          const week = weeks[index];
+          if (!week) return "";
+          return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
+            week.week_start,
+            locale,
+            { day: "numeric", month: "short", year: "numeric" },
+          )}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:2px;background:${ACCENT};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("chart.distance")}</span>
+              <strong style="margin-left:auto">${formatDistance(week.distance_m, units, locale, {
+                digits: 1,
+              })}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("progress.chart.load")}</span>
+              <strong style="margin-left:auto">${formatNumber(week.load, locale)}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="color:#a9b5ae">${t("progress.chart.sessions")}</span>
+              <strong style="margin-left:auto">${formatNumber(week.sessions, locale)}</strong>
+            </div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: [
+        {
+          type: "value",
+          splitNumber: 4,
+          axisLabel: {
+            color: TEXT,
+            fontSize: 10,
+            fontFamily: "JetBrains Mono Variable",
+            formatter: (value: number) => formatNumber(value, locale),
+          },
+          splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        },
+        {
+          type: "value",
+          splitNumber: 3,
+          axisLabel: { show: false },
+          splitLine: { show: false },
+        },
+      ],
+      series: [
+        {
+          type: "bar",
+          data: distances.map((value) => ({
+            value,
+            itemStyle: {
+              borderRadius: [4, 4, 2, 2],
+              color: value > 0 ? "rgba(201, 245, 106, 0.52)" : "transparent",
+            },
+          })),
+          barWidth: "58%",
+          emphasis: { itemStyle: { color: ACCENT } },
+        },
+        {
+          type: "line",
+          yAxisIndex: 1,
+          data: loads,
+          showSymbol: false,
+          smooth: true,
+          lineStyle: { color: ORANGE, width: 1.6, opacity: 0.9 },
+          itemStyle: { color: ORANGE },
+          z: 3,
+        },
+      ],
+    }),
+    [distances, labels, loads, locale, t, units, weeks],
+  );
+
+  if (!weeks.length || !distances.some((value) => value > 0)) {
+    return (
+      <EmptyState
+        compact
+        icon={BarChart3}
+        title={t("progress.weekly.empty")}
+        description={t("progress.weekly.emptyBody")}
+      />
+    );
+  }
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 252, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
+  const { locale, t } = useI18n();
+  const labels = points.map((point) =>
+    formatDate(point.date, locale, { day: "numeric", month: "short" }),
+  );
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const index = list[0]?.dataIndex ?? 0;
+          const point = points[index];
+          if (!point) return "";
+          return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
+            point.date,
+            locale,
+            { day: "numeric", month: "short", year: "numeric" },
+          )}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("progress.fitness.chart")}</span>
+              <strong style="margin-left:auto">${formatClock(point.time_s)}</strong>
+            </div>
+            ${
+              point.low_s !== null && point.low_s !== undefined && point.high_s !== null && point.high_s !== undefined
+                ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                    <span style="color:#a9b5ae">${t("performance.estimate.range")}</span>
+                    <strong style="margin-left:auto">${formatClock(point.low_s)} – ${formatClock(point.high_s)}</strong>
+                  </div>`
+                : ""
+            }`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        inverse: true,
+        scale: true,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatClock(value),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          name: t("performance.estimate.range"),
+          type: "line",
+          data: points.map((point) => point.high_s ?? null),
+          showSymbol: false,
+          connectNulls: true,
+          lineStyle: { color: "rgba(123, 200, 255, 0.35)", width: 1, type: "dashed" },
+          itemStyle: { color: "rgba(123, 200, 255, 0.35)" },
+        },
+        {
+          name: t("performance.estimate.range"),
+          type: "line",
+          data: points.map((point) => point.low_s ?? null),
+          showSymbol: false,
+          connectNulls: true,
+          lineStyle: { color: "rgba(123, 200, 255, 0.35)", width: 1, type: "dashed" },
+          itemStyle: { color: "rgba(123, 200, 255, 0.35)" },
+        },
+        {
+          name: t("progress.fitness.chart"),
+          type: "line",
+          data: points.map((point) => point.time_s),
+          showSymbol: true,
+          symbolSize: 5,
+          smooth: true,
+          lineStyle: { color: ACCENT, width: 2.2 },
+          itemStyle: { color: ACCENT },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(201, 245, 106, 0.18)" },
+                { offset: 1, color: "rgba(201, 245, 106, 0)" },
+              ],
+            },
+          },
+        },
+      ],
+    }),
+    [labels, locale, points, t],
+  );
+
+  if (!points.length) {
+    return (
+      <EmptyState
+        compact
+        icon={TrendingUp}
+        title={t("progress.fitness.empty")}
+        description={t("progress.fitness.emptyBody")}
+      />
+    );
+  }
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 252, width: "100%" }}
       notMerge
       lazyUpdate
     />
