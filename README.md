@@ -5,14 +5,17 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M3 — progress, calendar, reports and race planning.** Sync,
-> import, activities, weekly summary and data audit work. Performance turns
-> your efforts into 5K/10K/half/marathon predictions with ranges and
-> confidence. Diagnostics scores six training dimensions and explains every
-> limiter; Training turns that reading and your goal into a conservative
-> seven-day plan. Progress adds trends, personal bests, goals and named races;
-> the calendar merges real activities, suggested sessions and planned races;
-> reports are generated on demand for any week or month.
+> **Status: M4 — future scenarios and continuous tracking.** Sync, import,
+> activities, weekly summary and data audit work. Performance turns your
+> efforts into 5K/10K/half/marathon predictions with ranges and confidence.
+> Diagnostics scores six training dimensions and explains every limiter;
+> Training turns that reading and your goal into a conservative seven-day
+> plan. Progress adds trends, personal bests, goals and named races; the
+> calendar merges real activities, suggested sessions and planned races;
+> reports are generated on demand for any week or month. Scenarios compare
+> four 8- or 12-week training hypotheses with explicit assumptions and capped
+> effects; Tracking compares past predictions with real results and follows
+> goal revisions and training actions over time.
 
 ## What works today
 
@@ -26,6 +29,18 @@ metric dump.
   (A), a distance-specific forecast (B), the A–B gap and an 80% range.
 - **10K fitness anchor** and daily prediction snapshots to follow changes over
   time. Confidence is explicit and explains what is missing.
+- **Future scenarios**: maintain, improve consistency, add specific work or
+  deload, projected over 8 or 12 weeks. Every scenario shows its starting
+  assumptions, evidence, capped modelled effect and widening 80% range. The
+  focus distance comes from the next goal or race, otherwise 10K.
+- **Continuous tracking**: daily snapshots are compared with the first real
+  result after them, up to 90 days later, to report bias, mean absolute error
+  and how often the result fell inside the 80% range. Training efforts are
+  marked separately from races.
+- **Goal and action follow-up**: every target change is a revision with the
+  prediction in force at the time; goals show their 28-day trend and gap.
+  Recommendations can be marked pending, in progress or completed, with a
+  baseline score so later improvement, stability or decline is explicit.
 - **Diagnostics** across six dimensions: volume, consistency, intensity, load,
   recovery and specificity. Every score shows its status, confidence, evidence
   and reason codes; missing data lowers confidence instead of inventing a value.
@@ -59,6 +74,28 @@ metric dump.
   suspicious data detection and race candidates.
 - **Bilingual UI** (Spanish default, English) and metric/imperial units.
 - **Optional password login** and a localhost-only Docker Compose setup.
+
+### Scenarios and tracking
+
+Scenarios are conditional simulations, not forecasts. Each one changes a
+single training assumption for the next 8 or 12 weeks and projects the existing
+prediction curve with a capped effect. Twelve weeks is deliberately less than
+1.5× the eight-week effect: adaptation flattens and uncertainty grows faster
+than the central estimate. The UI shows the assumptions, the current training
+evidence, the confidence and the 80% range next to every number.
+
+Tracking uses the daily prediction snapshots. For each real result at a
+standard distance, the app picks the most recent snapshot at least one day
+earlier and up to 90 days before it, then reports the signed error, mean
+absolute error and range coverage. A best effort from training is included but
+labelled as such; a small sample or a training result never becomes a
+statistical validation.
+
+Goal targets are append-only: saving a different target records what was asked
+for and what the model predicted at that moment. Re-saving the same target
+does not create noise. Tracked actions store a baseline diagnostic score when
+they are created, so a later review can say whether the related dimension
+improved, stayed stable or got worse without claiming causality.
 
 ## Quick start
 
@@ -321,8 +358,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M0** | Infrastructure, Garmin sync, FIT/TCX/GPX import, activities, weekly summary, audit, Docker. |
 | **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. |
 | **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
-| **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. **Current.** |
-| **M4** | Future scenarios, continuous tracking of predictions and goals. |
+| **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. |
+| **M4** | Future scenarios, continuous tracking of predictions, goals and actions. **Current.** |
 
 ## License and disclaimer
 
