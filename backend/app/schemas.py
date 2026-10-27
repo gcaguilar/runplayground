@@ -796,6 +796,21 @@ class ProgressOverview(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class ReportNarrativeOut(ApiModel):
+    key: str
+    tone: str
+    confidence: str
+    confidence_score: float
+    improvement: str | None = None
+    limitation: str | None = None
+    action: str | None = None
+    fitness_change_s: float | None = None
+    fitness_change_pct: float | None = None
+    volume_delta_pct: float | None = None
+    evidence: dict[str, float | int | str | None] = Field(default_factory=dict)
+    reasons: list[str] = Field(default_factory=list)
+
+
 class ReportOut(ApiModel):
     generated_at: datetime
     period: Literal["week", "month"]
@@ -805,6 +820,7 @@ class ReportOut(ApiModel):
     totals: ProgressTotalsOut
     previous: ProgressTotalsOut
     delta: dict[str, float | None]
+    narrative: ReportNarrativeOut
     days: list[WeeklyDay] = Field(default_factory=list)
     weeks: list[ProgressWeekOut] = Field(default_factory=list)
     by_sport: list[SportTotal] = Field(default_factory=list)

@@ -41,6 +41,7 @@ from app.schemas import (
     ProgressOverview,
     ProgressTotalsOut,
     ProgressWeekOut,
+    ReportNarrativeOut,
     ReportOut,
     SportTotal,
     WeeklyDay,
@@ -57,6 +58,7 @@ from app.services.analysis import (
     target_weekly_distance,
     week_start,
 )
+from app.services.diagnostics import ACTION_BY_DIMENSION, build_diagnostics
 from app.services.performance import build_overview, ensure_efforts, store_snapshot
 from app.services.performance_models import (
     STANDARD_DISTANCES,
@@ -949,6 +951,114 @@ def _report_races(
     return [_race_out(race, overview, today, base_weekly) for race in races]
 
 
+def _report_narrative(
+    db: Session,
+    start: date,
+    end: date,
+    totals: ProgressTotalsOut,
+    delta: dict[str, float | None],
+    diagnostics,
+) -> ReportNarrativeOut:
+    snapshots = db.scalars(
+        select(PerformanceSnapshot)
+        .where(
+            PerformanceSnapshot.snapshot_date >= start,
+            PerformanceSnapshot.snapshot_date <= end,
+        )
+        .order_by(PerformanceSnapshot.snapshot_date)
+    ).all()
+    points = [
+        (snapshot.snapshot_date, snapshot.fitness_anchor_s)
+        for snapshot in snapshots
+        if snapshot.fitness_anchor_s is not None
+    ]
+    fitness_change_s = None
+    fitness_change_pct = None
+    reasons: list[str] = []
+    if len(points) >= 2:
+        first = float(points[0][1])
+        last = float(points[-1][1])
+        fitness_change_s = round(first - last, 1)
+        fitness_change_pct = round(fitness_change_s / max(1.0, first) * 100.0, 1)
+        reasons.append("fitness_from_snapshots")
+        if len(points) < 4:
+            reasons.append("small_fitness_history")
+    else:
+        reasons.append("volume_fallback")
+        if not points:
+            reasons.append("no_fitness_points")
+
+    volume_delta_pct = delta.get("distance_pct")
+    improvement: str | None = None
+    if fitness_change_pct is not None and fitness_change_pct > 0.5:
+        key = "fitness_up"
+        tone = "positive"
+        improvement = "fitness"
+    elif fitness_change_pct is not None and fitness_change_pct < -0.5:
+        key = "fitness_down"
+        tone = "warning"
+    elif volume_delta_pct is not None and volume_delta_pct > 10.0 and totals.sessions > 0:
+        key = "volume_up"
+        tone = "positive"
+        improvement = "volume"
+    elif volume_delta_pct is not None and volume_delta_pct < -10.0:
+        key = "volume_down"
+        tone = "warning"
+    elif totals.sessions > 0:
+        key = "stable"
+        tone = "neutral"
+    else:
+        key = "insufficient"
+        tone = "neutral"
+        reasons.append("no_sessions")
+
+    limiter = diagnostics.limiters[0] if diagnostics.limiters else None
+    limitation = limiter.dimension_key if limiter else None
+    action = (
+        ACTION_BY_DIMENSION.get(limitation, "maintain_balance")
+        if limitation
+        else "maintain_balance"
+    )
+    if limitation:
+        reasons.append("limitation_is_current")
+    if improvement is None:
+        reasons.append("no_measurable_improvement")
+
+    last_snapshot = next(
+        (snapshot for snapshot in reversed(snapshots) if snapshot.fitness_anchor_s is not None),
+        None,
+    )
+    confidence = (
+        last_snapshot.fitness_confidence
+        if last_snapshot is not None and last_snapshot.fitness_confidence
+        else diagnostics.confidence
+    )
+    evidence: dict[str, float | int | str | None] = {
+        "fitness_points": len(points),
+        "fitness_start_s": round(float(points[0][1]), 1) if points else None,
+        "fitness_end_s": round(float(points[-1][1]), 1) if points else None,
+        "volume_delta_pct": volume_delta_pct,
+        "sessions": totals.sessions,
+        "active_days": totals.active_days,
+        "load_ratio": diagnostics.load.ratio,
+        "limiter_score": limiter.score if limiter else None,
+    }
+    return ReportNarrativeOut(
+        key=key,
+        tone=tone,
+        confidence=confidence,
+        confidence_score=diagnostics.confidence_score,
+        improvement=improvement,
+        limitation=limitation,
+        action=action,
+        fitness_change_s=fitness_change_s,
+        fitness_change_pct=fitness_change_pct,
+        volume_delta_pct=volume_delta_pct,
+        evidence=evidence,
+        reasons=reasons,
+    )
+
+
 def build_report(
     db: Session,
     period: str,
@@ -979,6 +1089,8 @@ def build_report(
 
     ensure_efforts(db)
     overview = build_overview(db, reference)
+    store_snapshot(db, overview)
+    diagnostics = build_diagnostics(db, reference, tz_offset_minutes)
     threshold = overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None
 
     current_records = _records_for_range(db, start, end, offset)
@@ -1013,7 +1125,16 @@ def build_report(
         item.distance_m = round(item.distance_m + activity.distance_m, 1)
         item.duration_s = round(item.duration_s + activity.duration_s, 1)
 
-    notes: list[str] = ["load_is_estimated", "not_medical_advice"]
+    delta = _delta(totals, previous)
+    narrative = _report_narrative(db, start, end, totals, delta, diagnostics)
+
+    notes: list[str] = [
+        "load_is_estimated",
+        "not_medical_advice",
+        "narrative_is_derived",
+    ]
+    if narrative.limitation:
+        notes.append("limitation_is_current")
     if previous.sessions == 0:
         notes.append("no_previous_period")
     if any(race.race_date <= end for race in races):
@@ -1039,7 +1160,8 @@ def build_report(
         label=label,
         totals=totals,
         previous=previous,
-        delta=_delta(totals, previous),
+        delta=delta,
+        narrative=narrative,
         days=days,
         weeks=weeks,
         by_sport=sorted(by_sport.values(), key=lambda item: item.distance_m, reverse=True),
