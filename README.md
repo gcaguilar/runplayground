@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M7 — workout comparison.** The dashboard opens with the current
+> **Status: M8 — narrative reports.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -23,6 +23,9 @@ metric dump.
 > fitness changes as associations. The briefing composes those views instead
 > of repeating them. Comparison puts two sessions side by side, states whether
 > they are comparable, and only reads the difference when the data supports it.
+> Reports now open with a derived period reading: the strongest measured
+> change, the current main limitation and the next action, with an explicit
+> fallback when there are not enough fitness snapshots.
 
 ## What works today
 
@@ -89,8 +92,9 @@ metric dump.
   to the activity that completed them. Planned races are the only stored M3
   input; the calendar and its sessions are derived.
 - **Weekly and monthly reports**: totals, deltas, daily/weekly volume, load,
-  sessions by sport, goal gaps, races and period highlights. Reports are built
-  when requested and never persisted.
+  sessions by sport, goal gaps, races and period highlights. Each report opens
+  with a derived reading: main improvement, current limitation and suggested
+  action. Reports are built when requested and never persisted.
 - **Deduplication and provenance**: every activity records where it came
   from, when it was imported, its raw file hash and the parser version.
   Cross-format duplicates are merged instead of double-counted.
@@ -132,6 +136,13 @@ observed in that week's snapshot. It reports Pearson's correlation and the
 average improvement when the factor was above or below its median. It needs at
 least four paired weeks and labels small samples explicitly; a strong
 correlation is still not evidence that the factor caused the improvement.
+
+Narrative reports are derived, not generated prose. They compare the first and
+last fitness snapshot inside the period, fall back to the volume delta when
+there are fewer than two snapshots, pair the result with the current
+diagnostics limiter and its recommended action, and state that the limitation
+belongs to the current profile. The reading is rebuilt on every request and
+never stored.
 
 ### Comparing two workouts
 
@@ -424,7 +435,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M4** | Future scenarios, continuous tracking of predictions, goals and actions. |
 | **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. |
 | **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. |
-| **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. **Current.** |
+| **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. |
+| **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. **Current.** |
 
 ## License and disclaimer
 
