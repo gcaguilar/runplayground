@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.db import get_db
 from app.models import Activity, StreamSample
 from app.schemas import (
+    ActivityClassificationOut,
     ActivityDetail,
     ActivityList,
     ActivityOut,
@@ -21,6 +22,8 @@ from app.schemas import (
     SourceOut,
     StreamPoint,
 )
+from app.services.analysis import INTENSITY_KEYS, RunRecord, classify_run
+from app.services.analysis_settings import get_analysis_settings
 from app.services.comparison import build_comparison
 from app.services.performance import refresh_activity_efforts
 
@@ -123,11 +126,16 @@ def patch_activity(
     activity = db.get(Activity, activity_id)
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
-    if payload.name is not None:
-        activity.name = payload.name.strip()[:255]
-    if payload.is_race is not None and payload.is_race != activity.is_race:
-        activity.is_race = payload.is_race
+    data = payload.model_dump(exclude_unset=True)
+    if data.get("name") is not None:
+        activity.name = data["name"].strip()[:255]
+    if data.get("is_race") is not None and data["is_race"] != activity.is_race:
+        activity.is_race = data["is_race"]
         refresh_activity_efforts(db, activity)
+    if "intensity_override" in data:
+        activity.intensity_override = data["intensity_override"]
+    if "rpe" in data:
+        activity.rpe = data["rpe"]
     db.commit()
     return _detail(db, activity_id)
 
@@ -205,6 +213,44 @@ def _detail(db: Session, activity_id: int) -> ActivityDetail:
         **base.model_dump(),
         laps=[LapOut.model_validate(lap) for lap in activity.laps],
         sources=[SourceOut.from_orm_source(source) for source in activity.sources],
+        classification=_classification(db, activity),
+    )
+
+
+def _classification(db: Session, activity: Activity) -> ActivityClassificationOut | None:
+    if activity.sport != "running":
+        return None
+    analysis = get_analysis_settings(db)
+    record = RunRecord(
+        activity_id=activity.id,
+        start_time_utc=activity.start_time_utc,
+        local_date=activity.start_time_utc.date(),
+        distance_m=activity.distance_m,
+        duration_s=activity.duration_s,
+        avg_hr=activity.avg_hr,
+        max_hr=activity.max_hr,
+        is_race=activity.is_race,
+        sub_sport=activity.sub_sport,
+        has_streams=activity.has_streams,
+    )
+    auto_key = classify_run(
+        record,
+        analysis.threshold_pace_s_per_km,
+        analysis.max_hr,
+        mode=analysis.mode,
+        threshold_hr=analysis.threshold_hr,
+    )
+    override = (
+        activity.intensity_override if activity.intensity_override in INTENSITY_KEYS else None
+    )
+    return ActivityClassificationOut(
+        key=override or auto_key,
+        auto_key=auto_key,
+        source="manual" if override else "auto",
+        overridden=override is not None,
+        mode=analysis.mode,
+        threshold_pace_s_per_km=analysis.threshold_pace_s_per_km,
+        hr_reference=analysis.hr_reference,
     )
 
 

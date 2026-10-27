@@ -64,6 +64,8 @@ class Activity(Base):
     manufacturer: Mapped[str | None] = mapped_column(String(80))
 
     is_race: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    intensity_override: Mapped[str | None] = mapped_column(String(20))
+    rpe: Mapped[int | None] = mapped_column(Integer)
     has_streams: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     has_gps: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     has_laps: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

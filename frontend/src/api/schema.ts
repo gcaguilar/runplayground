@@ -227,6 +227,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/analysis/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Analysis Settings */
+        get: operations["analysis_settings_api_v1_analysis_settings_get"];
+        /** Update Analysis Settings */
+        put: operations["update_analysis_settings_api_v1_analysis_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/performance": {
         parameters: {
             query?: never;
@@ -713,6 +731,29 @@ export interface components {
             /** Note */
             note?: string | null;
         };
+        /** ActivityClassificationOut */
+        ActivityClassificationOut: {
+            /** Key */
+            key: string;
+            /** Auto Key */
+            auto_key: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "manual" | "auto";
+            /** Overridden */
+            overridden: boolean;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "auto" | "pace" | "hr";
+            /** Threshold Pace S Per Km */
+            threshold_pace_s_per_km?: number | null;
+            /** Hr Reference */
+            hr_reference?: number | null;
+        };
         /** ActivityDetail */
         ActivityDetail: {
             /** Id */
@@ -772,6 +813,10 @@ export interface components {
             manufacturer?: string | null;
             /** Is Race */
             is_race: boolean;
+            /** Intensity Override */
+            intensity_override?: string | null;
+            /** Rpe */
+            rpe?: number | null;
             /** Has Streams */
             has_streams: boolean;
             /** Has Gps */
@@ -798,6 +843,7 @@ export interface components {
             laps?: components["schemas"]["LapOut"][];
             /** Sources */
             sources?: components["schemas"]["SourceOut"][];
+            classification?: components["schemas"]["ActivityClassificationOut"] | null;
         };
         /** ActivityList */
         ActivityList: {
@@ -869,6 +915,10 @@ export interface components {
             manufacturer?: string | null;
             /** Is Race */
             is_race: boolean;
+            /** Intensity Override */
+            intensity_override?: string | null;
+            /** Rpe */
+            rpe?: number | null;
             /** Has Streams */
             has_streams: boolean;
             /** Has Gps */
@@ -898,6 +948,10 @@ export interface components {
             name?: string | null;
             /** Is Race */
             is_race?: boolean | null;
+            /** Intensity Override */
+            intensity_override?: ("easy" | "moderate" | "hard") | null;
+            /** Rpe */
+            rpe?: number | null;
         };
         /** ActivityStreams */
         ActivityStreams: {
@@ -1044,6 +1098,46 @@ export interface components {
             acute_load?: number | null;
             /** Chronic Load */
             chronic_load?: number | null;
+        };
+        /** AnalysisSettingsOut */
+        AnalysisSettingsOut: {
+            observed: components["schemas"]["AnalysisSettingsValuesOut"];
+            manual: components["schemas"]["AnalysisSettingsValuesOut"];
+            effective: components["schemas"]["AnalysisSettingsValuesOut"];
+            /** Sources */
+            sources?: {
+                [key: string]: string;
+            };
+            /** Warnings */
+            warnings?: string[];
+            /** Updated At */
+            updated_at?: string | null;
+        };
+        /** AnalysisSettingsUpdate */
+        AnalysisSettingsUpdate: {
+            /** Max Hr */
+            max_hr?: number | null;
+            /** Resting Hr */
+            resting_hr?: number | null;
+            /** Threshold Hr */
+            threshold_hr?: number | null;
+            /** Threshold Pace S Per Km */
+            threshold_pace_s_per_km?: number | null;
+            /** Classification Mode */
+            classification_mode?: ("auto" | "pace" | "hr") | null;
+        };
+        /** AnalysisSettingsValuesOut */
+        AnalysisSettingsValuesOut: {
+            /** Max Hr */
+            max_hr?: number | null;
+            /** Resting Hr */
+            resting_hr?: number | null;
+            /** Threshold Hr */
+            threshold_hr?: number | null;
+            /** Threshold Pace S Per Km */
+            threshold_pace_s_per_km?: number | null;
+            /** Classification Mode */
+            classification_mode?: ("auto" | "pace" | "hr") | null;
         };
         /** AuditCoverage */
         AuditCoverage: {
@@ -3722,6 +3816,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrainingPlan"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    analysis_settings_api_v1_analysis_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_analysis_settings_api_v1_analysis_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalysisSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisSettingsOut"];
                 };
             };
             /** @description Validation Error */

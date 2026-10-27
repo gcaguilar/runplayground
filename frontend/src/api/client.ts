@@ -42,6 +42,11 @@ export type GarminReference = Schemas["GarminReference"];
 export type GarminMetricPoint = Schemas["GarminMetricPoint"];
 export type GarminRacePrediction = Schemas["GarminRacePrediction"];
 export type GarminExportResponse = Schemas["GarminExportResponse"];
+export type AnalysisSettings = Schemas["AnalysisSettingsOut"];
+export type AnalysisSettingsValues = Schemas["AnalysisSettingsValuesOut"];
+export type AnalysisSettingsUpdate = Schemas["AnalysisSettingsUpdate"];
+export type AnalysisClassificationMode = "auto" | "pace" | "hr";
+export type ActivityClassification = Schemas["ActivityClassificationOut"];
 export type DiagnosticsOverview = Schemas["DiagnosticsOverview"];
 export type AnalysisDimension = Schemas["DimensionOut"];
 export type AnalysisLimiter = Schemas["LimiterOut"];
@@ -201,6 +206,8 @@ export type ActivityListParams = {
 export type ActivityPatch = {
   name?: string;
   is_race?: boolean;
+  intensity_override?: "easy" | "moderate" | "hard" | null;
+  rpe?: number | null;
 };
 
 export const api = {
@@ -294,6 +301,12 @@ export const api = {
         tz_offset_minutes: -new Date().getTimezoneOffset(),
       })}`,
     ),
+  analysisSettings: () => request<AnalysisSettings>("/analysis/settings"),
+  updateAnalysisSettings: (payload: AnalysisSettingsUpdate) =>
+    request<AnalysisSettings>("/analysis/settings", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
   training: () =>
     request<TrainingPlan>(
       `/training${queryString({

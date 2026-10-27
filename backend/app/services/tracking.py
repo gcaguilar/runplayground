@@ -46,6 +46,7 @@ from app.schemas import (
     TrackingOverview,
 )
 from app.services.analysis import DIMENSION_WEIGHTS, clamp
+from app.services.analysis_settings import get_analysis_settings
 from app.services.diagnostics import ACTION_BY_DIMENSION, build_diagnostics
 from app.services.drivers import build_drivers
 from app.services.performance import build_overview, ensure_efforts, store_snapshot
@@ -531,6 +532,7 @@ def build_tracking(
     ensure_efforts(db)
     diagnostics = build_diagnostics(db, reference, tz_offset_minutes)
     overview = build_overview(db, reference)
+    analysis = get_analysis_settings(db, reference, overview=overview)
     store_snapshot(db, overview)
     accuracy = _accuracy(db, start, today, offset)
     drivers = build_drivers(
@@ -538,8 +540,10 @@ def build_tracking(
         start,
         today,
         offset,
-        threshold_pace=(overview.fitness_anchor.pace_s_per_km if overview.fitness_anchor else None),
-        hr_reference=_hr_reference(db, start, today, offset),
+        threshold_pace=analysis.threshold_pace_s_per_km,
+        hr_reference=analysis.max_hr or _hr_reference(db, start, today, offset),
+        mode=analysis.mode,
+        threshold_hr=analysis.threshold_hr,
     )
 
     snapshots = db.scalars(
@@ -615,6 +619,8 @@ def build_tracking(
         "association_not_causation",
         "not_medical_advice",
     ]
+    if analysis.has_manual:
+        notes.append("manual_thresholds_applied")
     status = "ok" if accuracy.samples or goal_out else "insufficient"
     return TrackingOverview(
         generated_at=reference,

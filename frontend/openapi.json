@@ -873,6 +873,112 @@
         }
       }
     },
+    "/api/v1/analysis/settings": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Analysis Settings",
+        "operationId": "analysis_settings_api_v1_analysis_settings_get",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisSettingsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Update Analysis Settings",
+        "operationId": "update_analysis_settings_api_v1_analysis_settings_put",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisSettingsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/performance": {
       "get": {
         "tags": [
@@ -2886,6 +2992,70 @@
         ],
         "title": "ActionUpsert"
       },
+      "ActivityClassificationOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "auto_key": {
+            "type": "string",
+            "title": "Auto Key"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "auto"
+            ],
+            "title": "Source"
+          },
+          "overridden": {
+            "type": "boolean",
+            "title": "Overridden"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "pace",
+              "hr"
+            ],
+            "title": "Mode"
+          },
+          "threshold_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Pace S Per Km"
+          },
+          "hr_reference": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hr Reference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "auto_key",
+          "source",
+          "overridden",
+          "mode"
+        ],
+        "title": "ActivityClassificationOut"
+      },
       "ActivityDetail": {
         "properties": {
           "id": {
@@ -3137,6 +3307,28 @@
             "type": "boolean",
             "title": "Is Race"
           },
+          "intensity_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intensity Override"
+          },
+          "rpe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rpe"
+          },
           "has_streams": {
             "type": "boolean",
             "title": "Has Streams"
@@ -3197,6 +3389,16 @@
             },
             "type": "array",
             "title": "Sources"
+          },
+          "classification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityClassificationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -3498,6 +3700,28 @@
             "type": "boolean",
             "title": "Is Race"
           },
+          "intensity_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intensity Override"
+          },
+          "rpe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rpe"
+          },
           "has_streams": {
             "type": "boolean",
             "title": "Has Streams"
@@ -3587,6 +3811,35 @@
               }
             ],
             "title": "Is Race"
+          },
+          "intensity_override": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "easy",
+                  "moderate",
+                  "hard"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intensity Override"
+          },
+          "rpe": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rpe"
           }
         },
         "type": "object",
@@ -4044,6 +4297,192 @@
         },
         "type": "object",
         "title": "AnalysisReferenceOut"
+      },
+      "AnalysisSettingsOut": {
+        "properties": {
+          "observed": {
+            "$ref": "#/components/schemas/AnalysisSettingsValuesOut"
+          },
+          "manual": {
+            "$ref": "#/components/schemas/AnalysisSettingsValuesOut"
+          },
+          "effective": {
+            "$ref": "#/components/schemas/AnalysisSettingsValuesOut"
+          },
+          "sources": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Sources"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "observed",
+          "manual",
+          "effective"
+        ],
+        "title": "AnalysisSettingsOut"
+      },
+      "AnalysisSettingsUpdate": {
+        "properties": {
+          "max_hr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 230.0,
+                "minimum": 100.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Hr"
+          },
+          "resting_hr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 120.0,
+                "minimum": 30.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resting Hr"
+          },
+          "threshold_hr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 230.0,
+                "minimum": 100.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Hr"
+          },
+          "threshold_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1200.0,
+                "minimum": 120.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Pace S Per Km"
+          },
+          "classification_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "pace",
+                  "hr"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classification Mode"
+          }
+        },
+        "type": "object",
+        "title": "AnalysisSettingsUpdate"
+      },
+      "AnalysisSettingsValuesOut": {
+        "properties": {
+          "max_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Hr"
+          },
+          "resting_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resting Hr"
+          },
+          "threshold_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Hr"
+          },
+          "threshold_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Pace S Per Km"
+          },
+          "classification_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "pace",
+                  "hr"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classification Mode"
+          }
+        },
+        "type": "object",
+        "title": "AnalysisSettingsValuesOut"
       },
       "AuditCoverage": {
         "properties": {

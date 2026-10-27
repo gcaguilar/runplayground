@@ -78,6 +78,8 @@ class RunRecord:
     is_race: bool = False
     sub_sport: str | None = None
     has_streams: bool = False
+    intensity_override: str | None = None
+    rpe: int | None = None
 
     @property
     def pace_s_per_km(self) -> float | None:
@@ -229,21 +231,41 @@ def classify_run(
     run: RunRecord,
     threshold_pace_s_per_km: float | None = None,
     hr_reference: float | None = None,
+    *,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> str:
     """Classify a run as easy, moderate or hard.
 
-    Pace relative to the 10K anchor is preferred because it is specific to the
-    athlete and survives missing heart-rate data. Heart rate is the fallback.
-    The classification uses the session average, so an interval session with
-    long recoveries can look easier than its hardest block.
+    A valid manual override always wins. Otherwise ``mode`` decides the source:
+    ``pace`` compares the session pace with the threshold pace, ``hr`` uses the
+    heart-rate reference and ``auto`` prefers pace and falls back to heart rate.
+
+    Heart rate has two scales. A threshold heart rate uses 0.95/0.85 cuts; a
+    maximum heart rate keeps the conservative 0.85/0.75 cuts. The classification
+    uses the session average, so an interval session with long recoveries can
+    look easier than its hardest block.
     """
 
+    if run.intensity_override in INTENSITY_KEYS:
+        return run.intensity_override
+
     pace = run.pace_s_per_km
-    if threshold_pace_s_per_km and pace:
+    if mode in {"auto", "pace"} and threshold_pace_s_per_km and pace:
         ratio = pace / threshold_pace_s_per_km
         if ratio <= 1.05:
             return "hard"
         if ratio <= 1.15:
+            return "moderate"
+        return "easy"
+    if mode == "pace":
+        return "unknown"
+
+    if threshold_hr and run.avg_hr:
+        ratio = run.avg_hr / threshold_hr
+        if ratio >= 0.95:
+            return "hard"
+        if ratio >= 0.85:
             return "moderate"
         return "easy"
     if hr_reference and run.avg_hr:
@@ -260,11 +282,20 @@ def summarize_intensity(
     runs: list[RunRecord],
     threshold_pace_s_per_km: float | None = None,
     hr_reference: float | None = None,
+    *,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> IntensitySummary:
     buckets = {key: IntensityBucket(key=key) for key in INTENSITY_KEYS}
     unknown = 0
     for run in runs:
-        key = classify_run(run, threshold_pace_s_per_km, hr_reference)
+        key = classify_run(
+            run,
+            threshold_pace_s_per_km,
+            hr_reference,
+            mode=mode,
+            threshold_hr=threshold_hr,
+        )
         if key == "unknown" or run.duration_s <= 0:
             unknown += 1
             continue
@@ -610,6 +641,9 @@ def summarize_recovery(
     threshold_pace_s_per_km: float | None,
     hr_reference: float | None,
     readiness: float | None,
+    *,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> RecoverySummary:
     start = today - timedelta(days=27)
     window = [run for run in runs if start <= run.local_date <= today]
@@ -631,7 +665,14 @@ def summarize_recovery(
     hard_dates = {
         run.local_date
         for run in window
-        if classify_run(run, threshold_pace_s_per_km, hr_reference) == "hard"
+        if classify_run(
+            run,
+            threshold_pace_s_per_km,
+            hr_reference,
+            mode=mode,
+            threshold_hr=threshold_hr,
+        )
+        == "hard"
     }
     back_to_back = sum(1 for day in hard_dates if day + timedelta(days=1) in hard_dates)
 
@@ -690,6 +731,9 @@ def summarize_specificity(
     has_goal_effort: bool,
     threshold_pace_s_per_km: float | None,
     hr_reference: float | None,
+    *,
+    mode: str = "auto",
+    threshold_hr: float | None = None,
 ) -> SpecificitySummary:
     start = today - timedelta(days=BASELINE_DAYS - 1)
     recent = [run for run in runs if start <= run.local_date <= today]
@@ -699,7 +743,14 @@ def summarize_specificity(
     hard_sessions = sum(
         1
         for run in recent
-        if classify_run(run, threshold_pace_s_per_km, hr_reference) == "hard"
+        if classify_run(
+            run,
+            threshold_pace_s_per_km,
+            hr_reference,
+            mode=mode,
+            threshold_hr=threshold_hr,
+        )
+        == "hard"
         and (run.duration_s >= 600 or run.distance_m >= 3000)
     )
 

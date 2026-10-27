@@ -10,6 +10,7 @@ import {
   type ActionUpsert,
   type ActivityListParams,
   type ActivityPatch,
+  type AnalysisSettingsUpdate,
   type GoalUpsert,
   type PlannedRaceCreate,
   type PlannedRaceUpdate,
@@ -33,6 +34,7 @@ export const queryKeys = {
   performanceGoals: ["performance", "goals"] as const,
   performanceReference: ["performance", "reference"] as const,
   diagnostics: ["diagnostics"] as const,
+  analysisSettings: ["analysis", "settings"] as const,
   training: ["training"] as const,
   adherence: (weeks: number) => ["adherence", weeks] as const,
   progress: (days: number) => ["progress", days] as const,
@@ -255,6 +257,29 @@ export function useTraining() {
     queryKey: queryKeys.training,
     queryFn: api.training,
     staleTime: 60_000,
+  });
+}
+
+export function useAnalysisSettings() {
+  return useQuery({
+    queryKey: queryKeys.analysisSettings,
+    queryFn: api.analysisSettings,
+    staleTime: 60_000,
+  });
+}
+
+export function useUpdateAnalysisSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: AnalysisSettingsUpdate) => api.updateAnalysisSettings(payload),
+    onSuccess: (settings) => {
+      queryClient.setQueryData(queryKeys.analysisSettings, settings);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      void queryClient.invalidateQueries({ queryKey: ["activity"] });
+      void queryClient.invalidateQueries({ queryKey: ["activities"] });
+      invalidatePlanData(queryClient);
+    },
   });
 }
 

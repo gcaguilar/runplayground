@@ -5,11 +5,12 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M10 — suggested-plan adherence.** The dashboard opens with the current
-> 10K fitness anchor, its 4/8/12-week evolution, the four distance
-> predictions, a weekly message, the main strength, the main limitation and
-> the next action. Sync, import, activities, weekly summary and data audit
-> work. Performance turns your efforts into 5K/10K/half/marathon predictions
+> **Status: M11 — analysis settings and manual session corrections.** The
+> dashboard opens with the current 10K fitness anchor, its 4/8/12-week
+> evolution, the four distance predictions, a weekly message, the main
+> strength, the main limitation and the next action. Sync, import, activities,
+> weekly summary and data audit work. Performance turns your efforts into
+> 5K/10K/half/marathon predictions
 > with ranges and confidence. Diagnostics scores six training dimensions and
 > explains every limiter; Training turns that reading and your goal into a
 > conservative seven-day plan. Progress adds trends, personal bests, goals and
@@ -31,6 +32,12 @@ metric dump.
 > scores. Training now reconstructs what the suggested plan would have asked
 > each recent week and compares it with actual volume, long run, hard sessions
 > and rest. The current week stays in progress and is excluded from the score.
+> Analysis settings add persistent max, resting and threshold heart rates plus a
+> threshold pace and an auto/pace/HR classification mode, always showing what was
+> observed, what was set by hand and what is actually used. Any running activity
+> can be corrected to easy, moderate or hard and given an RPE; the correction
+> feeds the analysis views but never rewrites the 10K anchor, best efforts or
+> predictions.
 
 ## What works today
 
@@ -68,6 +75,15 @@ metric dump.
   then compares actual volume, longest run, hard sessions and rest against it.
   The current week is shown in progress and excluded; the score is explicit
   that the plan is derived and that adherence is a heuristic.
+- **Analysis settings and manual corrections**: global max, resting and
+  threshold heart rates, a threshold pace and an auto/pace/HR classification
+  mode. The settings page separates observed, manual and effective values with
+  a source for each field; a threshold heart rate is derived from max HR and
+  never presented as measured. A running activity can be corrected to easy,
+  moderate or hard and tagged with an RPE 1–10. The corrections feed
+  diagnostics, intensity, load, plan, calendar, reports, adherence, tracking,
+  comparable runs and driver analysis, while performance, best efforts and
+  prediction snapshots keep using the observed 10K anchor.
 - **Recovery context**: sleep duration and score, HRV, resting heart rate,
   Body Battery and weight imported from the Garmin data export. Each metric
   shows its latest value, 7/28-day averages, 28-day change and coverage. The
@@ -192,6 +208,26 @@ the top diagnostic limiter and writes one sentence from those facts. The
 sentence is returned as a code plus parameters, and the underlying numbers and
 evidence are always shown next to it. It never projects a result or replaces a
 race.
+
+### Analysis thresholds and manual corrections
+
+The 10K anchor is measured, so it is not an input. Analysis settings calibrate
+the reading around it: a maximum heart rate, a resting heart rate, an optional
+threshold heart rate, a threshold pace and a classification mode. Every
+response carries the observed value, the manual value, the effective value and
+the source of each field. A threshold heart rate is never observed: if it is not
+set by hand it is reported as missing, and HR classification falls back to max
+HR. When no anchor exists the observed threshold pace is missing, not invented.
+The classifier prefers pace in `auto`, can be forced to `pace` or `hr`, and
+uses 0.95/0.85 cuts against a configured threshold HR or the conservative
+0.85/0.75 cuts against max HR.
+
+A running activity can override its automatic intensity and record an RPE from
+1 to 10. The override wins over pace and heart rate everywhere the analysis
+classifies sessions, and the detail page still shows the automatic result next
+to it. It is deliberately not applied to best efforts, performance predictions
+or stored snapshots: those answer what the athlete ran, while the correction
+answers how the session should be read as training.
 
 ### Suggested-plan adherence
 
@@ -475,7 +511,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. |
 | **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. |
 | **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. |
-| **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. **Current.** |
+| **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. |
+| **M11** | Analysis settings and manual corrections: persistent heart-rate/pace thresholds, classification mode and per-activity intensity override with RPE. **Current.** |
 
 ## License and disclaimer
 

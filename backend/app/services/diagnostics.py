@@ -50,6 +50,7 @@ from app.services.analysis import (
     target_weekly_distance,
     week_start,
 )
+from app.services.analysis_settings import get_analysis_settings
 from app.services.performance import build_overview, garmin_reference
 from app.utils import as_utc, utcnow
 
@@ -92,8 +93,12 @@ def build_diagnostics(
 
     overview = build_overview(db, reference)
     anchor = overview.fitness_anchor
-    threshold_pace = anchor.pace_s_per_km if anchor else None
-    hr_reference = _hr_reference(window)
+    observed_pace = anchor.pace_s_per_km if anchor else None
+    analysis = get_analysis_settings(db, reference, overview=overview)
+    threshold_pace = analysis.threshold_pace_s_per_km
+    hr_reference = analysis.max_hr or _hr_reference(window)
+    threshold_hr = analysis.threshold_hr
+    classification_mode = analysis.mode
     goal = _select_goal(db.scalars(select(RaceGoal)).all(), today)
     has_goal_effort = _has_goal_effort(db, goal, reference)
     readiness_values, readiness_average = _readiness(db, today)
@@ -101,7 +106,13 @@ def build_diagnostics(
 
     volume = summarize_volume(records, today)
     consistency = summarize_consistency(records, today)
-    intensity = summarize_intensity(window, threshold_pace, hr_reference)
+    intensity = summarize_intensity(
+        window,
+        threshold_pace,
+        hr_reference,
+        mode=classification_mode,
+        threshold_hr=threshold_hr,
+    )
     load = summarize_load(records, today, threshold_pace)
     recovery = summarize_recovery(
         records,
@@ -109,6 +120,8 @@ def build_diagnostics(
         threshold_pace,
         hr_reference,
         readiness_average,
+        mode=classification_mode,
+        threshold_hr=threshold_hr,
     )
     specificity = summarize_specificity(
         records,
@@ -117,6 +130,8 @@ def build_diagnostics(
         has_goal_effort,
         threshold_pace,
         hr_reference,
+        mode=classification_mode,
+        threshold_hr=threshold_hr,
     )
 
     week_starts = {week_start(record.local_date) for record in window}
@@ -241,7 +256,7 @@ def build_diagnostics(
         warnings.append("no_activities")
     elif len(window) < 6:
         warnings.append("few_activities")
-    if threshold_pace is None:
+    if observed_pace is None:
         warnings.append("no_anchor")
     if not any(record.avg_hr for record in window):
         warnings.append("no_hr")
@@ -280,8 +295,8 @@ def build_diagnostics(
             ),
             last_activity_at=last_activity,
             last_race_at=last_race,
-            has_anchor=threshold_pace is not None,
-            anchor_pace_s_per_km=round(threshold_pace, 1) if threshold_pace else None,
+            has_anchor=observed_pace is not None,
+            anchor_pace_s_per_km=round(observed_pace, 1) if observed_pace else None,
             has_hr=any(record.avg_hr for record in window),
             trail_share=round(trail_share, 3),
             readiness_days=len(readiness_values),
@@ -316,6 +331,10 @@ def build_training_plan(
     )
     phase = select_phase(today, goal.target_date if goal else None, last_race_date)
 
+    analysis = get_analysis_settings(db, reference)
+    session_threshold = (
+        analysis.threshold_pace_s_per_km or diagnostics.coverage.anchor_pace_s_per_km
+    )
     base_weekly = _metric(diagnostics, "volume", "weekly_avg_m") or 0.0
     load_ratio = diagnostics.load.ratio
     limiter_keys = {limiter.dimension_key for limiter in diagnostics.limiters}
@@ -339,7 +358,7 @@ def build_training_plan(
             phase.key,
             weekly_low,
             weekly_high,
-            diagnostics.coverage.anchor_pace_s_per_km,
+            session_threshold,
             goal_pace,
             avoid_quality=avoid_quality,
         )
@@ -360,6 +379,10 @@ def build_training_plan(
         notes.append("goal_without_date")
     if diagnostics.status == "insufficient":
         notes.append("insufficient_data")
+    if analysis.has_manual:
+        notes.append("manual_thresholds_applied")
+    if analysis.mode != "auto":
+        notes.append(f"classification_mode_{analysis.mode}")
 
     return TrainingPlan(
         generated_at=reference,
@@ -413,6 +436,8 @@ def _record(activity: Activity, offset: timedelta) -> RunRecord:
         is_race=activity.is_race,
         sub_sport=activity.sub_sport,
         has_streams=activity.has_streams,
+        intensity_override=activity.intensity_override,
+        rpe=activity.rpe,
     )
 
 

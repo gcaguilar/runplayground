@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { useAuthStatus, useLogout, useStartSync, useSyncStatus, useSystemStatus } from "@/api/queries";
+import { AnalysisSettingsCard } from "@/components/AnalysisSettingsCard";
 import {
   Badge,
   Button,
@@ -73,6 +74,8 @@ export function SettingsPage() {
       ) : (
         <div className="settings-grid">
           <section className="settings-main">
+            <AnalysisSettingsCard />
+
             <Card className="panel">
               <SectionHeading
                 title={t("settings.connection.title")}
