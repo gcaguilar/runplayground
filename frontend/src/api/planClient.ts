@@ -1,6 +1,7 @@
 import {
   queryString,
   request,
+  requestBlob,
   type RegisteredPlan,
   type RegisteredPlanActivation,
   type RegisteredPlanBulk,
@@ -8,6 +9,7 @@ import {
   type RegisteredPlanCreate,
   type RegisteredPlanDetail,
   type RegisteredPlanFromSuggested,
+  type RegisteredPlanImportResult,
   type RegisteredPlanSession,
   type RegisteredPlanSessionCreate,
   type RegisteredPlanSessionUpdate,
@@ -84,4 +86,27 @@ export const planApi = {
       `/training-plans/${planId}/sessions/${sessionId}/activity`,
       { method: "DELETE" },
     ),
+  exportCsv: (planId: number) =>
+    requestBlob(`/training-plans/${planId}/export.csv`, `plan-${planId}.csv`),
+  importCsv: ({
+    file,
+    name,
+    activate = false,
+    dryRun = false,
+  }: {
+    file: File;
+    name?: string;
+    activate?: boolean;
+    dryRun?: boolean;
+  }) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (name?.trim()) form.append("name", name.trim());
+    form.append("activate", String(activate));
+    form.append("dry_run", String(dryRun));
+    return request<RegisteredPlanImportResult>("/training-plans/import", {
+      method: "POST",
+      body: form,
+    });
+  },
 };

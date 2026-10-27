@@ -829,6 +829,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/training-plans/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Plan Csv
+         * @description Parse a UTF-8 plan CSV; dry-run previews, otherwise creates atomically.
+         */
+        post: operations["import_plan_csv_api_v1_training_plans_import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Plan Csv
+         * @description Download one plan as UTF-8 CSV with a stable header and ISO dates.
+         */
+        get: operations["export_plan_csv_api_v1_training_plans__plan_id__export_csv_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/training-plans/{plan_id}": {
         parameters: {
             query?: never;
@@ -1756,6 +1796,23 @@ export interface components {
         Body_import_garmin_export_zip_api_v1_imports_garmin_export_post: {
             /** File */
             file: string;
+        };
+        /** Body_import_plan_csv_api_v1_training_plans_import_post */
+        Body_import_plan_csv_api_v1_training_plans_import_post: {
+            /** File */
+            file: string;
+            /** Name */
+            name?: string | null;
+            /**
+             * Activate
+             * @default false
+             */
+            activate: boolean;
+            /**
+             * Dry Run
+             * @default false
+             */
+            dry_run: boolean;
         };
         /** Body_stage_restore_api_v1_backups_restore_post */
         Body_stage_restore_api_v1_backups_restore_post: {
@@ -4069,6 +4126,72 @@ export interface components {
              */
             source: "manual" | "suggested" | "import";
         };
+        /**
+         * TrainingPlanCsvIssueOut
+         * @description One CSV problem, always tied to a physical line of the uploaded file.
+         */
+        TrainingPlanCsvIssueOut: {
+            /** Line */
+            line: number;
+            /** Message */
+            message: string;
+        };
+        /**
+         * TrainingPlanCsvPreviewOut
+         * @description Dry-run result for a plan CSV upload.
+         *
+         *     ``valid`` is false when the payload cannot be imported; ``rows`` still
+         *     contains every row that parsed correctly so the UI can show what would be
+         *     created. Nothing is written in a dry run.
+         */
+        TrainingPlanCsvPreviewOut: {
+            /** Valid */
+            valid: boolean;
+            /** Message */
+            message?: string | null;
+            /** Plan Name */
+            plan_name: string;
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count: number;
+            /** Rows */
+            rows?: components["schemas"]["TrainingPlanCsvRowOut"][];
+            /** Errors */
+            errors?: components["schemas"]["TrainingPlanCsvIssueOut"][];
+        };
+        /**
+         * TrainingPlanCsvRowOut
+         * @description One normalized session parsed from a CSV row (metres and seconds).
+         */
+        TrainingPlanCsvRowOut: {
+            /** Line */
+            line: number;
+            /** Position */
+            position: number;
+            /**
+             * Session Date
+             * Format: date
+             */
+            session_date: string;
+            /** Type */
+            type: string;
+            /** Intensity */
+            intensity: string;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Status */
+            status: string;
+            /** Notes */
+            notes?: string | null;
+        };
         /** TrainingPlanDetailOut */
         TrainingPlanDetailOut: {
             /** Id */
@@ -6360,6 +6483,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrainingPlanDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_plan_csv_api_v1_training_plans_import_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_plan_csv_api_v1_training_plans_import_post"];
+            };
+        };
+        responses: {
+            /** @description Dry-run preview with normalized rows and errors */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanDetailOut"] | components["schemas"]["TrainingPlanCsvPreviewOut"];
+                };
+            };
+            /** @description Plan created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanDetailOut"];
+                };
+            };
+            /** @description CSV file exceeds the size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid CSV; nothing created */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanCsvPreviewOut"];
+                };
+            };
+        };
+    };
+    export_plan_csv_api_v1_training_plans__plan_id__export_csv_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "text/csv": unknown;
                 };
             };
             /** @description Validation Error */

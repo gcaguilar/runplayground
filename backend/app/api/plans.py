@@ -2,7 +2,19 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -11,6 +23,7 @@ from app.schemas_plans import (
     TrainingPlanActivationOut,
     TrainingPlanBulkOut,
     TrainingPlanCreate,
+    TrainingPlanCsvPreviewOut,
     TrainingPlanDetailOut,
     TrainingPlanFromSuggested,
     TrainingPlanLinkActivity,
@@ -22,6 +35,7 @@ from app.schemas_plans import (
     TrainingPlanUpdate,
 )
 from app.services import plans as service
+from app.services import plans_csv as csv_service
 
 router = APIRouter(prefix="/training-plans", tags=["training-plans"])
 
@@ -82,6 +96,76 @@ def create_from_suggested(
     except Exception as exc:  # noqa: BLE001 - translated to HTTP below
         raise _translate(exc) from exc
     return service.plan_out(plan, include_sessions=True)
+
+
+@router.post(
+    "/import",
+    response_model=TrainingPlanDetailOut | TrainingPlanCsvPreviewOut,
+    responses={
+        200: {"description": "Dry-run preview with normalized rows and errors"},
+        201: {"model": TrainingPlanDetailOut, "description": "Plan created"},
+        413: {"description": "CSV file exceeds the size limit"},
+        422: {"model": TrainingPlanCsvPreviewOut, "description": "Invalid CSV; nothing created"},
+    },
+)
+async def import_plan_csv(
+    response: Response,
+    file: UploadFile = File(...),
+    name: str | None = Form(None),
+    activate: bool = Form(False),
+    dry_run: bool = Form(False),
+    db: Session = Depends(get_db),
+) -> TrainingPlanDetailOut | TrainingPlanCsvPreviewOut | JSONResponse:
+    """Parse a UTF-8 plan CSV; dry-run previews, otherwise creates atomically."""
+
+    content = await file.read(csv_service.MAX_CSV_BYTES + 1)
+    await file.close()
+    if len(content) > csv_service.MAX_CSV_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail=(
+                f"The CSV file is too large; the limit is {csv_service.MAX_CSV_BYTES // 1024} KiB"
+            ),
+        )
+    parsed = csv_service.parse_plan_csv(content, file.filename, name)
+    if dry_run:
+        return parsed.preview()
+    if not parsed.valid:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content=jsonable_encoder(parsed.preview("CSV validation failed; nothing was created.")),
+        )
+    try:
+        plan = csv_service.import_plan_csv(db, parsed, activate=activate)
+    except csv_service.PlanCsvImportError as exc:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content=jsonable_encoder(
+                exc.result.preview("CSV validation failed; nothing was created.")
+            ),
+        )
+    response.status_code = status.HTTP_201_CREATED
+    return service.plan_out(plan, include_sessions=True)
+
+
+@router.get(
+    "/{plan_id}/export.csv",
+    responses={200: {"content": {"text/csv": {}}}},
+)
+def export_plan_csv(plan_id: int, db: Session = Depends(get_db)) -> Response:
+    """Download one plan as UTF-8 CSV with a stable header and ISO dates."""
+
+    plan = _plan(db, plan_id)
+    return Response(
+        content=csv_service.plan_csv_bytes(plan),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{csv_service.plan_csv_filename(plan)}"'
+            ),
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @router.get("/{plan_id}", response_model=TrainingPlanDetailOut)

@@ -76,6 +76,12 @@ export type RegisteredPlanBulk = Schemas["TrainingPlanSessionsBulk"];
 export type RegisteredPlanBulkResult = Schemas["TrainingPlanBulkOut"];
 export type RegisteredPlanFromSuggested = Schemas["TrainingPlanFromSuggested"];
 export type RegisteredPlanActivation = Schemas["TrainingPlanActivationOut"];
+export type RegisteredPlanCsvIssue = Schemas["TrainingPlanCsvIssueOut"];
+export type RegisteredPlanCsvRow = Schemas["TrainingPlanCsvRowOut"];
+export type RegisteredPlanCsvPreview = Schemas["TrainingPlanCsvPreviewOut"];
+export type RegisteredPlanImportResult =
+  | Schemas["TrainingPlanDetailOut"]
+  | Schemas["TrainingPlanCsvPreviewOut"];
 export type CalendarPlan = Schemas["CalendarActivePlanOut"];
 export type AdherenceSessionItem = Schemas["AdherenceSessionItemOut"];
 export type TrainingFocus = Schemas["TrainingFocusOut"];
@@ -214,7 +220,10 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   return (await response.json()) as T;
 }
 
-async function requestBlob(path: string): Promise<{ blob: Blob; filename: string }> {
+export async function requestBlob(
+  path: string,
+  fallbackFilename = "run-backup.zip",
+): Promise<{ blob: Blob; filename: string }> {
   const response = await fetch(`${API_BASE}${path}`, { credentials: "include" });
   if (!response.ok) {
     let payload: unknown;
@@ -232,7 +241,7 @@ async function requestBlob(path: string): Promise<{ blob: Blob; filename: string
   const match = /filename="?([^";]+)"?/i.exec(disposition);
   return {
     blob: await response.blob(),
-    filename: match?.[1] ?? "run-backup.zip",
+    filename: match?.[1] ?? fallbackFilename,
   };
 }
 

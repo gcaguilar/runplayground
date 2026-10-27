@@ -191,6 +191,45 @@ class TrainingPlanBulkOut(ApiModel):
     sessions: list[TrainingPlanSessionOut] = Field(default_factory=list)
 
 
+class TrainingPlanCsvIssueOut(ApiModel):
+    """One CSV problem, always tied to a physical line of the uploaded file."""
+
+    line: int
+    message: str
+
+
+class TrainingPlanCsvRowOut(ApiModel):
+    """One normalized session parsed from a CSV row (metres and seconds)."""
+
+    line: int
+    position: int
+    session_date: date
+    type: str
+    intensity: str
+    distance_m: float | None = None
+    duration_s: float | None = None
+    status: str
+    notes: str | None = None
+
+
+class TrainingPlanCsvPreviewOut(ApiModel):
+    """Dry-run result for a plan CSV upload.
+
+    ``valid`` is false when the payload cannot be imported; ``rows`` still
+    contains every row that parsed correctly so the UI can show what would be
+    created. Nothing is written in a dry run.
+    """
+
+    valid: bool
+    message: str | None = None
+    plan_name: str
+    start_date: date | None = None
+    end_date: date | None = None
+    row_count: int = 0
+    rows: list[TrainingPlanCsvRowOut] = Field(default_factory=list)
+    errors: list[TrainingPlanCsvIssueOut] = Field(default_factory=list)
+
+
 __all__ = [
     "NON_RUNNING_SESSION_TYPES",
     "REST_SESSION_TYPES",
@@ -201,6 +240,9 @@ __all__ = [
     "TrainingPlanActivationOut",
     "TrainingPlanBulkOut",
     "TrainingPlanCreate",
+    "TrainingPlanCsvRowOut",
+    "TrainingPlanCsvPreviewOut",
+    "TrainingPlanCsvIssueOut",
     "TrainingPlanDeleteOut",
     "TrainingPlanDetailOut",
     "TrainingPlanFromSuggested",

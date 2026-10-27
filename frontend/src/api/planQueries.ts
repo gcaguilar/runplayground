@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type {
   RegisteredPlanCreate,
+  RegisteredPlanImportResult,
   RegisteredPlanFromSuggested,
   RegisteredPlanSessionCreate,
   RegisteredPlanSessionUpdate,
@@ -141,6 +142,21 @@ export function useLinkActivity(planId: number) {
       activityId: number;
     }) => planApi.linkActivity(planId, sessionId, activityId),
     onSuccess: () => invalidatePlans(queryClient, planId),
+  });
+}
+
+export function useImportPlanCsv() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: {
+      file: File;
+      name?: string;
+      activate?: boolean;
+      dryRun?: boolean;
+    }) => planApi.importCsv(payload),
+    onSuccess: (result: RegisteredPlanImportResult) => {
+      if ("id" in result) invalidatePlans(queryClient, result.id);
+    },
   });
 }
 
