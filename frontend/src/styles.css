@@ -7721,3 +7721,113 @@ svg {
     display: none !important;
   }
 }
+
+.driver-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.driver-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.driver-card {
+  min-width: 0;
+}
+
+.driver-card__head,
+.driver-card__correlation,
+.driver-card__foot,
+.driver-card__split-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+
+.driver-card__head {
+  margin-bottom: 12px;
+}
+
+.driver-card__head strong {
+  font-size: 13.5px;
+}
+
+.driver-card__correlation span {
+  color: var(--text-faint);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.driver-card__correlation strong {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 21px;
+}
+
+.driver-card .badge {
+  margin-top: 9px;
+}
+
+.driver-card__split {
+  display: grid;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.driver-card__split-row {
+  display: grid;
+  grid-template-columns: 1.2fr auto;
+  gap: 4px 9px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.driver-card__split-row strong {
+  color: var(--text);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11.5px;
+}
+
+.driver-card__split-row i {
+  display: block;
+  grid-column: 1 / -1;
+  height: 4px;
+  min-width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(201, 245, 106, 0.9), rgba(201, 245, 106, 0.25));
+}
+
+.driver-card__split-row + .driver-card__split-row i {
+  background: linear-gradient(90deg, rgba(255, 171, 107, 0.9), rgba(255, 171, 107, 0.25));
+}
+
+.driver-card__foot {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: 10.5px;
+  flex-wrap: wrap;
+}
+
+.driver-card__reasons {
+  margin-top: 9px;
+}
+
+@media (max-width: 1180px) {
+  .driver-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .driver-grid {
+    grid-template-columns: 1fr;
+  }
+}

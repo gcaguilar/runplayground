@@ -18,6 +18,7 @@ import {
 import type {
   AccuracySample,
   ActionSuggestion,
+  Driver,
   GoalTracking,
   TrackedAction,
 } from "@/api/client";
@@ -65,6 +66,51 @@ const WARNING_KEYS: Record<string, MessageKey> = {
   no_accuracy_samples: "tracking.warning.no_accuracy_samples",
   small_accuracy_sample: "tracking.warning.small_accuracy_sample",
   short_history: "tracking.warning.short_history",
+  few_paired_weeks: "tracking.drivers.warning.few_paired_weeks",
+  no_recent_volume: "tracking.drivers.warning.no_recent_volume",
+  snapshot_gaps: "tracking.drivers.warning.snapshot_gaps",
+};
+
+const DRIVER_LABEL_KEYS: Record<string, MessageKey> = {
+  volume_m: "tracking.drivers.label.volume_m",
+  sessions: "tracking.drivers.label.sessions",
+  longest_m: "tracking.drivers.label.longest_m",
+  quality_sessions: "tracking.drivers.label.quality_sessions",
+  active_days: "tracking.drivers.label.active_days",
+  load: "tracking.drivers.label.load",
+};
+
+const DRIVER_DIRECTION_KEYS: Record<string, MessageKey> = {
+  positive: "tracking.drivers.direction.positive",
+  negative: "tracking.drivers.direction.negative",
+  none: "tracking.drivers.direction.none",
+  unknown: "tracking.drivers.direction.unknown",
+};
+
+const DRIVER_STRENGTH_KEYS: Record<string, MessageKey> = {
+  strong: "tracking.drivers.strength.strong",
+  moderate: "tracking.drivers.strength.moderate",
+  weak: "tracking.drivers.strength.weak",
+  unknown: "tracking.drivers.strength.unknown",
+};
+
+const DRIVER_REASON_KEYS: Record<string, MessageKey> = {
+  few_samples: "tracking.drivers.reason.few_samples",
+  small_sample: "tracking.drivers.reason.small_sample",
+  strong_association: "tracking.drivers.reason.strong_association",
+  moderate_association: "tracking.drivers.reason.moderate_association",
+  weak_association: "tracking.drivers.reason.weak_association",
+  association_not_causation: "tracking.drivers.reason.association_not_causation",
+};
+
+const DRIVER_NOTE_KEYS: Record<string, MessageKey> = {
+  association_not_causation: "tracking.drivers.notes.association_not_causation",
+  weekly_pairs: "tracking.drivers.notes.weekly_pairs",
+  improvement_is_fitness_change: "tracking.drivers.notes.improvement_is_fitness_change",
+  features_are_measured: "tracking.drivers.notes.features_are_measured",
+  classification_uses_current_anchor:
+    "tracking.drivers.notes.classification_uses_current_anchor",
+  load_is_estimated: "tracking.drivers.notes.load_is_estimated",
 };
 
 const ACCURACY_NOTE_KEYS: Record<string, MessageKey> = {
@@ -128,6 +174,7 @@ const TRACKING_NOTES = [
   "tracking.notes.snapshots_are_daily",
   "tracking.notes.accuracy_is_observational",
   "tracking.notes.actions_do_not_claim_causality",
+  "tracking.notes.association_not_causation",
   "tracking.notes.not_medical_advice",
 ] as const satisfies readonly MessageKey[];
 
@@ -182,6 +229,7 @@ export function TrackingPage() {
   const accuracySamples = accuracy.samples ?? [];
   const accuracyByDistance = accuracy.by_distance ?? [];
   const accuracyByHorizon = accuracy.by_horizon ?? [];
+  const drivers = data.drivers;
   const goals = data.goals ?? [];
   const actions = data.actions ?? [];
   const suggestions = data.suggestions ?? [];
@@ -378,6 +426,48 @@ export function TrackingPage() {
               }
             />
           </Card>
+        )}
+      </section>
+
+      <section className="tracking-section">
+        <SectionHeading
+          title={t("tracking.drivers.title")}
+          subtitle={t("tracking.drivers.subtitle")}
+          icon={TrendingUp}
+          action={
+            <div className="driver-summary">
+              <Badge tone="info">
+                {t("tracking.drivers.weeks")}: {drivers.weeks}
+              </Badge>
+              <Badge tone="neutral">
+                {t("tracking.drivers.samples")}: {drivers.samples}
+              </Badge>
+            </div>
+          }
+        />
+        {drivers.status === "insufficient" && !drivers.samples ? (
+          <Card className="panel">
+            <EmptyState
+              icon={TrendingUp}
+              title={t("tracking.drivers.empty.title")}
+              description={t("tracking.drivers.empty.body")}
+            />
+          </Card>
+        ) : (
+          <>
+            <div className="driver-grid">
+              {(drivers.drivers ?? []).map((driver) => (
+                <DriverCard key={driver.key} driver={driver} locale={locale} />
+              ))}
+            </div>
+            <ul className="tracking-notes">
+              {(drivers.notes ?? [])
+                .filter((note) => DRIVER_NOTE_KEYS[note])
+                .map((note) => (
+                  <li key={note}>{t(DRIVER_NOTE_KEYS[note])}</li>
+                ))}
+            </ul>
+          </>
         )}
       </section>
 
@@ -609,6 +699,64 @@ function GoalCard({
           </div>
         </details>
       ) : null}
+    </Card>
+  );
+}
+
+function DriverCard({ driver, locale }: { driver: Driver; locale: Locale }) {
+  const { t } = useI18n();
+  const correlation = driver.correlation;
+  const high = driver.improvement_high_pct;
+  const low = driver.improvement_low_pct;
+  const max = Math.max(Math.abs(high ?? 0), Math.abs(low ?? 0), 1);
+  const tone =
+    driver.direction === "positive" ? "success" : driver.direction === "negative" ? "danger" : "neutral";
+
+  return (
+    <Card className="panel driver-card">
+      <div className="driver-card__head">
+        <strong>{t(DRIVER_LABEL_KEYS[driver.key] ?? "tracking.drivers.label.volume_m")}</strong>
+        <Badge tone={driver.confidence === "high" ? "success" : driver.confidence === "medium" ? "warning" : "neutral"}>
+          {t(DRIVER_STRENGTH_KEYS[driver.strength] ?? "tracking.drivers.strength.unknown")}
+        </Badge>
+      </div>
+
+      <div className="driver-card__correlation">
+        <span>{t("tracking.drivers.correlation")}</span>
+        <strong>{correlation == null ? "—" : correlation.toFixed(2)}</strong>
+      </div>
+
+      <Badge tone={tone}>
+        {t(DRIVER_DIRECTION_KEYS[driver.direction] ?? "tracking.drivers.direction.unknown")}
+      </Badge>
+
+      <div className="driver-card__split">
+        <div className="driver-card__split-row">
+          <span>{t("tracking.drivers.high")}</span>
+          <strong>{formatPercent(high, locale, 1)}</strong>
+          <i style={{ width: `${(Math.abs(high ?? 0) / max) * 100}%` }} />
+        </div>
+        <div className="driver-card__split-row">
+          <span>{t("tracking.drivers.low")}</span>
+          <strong>{formatPercent(low, locale, 1)}</strong>
+          <i style={{ width: `${(Math.abs(low ?? 0) / max) * 100}%` }} />
+        </div>
+      </div>
+
+      <div className="driver-card__foot">
+        <span>{t("tracking.drivers.sampleSize", { samples: driver.samples })}</span>
+        <span>
+          {t("tracking.drivers.difference")}: {formatPercent(driver.difference_pct, locale, 1)}
+        </span>
+      </div>
+
+      <div className="reason-list driver-card__reasons">
+        {(driver.reasons ?? []).map((reason) => (
+          <span className="reason-chip" key={reason}>
+            {DRIVER_REASON_KEYS[reason] ? t(DRIVER_REASON_KEYS[reason]) : reason}
+          </span>
+        ))}
+      </div>
     </Card>
   );
 }
