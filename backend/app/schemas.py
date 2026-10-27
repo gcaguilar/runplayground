@@ -750,6 +750,184 @@ class ReportOut(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Future scenarios and continuous tracking (M4)
+
+
+class ScenarioProjectionOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    time_s: float | None = None
+    low_s: float | None = None
+    high_s: float | None = None
+    pace_s_per_km: float | None = None
+    delta_s: float | None = None
+    delta_pct: float | None = None
+    confidence: str
+    confidence_score: float
+
+
+class ForecastBaselineOut(ApiModel):
+    anchor_time_s: float | None = None
+    anchor_low_s: float | None = None
+    anchor_high_s: float | None = None
+    confidence: str
+    confidence_score: float
+    distances: list[ScenarioProjectionOut] = Field(default_factory=list)
+
+
+class ScenarioOut(ApiModel):
+    key: str
+    assumptions: list[str] = Field(default_factory=list)
+    evidence: dict[str, float | int | str | bool | None] = Field(default_factory=dict)
+    effect_pct: float | None = None
+    anchor_time_s: float | None = None
+    anchor_low_s: float | None = None
+    anchor_high_s: float | None = None
+    delta_s: float | None = None
+    delta_pct: float | None = None
+    confidence: str
+    confidence_score: float
+    confidence_reasons: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+    distances: list[ScenarioProjectionOut] = Field(default_factory=list)
+
+
+class ForecastView(ApiModel):
+    generated_at: datetime
+    model_version: str
+    weeks: int
+    status: str
+    focus_distance_key: str
+    focus_distance_m: float
+    focus_source: str
+    baseline: ForecastBaselineOut
+    scenarios: list[ScenarioOut] = Field(default_factory=list)
+    training: dict[str, float | int | None] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class AccuracySampleOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    predicted_on: date
+    actual_on: date
+    horizon_days: int
+    predicted_s: float
+    predicted_low_s: float | None = None
+    predicted_high_s: float | None = None
+    actual_s: float
+    activity_id: int
+    activity_name: str
+    is_race: bool
+    error_s: float
+    error_pct: float
+    within_range: bool
+
+
+class AccuracySummaryOut(ApiModel):
+    scope: str
+    key: str
+    samples: int
+    mean_bias_s: float
+    mean_bias_pct: float
+    mae_s: float
+    mape_pct: float
+    within_range_pct: float
+
+
+class PredictionAccuracyOut(ApiModel):
+    samples: list[AccuracySampleOut] = Field(default_factory=list)
+    overall: AccuracySummaryOut | None = None
+    by_distance: list[AccuracySummaryOut] = Field(default_factory=list)
+    by_horizon: list[AccuracySummaryOut] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class GoalHistoryPointOut(ApiModel):
+    date: date
+    predicted_s: float | None = None
+    gap_s: float | None = None
+
+
+class GoalRevisionOut(ApiModel):
+    created_at: datetime
+    target_time_s: float
+    target_date: date | None = None
+    race_name: str | None = None
+    prediction_time_s: float | None = None
+    prediction_low_s: float | None = None
+    prediction_high_s: float | None = None
+    confidence: str | None = None
+    change_s: float | None = None
+
+
+class GoalTrackingOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    target_time_s: float
+    target_date: date | None = None
+    race_name: str | None = None
+    current_time_s: float | None = None
+    low_s: float | None = None
+    high_s: float | None = None
+    confidence: str | None = None
+    gap_s: float | None = None
+    gap_pct: float | None = None
+    readiness_pct: float | None = None
+    status: str
+    trend: str
+    change_28d_s: float | None = None
+    change_28d_pct: float | None = None
+    days_to_target: int | None = None
+    last_reviewed_at: datetime
+    history: list[GoalHistoryPointOut] = Field(default_factory=list)
+    revisions: list[GoalRevisionOut] = Field(default_factory=list)
+
+
+class TrackedActionOut(ApiModel):
+    dimension_key: str
+    status: str
+    note: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None = None
+    baseline_score: float | None = None
+    baseline_confidence: str | None = None
+    current_score: float | None = None
+    delta: float | None = None
+    verdict: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class ActionUpsert(ApiModel):
+    status: Literal["pending", "in_progress", "completed"]
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class ActionSuggestionOut(ApiModel):
+    dimension_key: str
+    score: float | None = None
+    priority: int | None = None
+    action: str
+    reasons: list[str] = Field(default_factory=list)
+    tracked: bool = False
+
+
+class TrackingOverview(ApiModel):
+    generated_at: datetime
+    model_version: str
+    days: int
+    status: str
+    accuracy: PredictionAccuracyOut
+    goals: list[GoalTrackingOut] = Field(default_factory=list)
+    actions: list[TrackedActionOut] = Field(default_factory=list)
+    suggestions: list[ActionSuggestionOut] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime
