@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart, LineChart, ScatterChart } from "echarts/charts";
 import {
   AxisPointerComponent,
   DataZoomComponent,
@@ -17,6 +17,7 @@ import type {
   FitnessPoint,
   GarminMetricPoint,
   GoalHistoryPoint,
+  GoalResult,
   PerformanceSnapshot,
   ProgressWeek,
   StreamPoint,
@@ -45,6 +46,7 @@ const chartOpts = { renderer: "canvas" as const };
 echarts.use([
   BarChart,
   LineChart,
+  ScatterChart,
   AxisPointerComponent,
   DataZoomComponent,
   GridComponent,
@@ -58,6 +60,7 @@ type TooltipItem = {
   marker?: string;
   seriesName?: string;
   value?: unknown;
+  data?: unknown;
 };
 
 export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
@@ -950,16 +953,30 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
 
 export function GoalTrendChart({
   points,
+  results = [],
   targetTimeS,
 }: {
   points: GoalHistoryPoint[];
+  results?: GoalResult[];
   targetTimeS: number;
 }) {
   const { locale, t } = useI18n();
-  const labels = points.map((point) =>
-    formatDate(point.date, locale, { day: "numeric", month: "short" }),
+  const dates = Array.from(
+    new Set([...points.map((point) => point.date), ...results.map((item) => item.date)]),
+  ).sort();
+  const pointByDate = new Map(points.map((point) => [point.date, point]));
+  const labels = dates.map((value) =>
+    formatDate(value, locale, { day: "numeric", month: "short" }),
   );
-  const predicted = points.map((point) => point.predicted_s ?? null);
+  const predicted = dates.map((value) => pointByDate.get(value)?.predicted_s ?? null);
+  const resultByDate = new Map<string, GoalResult[]>();
+  for (const result of results) {
+    resultByDate.set(result.date, [...(resultByDate.get(result.date) ?? []), result]);
+  }
+  const resultPoints = results.map((result) => ({
+    value: [dates.indexOf(result.date), result.time_s],
+    name: result.activity_name,
+  }));
 
   const option = useMemo<EChartsOption>(
     () => ({
@@ -974,28 +991,38 @@ export function GoalTrendChart({
         textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
-          const index = list[0]?.dataIndex ?? 0;
-          const point = points[index];
-          if (!point) return "";
-          const gap = point.gap_s;
+          const first = list[0];
+          if (!first) return "";
+          const index = first.axisValueLabel ? labels.indexOf(first.axisValueLabel) : -1;
+          const day = dates[index >= 0 ? index : (first.dataIndex ?? 0)];
+          if (!day) return "";
+          const point = pointByDate.get(day);
+          const actuals = resultByDate.get(day) ?? [];
+          const predictedRow = point
+            ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
+                <span style="color:#a9b5ae">${t("tracking.goal.predicted")}</span>
+                <strong style="margin-left:auto">${formatClock(point.predicted_s)}</strong>
+              </div>`
+            : "";
+          const actualRows = actuals
+            .map(
+              (actual) => `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
+                <span style="color:#a9b5ae">${
+                  actual.is_race
+                    ? t("tracking.goal.result.race")
+                    : t("tracking.goal.result.effort")
+                }</span>
+                <strong style="margin-left:auto">${formatClock(actual.time_s)}</strong>
+              </div>`,
+            )
+            .join("");
           return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
-            point.date,
+            day,
             locale,
             { day: "numeric", month: "short", year: "numeric" },
-          )}</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("tracking.goal.predicted")}</span>
-              <strong style="margin-left:auto">${formatClock(point.predicted_s)}</strong>
-            </div>
-            ${
-              gap !== null && gap !== undefined
-                ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-                    <span style="color:#a9b5ae">${t("tracking.goal.gap")}</span>
-                    <strong style="margin-left:auto">${gap > 0 ? "+" : ""}${formatClock(gap)}</strong>
-                  </div>`
-                : ""
-            }`;
+          )}</div>${predictedRow}${actualRows}`;
         },
       },
       xAxis: {
@@ -1044,12 +1071,24 @@ export function GoalTrendChart({
             data: [{ yAxis: targetTimeS }],
           },
         },
+        {
+          name: t("tracking.goal.results"),
+          type: "scatter",
+          data: resultPoints,
+          symbolSize: 8,
+          itemStyle: {
+            color: ORANGE,
+            borderColor: "#0f1512",
+            borderWidth: 1,
+          },
+          z: 6,
+        },
       ],
     }),
-    [labels, locale, points, predicted, t, targetTimeS],
+    [dates, labels, locale, pointByDate, predicted, resultByDate, resultPoints, t, targetTimeS],
   );
 
-  if (points.length < 2) return null;
+  if (dates.length < 2 && results.length === 0) return null;
 
   return (
     <ReactECharts

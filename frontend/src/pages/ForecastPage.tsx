@@ -12,7 +12,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import type { ForecastScenario, ScenarioProjection } from "@/api/client";
+import type {
+  ForecastGoal,
+  ForecastScenario,
+  ScenarioProjection,
+} from "@/api/client";
 import { useForecast } from "@/api/queries";
 import {
   Badge,
@@ -29,6 +33,7 @@ import { useI18n, type Locale, type MessageKey, type Units } from "@/i18n";
 import { cn } from "@/lib/cn";
 import {
   formatClock,
+  formatDate,
   formatDistance,
   formatNumber,
   formatPace,
@@ -61,6 +66,21 @@ const WARNING_KEYS: Record<string, MessageKey> = {
   no_consistency_data: "forecast.warning.no_consistency_data",
   no_load_data: "forecast.warning.no_load_data",
   no_goal: "forecast.warning.no_goal",
+  horizon_before_goal: "forecast.warning.horizon_before_goal",
+};
+
+const GOAL_STATUS_KEYS: Record<string, MessageKey> = {
+  ahead: "forecast.goal.status.ahead",
+  close: "forecast.goal.status.close",
+  behind: "forecast.goal.status.behind",
+  unknown: "forecast.goal.status.unknown",
+};
+
+const GOAL_STATUS_TONE: Record<string, "success" | "warning" | "danger" | "neutral"> = {
+  ahead: "success",
+  close: "warning",
+  behind: "danger",
+  unknown: "neutral",
 };
 
 const CONFIDENCE_KEYS: Record<string, MessageKey> = {
@@ -321,6 +341,46 @@ export function ForecastPage() {
                 tone={progressTone(data.baseline.confidence)}
               />
             </div>
+
+            {data.goal ? (
+              <div className="forecast-goal">
+                <div className="forecast-goal__head">
+                  <span>{t("forecast.goal.title")}</span>
+                  <Badge tone={GOAL_STATUS_TONE[data.goal.baseline_status] ?? "neutral"}>
+                    {t(
+                      GOAL_STATUS_KEYS[data.goal.baseline_status] ??
+                        "forecast.goal.status.unknown",
+                    )}
+                  </Badge>
+                </div>
+                <div className="forecast-goal__grid">
+                  <GoalValue
+                    label={t("forecast.goal.target")}
+                    value={formatClock(data.goal.target_time_s)}
+                  />
+                  <GoalValue
+                    label={t("forecast.goal.date")}
+                    value={
+                      data.goal.target_date
+                        ? formatDate(data.goal.target_date, locale)
+                        : t("common.noData")
+                    }
+                  />
+                  <GoalValue
+                    label={t("forecast.goal.baselineGap")}
+                    value={formatGap(data.goal.baseline_gap_s)}
+                    tone={
+                      data.goal.baseline_gap_s != null && data.goal.baseline_gap_s > 0
+                        ? "is-ahead"
+                        : data.goal.baseline_gap_s != null && data.goal.baseline_gap_s < 0
+                          ? "is-behind"
+                          : undefined
+                    }
+                  />
+                </div>
+                <p>{t("forecast.goal.note")}</p>
+              </div>
+            ) : null}
           </Card>
 
           <Card className="panel forecast-training">
@@ -393,6 +453,7 @@ export function ForecastPage() {
               <ScenarioCard
                 key={scenario.key}
                 scenario={scenario}
+                goal={data.goal ?? null}
                 locale={locale}
                 units={units}
               />
@@ -428,10 +489,12 @@ export function ForecastPage() {
 
 function ScenarioCard({
   scenario,
+  goal,
   locale,
   units,
 }: {
   scenario: ForecastScenario;
+  goal: ForecastGoal | null;
   locale: Locale;
   units: Units;
 }) {
@@ -480,6 +543,30 @@ function ScenarioCard({
           <strong>{formatPercent(scenario.effect_pct, locale, 1)}</strong>
         </div>
       </div>
+
+      {goal && scenario.goal_gap_s != null ? (
+        <div className="scenario-card__goal">
+          <div>
+            <span>{t("forecast.goal.scenarioGap")}</span>
+            <strong
+              className={cn(
+                scenario.goal_gap_s > 0 && "is-ahead",
+                scenario.goal_gap_s < 0 && "is-behind",
+              )}
+            >
+              {formatGap(scenario.goal_gap_s)}
+            </strong>
+          </div>
+          <Badge tone={GOAL_STATUS_TONE[scenario.goal_status] ?? "neutral"}>
+            {t(
+              GOAL_STATUS_KEYS[scenario.goal_status] ?? "forecast.goal.status.unknown",
+            )}
+          </Badge>
+          <small>
+            {t("forecast.goal.target")} {formatClock(goal.target_time_s)}
+          </small>
+        </div>
+      ) : null}
 
       <div className="scenario-card__block">
         <h3>{t("forecast.scenario.assumptions")}</h3>
@@ -579,6 +666,28 @@ function ScenarioDistance({
       <small className="scenario-distance__range">
         {formatClock(item.low_s)} – {formatClock(item.high_s)}
       </small>
+    </div>
+  );
+}
+
+function formatGap(gap: number | null | undefined): string {
+  if (gap == null) return "—";
+  return formatClock(Math.abs(gap));
+}
+
+function GoalValue({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}) {
+  return (
+    <div className="forecast-goal__value">
+      <span>{label}</span>
+      <strong className={tone}>{value}</strong>
     </div>
   );
 }

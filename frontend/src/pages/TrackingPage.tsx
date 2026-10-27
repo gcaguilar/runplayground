@@ -66,6 +66,7 @@ const WARNING_KEYS: Record<string, MessageKey> = {
   no_accuracy_samples: "tracking.warning.no_accuracy_samples",
   small_accuracy_sample: "tracking.warning.small_accuracy_sample",
   short_history: "tracking.warning.short_history",
+  short_driver_history: "tracking.warning.short_driver_history",
   few_paired_weeks: "tracking.drivers.warning.few_paired_weeks",
   no_recent_volume: "tracking.drivers.warning.no_recent_volume",
   snapshot_gaps: "tracking.drivers.warning.snapshot_gaps",
@@ -653,7 +654,26 @@ function GoalCard({
 
       <div className="tracking-goal__chart">
         <span className="eyebrow">{t("tracking.goal.history")}</span>
-        <GoalTrendChart points={goal.history ?? []} targetTimeS={goal.target_time_s} />
+        <GoalTrendChart
+          points={goal.history ?? []}
+          results={goal.results ?? []}
+          targetTimeS={goal.target_time_s}
+        />
+        <p className="tracking-goal__results">
+          {(goal.results ?? []).length
+            ? t(
+                (goal.results ?? []).length === 1
+                  ? "tracking.goal.resultsCountOne"
+                  : "tracking.goal.resultsCount",
+                { count: (goal.results ?? []).length },
+              )
+            : t("tracking.goal.resultsEmpty")}
+          {" · "}
+          {t("tracking.goal.chartResults")}
+        </p>
+        {(goal.results ?? []).length ? (
+          <p className="tracking-goal__results-note">{t("tracking.goal.resultsNote")}</p>
+        ) : null}
       </div>
 
       <p className="tracking-goal__review">

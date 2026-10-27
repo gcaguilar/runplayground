@@ -7831,3 +7831,108 @@ svg {
     grid-template-columns: 1fr;
   }
 }
+
+.forecast-goal {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.forecast-goal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.forecast-goal__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.forecast-goal__value span {
+  display: block;
+  color: var(--text-faint);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.forecast-goal__value strong {
+  display: block;
+  margin-top: 3px;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 13px;
+}
+
+.forecast-goal__value strong.is-ahead,
+.scenario-card__goal strong.is-ahead {
+  color: var(--accent);
+}
+
+.forecast-goal__value strong.is-behind,
+.scenario-card__goal strong.is-behind {
+  color: var(--orange);
+}
+
+.forecast-goal p {
+  margin: 9px 0 0;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.scenario-card__goal {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 11px;
+}
+
+.scenario-card__goal span {
+  display: block;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scenario-card__goal strong {
+  display: block;
+  margin-top: 3px;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 14px;
+}
+
+.scenario-card__goal small {
+  grid-column: 1 / -1;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.tracking-goal__results,
+.tracking-goal__results-note {
+  margin: 6px 0 0;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.tracking-goal__results-note {
+  margin-top: 3px;
+}
+
+@media (max-width: 560px) {
+  .forecast-goal__grid {
+    grid-template-columns: 1fr;
+  }
+}
