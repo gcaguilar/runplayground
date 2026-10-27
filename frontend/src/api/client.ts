@@ -73,6 +73,7 @@ export type CalendarDay = Schemas["CalendarDayOut"];
 export type CalendarEntry = Schemas["CalendarEntryOut"];
 export type ReportPeriod = "week" | "month";
 export type Report = Schemas["ReportOut"];
+export type ReportNarrative = Schemas["ReportNarrativeOut"];
 export type ForecastView = Schemas["ForecastView"];
 export type ForecastGoal = Schemas["ForecastGoalOut"];
 export type ForecastBaseline = Schemas["ForecastBaselineOut"];

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -18,6 +18,7 @@ import {
   Timer,
   TrendingUp,
   Trophy,
+  type LucideIcon,
 } from "lucide-react";
 
 import type {
@@ -25,12 +26,13 @@ import type {
   PlannedRace,
   ProgressHighlight,
   Report,
+  ReportNarrative,
   ReportPeriod,
   SportTotal,
 } from "@/api/client";
 import { useReport } from "@/api/queries";
 import { ProgressWeeksChart, WeeklyLoadChart, WeeklyVolumeChart } from "@/components/Charts";
-import { AnalysisWarnings, LoadPanel } from "@/components/analysis";
+import { AnalysisWarnings, DIMENSION_META, LoadPanel } from "@/components/analysis";
 import {
   Badge,
   Button,
@@ -53,6 +55,7 @@ import {
   formatElevation,
   formatNumber,
   formatPace,
+  formatPercent,
   parseUtc,
   toISODate,
 } from "@/lib/format";
@@ -71,6 +74,16 @@ const NOTE_KEYS: Record<string, MessageKey> = {
   race_in_period: "reports.notes.race_in_period",
   goal_missing: "reports.notes.goal_missing",
   no_sessions_in_period: "reports.notes.no_sessions_in_period",
+  narrative_is_derived: "reports.notes.narrative_is_derived",
+  limitation_is_current: "reports.notes.limitation_is_current",
+};
+
+const NARRATIVE_REASON_KEYS: Record<string, MessageKey> = {
+  volume_fallback: "reports.narrative.reason.volume_fallback",
+  no_fitness_points: "reports.narrative.reason.no_fitness_points",
+  small_fitness_history: "reports.narrative.reason.small_fitness_history",
+  limitation_is_current: "reports.narrative.reason.limitation_is_current",
+  no_measurable_improvement: "reports.narrative.reason.no_measurable_improvement",
 };
 
 const GOAL_STATUS_KEYS: Record<string, MessageKey> = {
@@ -323,6 +336,8 @@ export function ReportsPage() {
         )}
       </Card>
 
+      <ReportNarrativeCard narrative={data.narrative} locale={locale} />
+
       {isEmpty ? (
         <Card className="panel">
           <EmptyState
@@ -460,6 +475,159 @@ export function ReportsPage() {
           ))}
         </ul>
       </Card>
+    </div>
+  );
+}
+
+function ReportNarrativeCard({
+  narrative,
+  locale,
+}: {
+  narrative: ReportNarrative;
+  locale: Locale;
+}) {
+  const { t } = useI18n();
+  const dimension = narrative.limitation ? DIMENSION_META[narrative.limitation] : null;
+  const improvement =
+    narrative.improvement === "fitness" && narrative.fitness_change_pct != null
+      ? t("reports.narrative.improvement.fitness", {
+          change: formatClock(Math.abs(narrative.fitness_change_s ?? 0)),
+          pct: formatPercent(Math.abs(narrative.fitness_change_pct), locale, 1),
+        })
+      : narrative.improvement === "volume" && narrative.volume_delta_pct != null
+        ? t("reports.narrative.improvement.volume", {
+            pct: formatPercent(narrative.volume_delta_pct, locale, 1),
+          })
+        : t("reports.narrative.improvement.none");
+  const limitation = dimension
+    ? t(dimension.label)
+    : t("reports.narrative.limitation.none");
+  const action = narrative.action
+    ? t(`training.focus.action.${narrative.action}` as MessageKey)
+    : t("training.focus.action.maintain_balance");
+  const reasons = (narrative.reasons ?? []).filter((reason) => NARRATIVE_REASON_KEYS[reason]);
+  const fitnessPoints = Number(narrative.evidence?.fitness_points ?? 0);
+  const volumeDelta = narrative.evidence?.volume_delta_pct;
+  const limiterScore = narrative.evidence?.limiter_score;
+  const tone =
+    narrative.tone === "positive"
+      ? "success"
+      : narrative.tone === "warning" || narrative.tone === "danger"
+        ? "warning"
+        : "neutral";
+
+  return (
+    <Card className={cn("panel report-narrative", `report-narrative--${narrative.tone}`)}>
+      <div className="report-narrative__head">
+        <div>
+          <span className="eyebrow">{t("reports.narrative.title")}</span>
+          <h2>{t(`reports.narrative.key.${narrative.key}` as MessageKey)}</h2>
+          <p>{t("reports.narrative.subtitle")}</p>
+        </div>
+        <div className="report-narrative__confidence">
+          <Badge tone={tone}>
+            {t("reports.narrative.confidence", {
+              score: Math.round(narrative.confidence_score * 100),
+            })}
+          </Badge>
+          <ProgressBar
+            value={narrative.confidence_score * 100}
+            tone={
+              narrative.confidence === "high"
+                ? "accent"
+                : narrative.confidence === "medium"
+                  ? "warning"
+                  : "danger"
+            }
+          />
+        </div>
+      </div>
+
+      <div className="report-narrative__grid">
+        <NarrativeBlock icon={TrendingUp} title={t("reports.narrative.improvement.title")}>
+          {improvement}
+        </NarrativeBlock>
+        <NarrativeBlock
+          icon={Target}
+          title={t("reports.narrative.limitation.title")}
+          note={
+            narrative.limitation ? t("reports.narrative.limitation.current") : undefined
+          }
+        >
+          {limitation}
+          {limiterScore != null ? (
+            <small className="report-narrative__score">{Math.round(Number(limiterScore))}/100</small>
+          ) : null}
+        </NarrativeBlock>
+        <NarrativeBlock
+          icon={Sparkles}
+          title={t("reports.narrative.action.title")}
+          note={t("reports.narrative.action.note")}
+        >
+          {action}
+        </NarrativeBlock>
+      </div>
+
+      <div className="report-narrative__evidence">
+        <span className="eyebrow">{t("reports.narrative.evidence")}</span>
+        <div className="report-narrative__chips">
+          {fitnessPoints > 0 ? (
+            <span className="reason-chip">
+              {t(
+                fitnessPoints === 1
+                  ? "reports.narrative.evidence.fitnessPointsOne"
+                  : "reports.narrative.evidence.fitnessPoints",
+                { count: fitnessPoints },
+              )}
+            </span>
+          ) : null}
+          {volumeDelta != null ? (
+            <span className="reason-chip">
+              {t("reports.narrative.evidence.volumeDelta", {
+                pct: formatPercent(Number(volumeDelta), locale, 1),
+              })}
+            </span>
+          ) : null}
+          {limiterScore != null && dimension ? (
+            <span className="reason-chip">
+              {t(dimension.label)} {Math.round(Number(limiterScore))}/100
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {reasons.length ? (
+        <ul className="report-narrative__reasons">
+          {reasons.map((reason) => (
+            <li key={reason}>{t(NARRATIVE_REASON_KEYS[reason])}</li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
+  );
+}
+
+function NarrativeBlock({
+  icon: Icon,
+  title,
+  note,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  note?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="report-narrative__block">
+      <span className="report-narrative__icon">
+        <Icon size={16} aria-hidden="true" />
+      </span>
+      <div>
+        <h3>{title}</h3>
+        <p>{children}</p>
+        {note ? <small>{note}</small> : null}
+      </div>
     </div>
   );
 }
