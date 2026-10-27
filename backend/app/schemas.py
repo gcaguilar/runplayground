@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from datetime import date as Date
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -542,6 +543,211 @@ class TrainingPlan(ApiModel):
     load: LoadOut
     warnings: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Progress, calendar, reports and race planning (M3)
+
+
+class ProgressTotalsOut(ApiModel):
+    distance_m: float
+    duration_s: float
+    elevation_gain_m: float
+    sessions: int
+    active_days: int
+    load: float
+
+
+class ProgressWeekOut(ApiModel):
+    week_start: date
+    distance_m: float
+    duration_s: float
+    load: float
+    sessions: int
+    active_days: int
+
+
+class ConsistencyOut(ApiModel):
+    window_days: int
+    weeks: int
+    weeks_with_data: int
+    active_days: int
+    current_streak_days: int
+    longest_streak_days: int
+    weekly_average_m: float
+    best_week_start: date | None = None
+    best_week_m: float
+
+
+class FitnessPointOut(ApiModel):
+    date: date
+    time_s: float
+    low_s: float | None = None
+    high_s: float | None = None
+    confidence: str | None = None
+
+
+class PersonalBestOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    time_s: float
+    pace_s_per_km: float
+    activity_id: int
+    activity_name: str
+    date: datetime
+    is_race: bool
+
+
+class GoalProgressOut(ApiModel):
+    distance_key: str | None = None
+    distance_m: float
+    target_time_s: float
+    target_date: date | None = None
+    race_name: str | None = None
+    current_time_s: float | None = None
+    low_s: float | None = None
+    high_s: float | None = None
+    confidence: str | None = None
+    gap_s: float | None = None
+    gap_pct: float | None = None
+    readiness_pct: float | None = None
+    status: str
+
+
+class ProgressHighlightOut(ApiModel):
+    key: str
+    date: Date | None = None
+    value: float
+    activity_id: int | None = None
+    detail: dict[str, Any] = Field(default_factory=dict)
+
+
+class PlannedRaceOut(ApiModel):
+    id: int
+    name: str
+    race_date: date
+    distance_m: float
+    goal_time_s: float | None = None
+    priority: str
+    location: str | None = None
+    notes: str | None = None
+    status: str
+    activity_id: int | None = None
+    created_at: datetime
+    updated_at: datetime
+    days_to_race: int | None = None
+    weeks_to_race: int | None = None
+    phase: str | None = None
+    phase_reason: str | None = None
+    target_pace_s_per_km: float | None = None
+    predicted_time_s: float | None = None
+    predicted_low_s: float | None = None
+    predicted_high_s: float | None = None
+    prediction_confidence: str | None = None
+    gap_s: float | None = None
+    gap_pct: float | None = None
+    readiness: str
+    weekly_distance_low_m: float | None = None
+    weekly_distance_high_m: float | None = None
+    long_run_low_m: float | None = None
+    long_run_high_m: float | None = None
+
+
+class PlannedRaceCreate(ApiModel):
+    name: str = Field(min_length=1, max_length=255)
+    race_date: date
+    distance_m: float = Field(gt=0, le=500_000)
+    goal_time_s: float | None = Field(default=None, gt=0, le=48 * 3600)
+    priority: Literal["A", "B", "C"] = "B"
+    location: str | None = Field(default=None, max_length=255)
+    notes: str | None = Field(default=None, max_length=2000)
+    status: Literal["planned", "completed", "cancelled"] = "planned"
+    activity_id: int | None = Field(default=None, ge=1)
+
+
+class PlannedRaceUpdate(ApiModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    race_date: date | None = None
+    distance_m: float | None = Field(default=None, gt=0, le=500_000)
+    goal_time_s: float | None = Field(default=None, gt=0, le=48 * 3600)
+    priority: Literal["A", "B", "C"] | None = None
+    location: str | None = Field(default=None, max_length=255)
+    notes: str | None = Field(default=None, max_length=2000)
+    status: Literal["planned", "completed", "cancelled"] | None = None
+    activity_id: int | None = Field(default=None, ge=1)
+
+
+class CalendarEntryOut(ApiModel):
+    id: str
+    date: Date
+    kind: Literal["activity", "race", "session"]
+    title: str
+    sport: str | None = None
+    activity_id: int | None = None
+    race_id: int | None = None
+    distance_m: float | None = None
+    duration_s: float | None = None
+    intensity: str | None = None
+    status: str | None = None
+    is_race: bool = False
+
+
+class CalendarDayOut(ApiModel):
+    date: Date
+    entries: list[CalendarEntryOut] = Field(default_factory=list)
+    actual_distance_m: float = 0.0
+    planned_distance_m: float = 0.0
+
+
+class CalendarWeekOut(ApiModel):
+    week_start: date
+    days: list[CalendarDayOut]
+    actual_distance_m: float
+    planned_distance_m: float
+
+
+class CalendarView(ApiModel):
+    start: date
+    end: date
+    today: date
+    weeks: list[CalendarWeekOut]
+
+
+class ProgressOverview(ApiModel):
+    generated_at: datetime
+    window_days: int
+    status: str
+    totals: ProgressTotalsOut
+    previous: ProgressTotalsOut
+    delta: dict[str, float | None]
+    consistency: ConsistencyOut
+    weeks: list[ProgressWeekOut]
+    fitness: list[FitnessPointOut]
+    best_efforts: list[PersonalBestOut]
+    goals: list[GoalProgressOut]
+    races: list[PlannedRaceOut]
+    highlights: list[ProgressHighlightOut]
+    warnings: list[str] = Field(default_factory=list)
+
+
+class ReportOut(ApiModel):
+    generated_at: datetime
+    period: Literal["week", "month"]
+    start: date
+    end: date
+    label: str
+    totals: ProgressTotalsOut
+    previous: ProgressTotalsOut
+    delta: dict[str, float | None]
+    days: list[WeeklyDay] = Field(default_factory=list)
+    weeks: list[ProgressWeekOut] = Field(default_factory=list)
+    by_sport: list[SportTotal] = Field(default_factory=list)
+    load: LoadOut
+    goals: list[GoalProgressOut] = Field(default_factory=list)
+    races: list[PlannedRaceOut] = Field(default_factory=list)
+    highlights: list[ProgressHighlightOut] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
 
 
 class AuditReport(ApiModel):
