@@ -416,6 +416,19 @@ function CalendarEntryItem({
         {isPlan && entry.status ? (
           <Badge tone="neutral">{t(calendarStatusKey(entry.status))}</Badge>
         ) : null}
+        {entry.kind === "race" && entry.status ? (
+          <Badge
+            tone={
+              entry.status === "completed"
+                ? "success"
+                : entry.status === "cancelled"
+                  ? "warning"
+                  : "neutral"
+            }
+          >
+            {t(`progress.race.status.${entry.status}` as MessageKey)}
+          </Badge>
+        ) : null}
       </span>
     </>
   );

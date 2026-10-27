@@ -13,6 +13,7 @@ import {
   type ActivityListParams,
   type ActivityPatch,
   type AnalysisSettingsUpdate,
+  type GoalClose,
   type GoalUpsert,
   type PlannedRaceCreate,
   type PlannedRaceUpdate,
@@ -34,6 +35,7 @@ export const queryKeys = {
   performance: ["performance"] as const,
   performanceHistory: (days: number) => ["performance", "history", days] as const,
   performanceGoals: ["performance", "goals"] as const,
+  goalArchive: ["performance", "goals", "archive"] as const,
   performanceReference: ["performance", "reference"] as const,
   diagnostics: ["diagnostics"] as const,
   analysisSettings: ["analysis", "settings"] as const,
@@ -255,6 +257,14 @@ export function usePerformanceGoals() {
   });
 }
 
+export function useGoalArchive() {
+  return useQuery({
+    queryKey: queryKeys.goalArchive,
+    queryFn: api.goalArchive,
+    staleTime: 60_000,
+  });
+}
+
 export function useGarminReference() {
   return useQuery({
     queryKey: queryKeys.performanceReference,
@@ -339,6 +349,23 @@ export function useDeleteGoal() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
+      void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.training });
+      invalidatePlanData(queryClient);
+    },
+  });
+}
+
+export function useCloseGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ distanceKey, payload }: { distanceKey: string; payload: GoalClose }) =>
+      api.closeGoal(distanceKey, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.performanceGoals });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.goalArchive });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });

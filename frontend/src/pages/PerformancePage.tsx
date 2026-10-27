@@ -2,7 +2,9 @@ import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
+  Archive,
   ArrowRight,
+  CheckCircle2,
   CircleAlert,
   Clock3,
   Database,
@@ -14,16 +16,21 @@ import {
   Timer,
   TrendingUp,
   Upload,
+  XCircle,
   Zap,
 } from "lucide-react";
 
 import type {
   DistancePrediction,
+  GoalArchive,
   PerformanceEffort,
   PerformanceGoal,
 } from "@/api/client";
 import {
+  useActivities,
+  useCloseGoal,
   useDeleteGoal,
+  useGoalArchive,
   usePerformance,
   usePerformanceHistory,
   useRecomputePerformance,
@@ -101,6 +108,7 @@ export function PerformancePage() {
   const { t, locale, units } = useI18n();
   const overview = usePerformance();
   const history = usePerformanceHistory(180);
+  const archive = useGoalArchive();
   const recompute = useRecomputePerformance();
   const [editingGoal, setEditingGoal] = useState<string | null>(null);
 
@@ -343,6 +351,12 @@ export function PerformancePage() {
       ) : (
         <GarminOnlyCard reference={data.garmin} locale={locale} units={units} />
       )}
+
+      <ClosedGoalsSection
+        goals={archive.data ?? []}
+        loading={archive.isLoading}
+        locale={locale}
+      />
 
       <Card className="panel performance-method">
         <SectionHeading
@@ -589,11 +603,24 @@ function GoalEditor({
   const { t } = useI18n();
   const upsert = useUpsertGoal();
   const remove = useDeleteGoal();
+  const close = useCloseGoal();
   const [time, setTime] = useState(goal ? formatClock(goal.target_time_s) : "");
   const [date, setDate] = useState(goal?.target_date ?? "");
   const [name, setName] = useState(goal?.race_name ?? "");
   const [notes, setNotes] = useState(goal?.notes ?? "");
   const [problem, setProblem] = useState<string | null>(null);
+  const [closeStatus, setCloseStatus] = useState<"achieved" | "missed" | "cancelled">("achieved");
+  const [outcomeTime, setOutcomeTime] = useState("");
+  const [activityId, setActivityId] = useState<number | null>(null);
+  const [closeDate, setCloseDate] = useState(goal?.target_date ?? new Date().toISOString().slice(0, 10));
+  const [closeNote, setCloseNote] = useState("");
+  const activities = useActivities({
+    from: closeDate,
+    to: closeDate,
+    limit: 100,
+    sport: "running",
+  });
+  const activityItems = activities.data?.items ?? [];
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -617,6 +644,34 @@ function GoalEditor({
         onSuccess: onClose,
         onError: (error) =>
           setProblem(error instanceof Error ? error.message : t("performance.goal.error")),
+      },
+    );
+  };
+
+  const submitClose = () => {
+    let outcomeSeconds: number | null = null;
+    if (outcomeTime.trim()) {
+      outcomeSeconds = parseTimeInput(outcomeTime);
+      if (outcomeSeconds === null) {
+        setProblem(t("performance.goal.invalidTime"));
+        return;
+      }
+    }
+    setProblem(null);
+    close.mutate(
+      {
+        distanceKey,
+        payload: {
+          status: closeStatus,
+          outcome_time_s: outcomeSeconds,
+          activity_id: activityId,
+          note: closeNote.trim() || null,
+        },
+      },
+      {
+        onSuccess: onClose,
+        onError: (error) =>
+          setProblem(error instanceof Error ? error.message : t("performance.goal.closeError")),
       },
     );
   };
@@ -687,8 +742,193 @@ function GoalEditor({
           {t("performance.actions.cancel")}
         </Button>
       </div>
+
+      {goal ? (
+        <div className="goal-editor__close">
+          <div className="goal-editor__close-head">
+            <strong>{t("performance.goal.closeTitle")}</strong>
+            <span>{t("performance.goal.closeHint")}</span>
+          </div>
+          <label>
+            <span>{t("performance.goal.outcome")}</span>
+            <select
+              value={closeStatus}
+              onChange={(event) =>
+                setCloseStatus(event.target.value as "achieved" | "missed" | "cancelled")
+              }
+            >
+              <option value="achieved">{t("performance.archive.status.achieved")}</option>
+              <option value="missed">{t("performance.archive.status.missed")}</option>
+              <option value="cancelled">{t("performance.archive.status.cancelled")}</option>
+            </select>
+          </label>
+          <label>
+            <span>{t("performance.goal.outcomeTime")}</span>
+            <input
+              value={outcomeTime}
+              onChange={(event) => setOutcomeTime(event.target.value)}
+              placeholder="20:00"
+              inputMode="numeric"
+            />
+          </label>
+          <label>
+            <span>{t("performance.goal.activityDate")}</span>
+            <input
+              type="date"
+              value={closeDate}
+              onChange={(event) => {
+                setCloseDate(event.target.value);
+                setActivityId(null);
+              }}
+            />
+          </label>
+          <label>
+            <span>{t("performance.goal.activity")}</span>
+            <select
+              value={activityId ?? ""}
+              onChange={(event) => {
+                const next = event.target.value ? Number(event.target.value) : null;
+                setActivityId(next);
+                const selected = activityItems.find((item) => item.id === next);
+                if (selected && !outcomeTime.trim()) {
+                  setOutcomeTime(formatClock(selected.duration_s));
+                }
+              }}
+            >
+              <option value="">{t("performance.goal.noActivity")}</option>
+              {activityItems.map((activity) => (
+                <option key={activity.id} value={activity.id}>
+                  {activity.name || t("calendar.legend.activity")} ·{" "}
+                  {formatClock(activity.duration_s)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="goal-editor__wide">
+            <span>{t("performance.goal.closeNote")}</span>
+            <textarea
+              value={closeNote}
+              onChange={(event) => setCloseNote(event.target.value)}
+              rows={2}
+              maxLength={2000}
+            />
+          </label>
+          <div className="goal-editor__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              loading={close.isPending}
+              onClick={submitClose}
+            >
+              <Archive size={14} aria-hidden="true" />
+              {t("performance.actions.closeGoal")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </form>
   );
+}
+
+function ClosedGoalsSection({
+  goals,
+  loading,
+  locale,
+}: {
+  goals: GoalArchive[];
+  loading: boolean;
+  locale: Locale;
+}) {
+  const { t } = useI18n();
+  return (
+    <Card className="panel performance-archive">
+      <SectionHeading
+        title={t("performance.archive.title")}
+        subtitle={t("performance.archive.subtitle")}
+        icon={Archive}
+      />
+      {loading ? (
+        <Skeleton className="skeleton--line" />
+      ) : goals.length === 0 ? (
+        <p className="performance-note">{t("performance.archive.empty")}</p>
+      ) : (
+        <div className="goal-archive-list">
+          {goals.map((goal) => {
+            const label = DISTANCE_KEYS[goal.distance_key] ?? goal.distance_key;
+            const tone =
+              goal.status === "achieved"
+                ? "success"
+                : goal.status === "missed"
+                  ? "danger"
+                  : "warning";
+            const Icon =
+              goal.status === "achieved"
+                ? CheckCircle2
+                : goal.status === "missed"
+                  ? XCircle
+                  : CircleAlert;
+            return (
+              <article className="goal-archive-row" key={`${goal.distance_key}-${goal.closed_at}`}>
+                <div className="goal-archive-row__head">
+                  <div>
+                    <strong>{t(label)}</strong>
+                    <span>
+                      {goal.race_name ? `${goal.race_name} · ` : ""}
+                      {formatDate(goal.closed_at, locale)}
+                    </span>
+                  </div>
+                  <Badge tone={tone}>
+                    <Icon size={12} aria-hidden="true" />
+                    {t(`performance.archive.status.${goal.status}` as MessageKey)}
+                  </Badge>
+                </div>
+                <div className="goal-archive-row__times">
+                  <span>
+                    {t("performance.archive.target")} <strong>{formatClock(goal.target_time_s)}</strong>
+                  </span>
+                  <span>
+                    {t("performance.archive.outcome")}{" "}
+                    <strong>
+                      {goal.outcome_time_s !== null
+                        ? formatClock(goal.outcome_time_s)
+                        : t("performance.archive.noOutcome")}
+                    </strong>
+                  </span>
+                  <span>
+                    {t("performance.archive.vsTarget")}{" "}
+                    <strong>{signedClock(goal.outcome_vs_target_s)}</strong>
+                  </span>
+                  <span>
+                    {t("performance.archive.vsPrediction")}{" "}
+                    <strong>{signedClock(goal.outcome_vs_prediction_s)}</strong>
+                  </span>
+                </div>
+                {goal.note ? <p className="goal-archive-row__note">{goal.note}</p> : null}
+                {goal.activity_id ? (
+                  <Link
+                    to="/activities/$activityId"
+                    params={{ activityId: String(goal.activity_id) }}
+                    className="text-link"
+                  >
+                    {goal.activity_name || t("performance.archive.openActivity")}
+                    <ArrowRight size={13} aria-hidden="true" />
+                  </Link>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      )}
+      <p className="performance-note">{t("performance.archive.note")}</p>
+    </Card>
+  );
+}
+
+function signedClock(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  if (value === 0) return formatClock(0);
+  return `${value > 0 ? "+" : "−"}${formatClock(Math.abs(value))}`;
 }
 
 function GarminReferencePanel({

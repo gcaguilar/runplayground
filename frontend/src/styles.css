@@ -9804,3 +9804,136 @@ svg {
     width: calc(100vw - 32px);
   }
 }
+
+.goal-editor select {
+  width: 100%;
+  font-size: 11.5px;
+  padding: 7px 9px;
+}
+
+.goal-editor__close {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+
+.goal-editor__close-head {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.goal-editor__close-head strong {
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.goal-editor__close-head span {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.goal-editor__close label:nth-of-type(3),
+.goal-editor__close label:nth-of-type(4) {
+  grid-column: auto;
+}
+
+.goal-editor__wide {
+  grid-column: 1 / -1 !important;
+}
+
+.performance-archive {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-archive-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.goal-archive-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.017);
+}
+
+.goal-archive-row__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.goal-archive-row__head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.goal-archive-row__head strong {
+  font-size: 12px;
+}
+
+.goal-archive-row__head span {
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.goal-archive-row__times {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 12px;
+}
+
+.goal-archive-row__times span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--faint);
+  font-size: 9.5px;
+}
+
+.goal-archive-row__times strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.goal-archive-row__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+@media (max-width: 900px) {
+  .goal-archive-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .goal-editor__close {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .goal-editor__close label:nth-of-type(3),
+  .goal-editor__close label:nth-of-type(4) {
+    grid-column: auto;
+  }
+}
