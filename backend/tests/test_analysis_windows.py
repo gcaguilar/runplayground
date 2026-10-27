@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from app.db import get_session_factory
-from app.models import Activity
+from app.models import Activity, PerformanceSnapshot, PlannedRace, RaceGoal
 from app.services.diagnostics import build_diagnostics, build_diagnostics_trend
 from app.utils import utcnow
 
@@ -157,6 +157,73 @@ def test_progress_accepts_short_and_long_windows(client, days):
 @pytest.mark.parametrize("days", [6, 731])
 def test_progress_rejects_windows_outside_limits(client, days):
     assert client.get(f"/api/v1/progress?days={days}").status_code == 422
+
+
+@pytest.mark.parametrize("days", [28, 730])
+def test_progress_keeps_goals_races_and_series_on_any_window(client, days):
+    reference = utcnow()
+    today = reference.date()
+    session = get_session_factory()()
+    try:
+        session.add(
+            Activity(
+                fingerprint=f"m16-progress-{days}",
+                name="Recent 10K",
+                sport="running",
+                start_time_utc=reference - timedelta(days=3),
+                distance_m=10000,
+                duration_s=3000,
+                avg_hr=176,
+                max_hr=190,
+                is_race=True,
+                has_streams=True,
+            )
+        )
+        session.add(
+            PerformanceSnapshot(
+                snapshot_date=today - timedelta(days=2),
+                computed_at=reference - timedelta(days=2),
+                model_version="m1.0",
+                fitness_anchor_s=3000.0,
+                fitness_anchor_low_s=2950.0,
+                fitness_anchor_high_s=3050.0,
+                fitness_confidence="medium",
+            )
+        )
+        session.add(
+            RaceGoal(
+                distance_m=10000,
+                target_time_s=2940,
+                target_date=today + timedelta(days=70),
+                race_name="Window 10K",
+            )
+        )
+        session.add(
+            PlannedRace(
+                name="Window Half",
+                race_date=today + timedelta(days=49),
+                distance_m=21097.5,
+                goal_time_s=5700,
+                priority="A",
+            )
+        )
+        session.commit()
+    finally:
+        session.close()
+
+    response = client.get(f"/api/v1/progress?days={days}")
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["window_days"] == days
+    assert len(payload["weeks"]) >= days // 7
+    assert len(payload["goals"]) == 1
+    assert payload["goals"][0]["distance_key"] == "10k"
+    assert payload["goals"][0]["current_time_s"] is not None
+    assert len(payload["races"]) == 1
+    assert payload["races"][0]["predicted_time_s"] is not None
+    assert len(payload["fitness"]) >= 1
+    assert payload["totals"]["sessions"] == 1
 
 
 def test_existing_diagnostics_and_progress_defaults_are_unchanged(client):
