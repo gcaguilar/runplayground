@@ -5,7 +5,10 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M4 — future scenarios and continuous tracking.** Sync, import,
+> **Status: M5 — weekly briefing.** The dashboard now opens with the current
+> 10K fitness anchor, its 4/8/12-week evolution, the four distance
+> predictions, a weekly message, the main strength, the main limitation and
+> the next action. Sync, import,
 > activities, weekly summary and data audit work. Performance turns your
 > efforts into 5K/10K/half/marathon predictions with ranges and confidence.
 > Diagnostics scores six training dimensions and explains every limiter;
@@ -16,7 +19,8 @@ metric dump.
 > four 8- or 12-week training hypotheses with explicit assumptions and capped
 > effects and the projected goal gap; Tracking compares past predictions
 > with real results, follows goal revisions and training actions over time,
-> and pairs training factors with fitness changes as associations.
+> and pairs training factors with fitness changes as associations. The
+> briefing composes those views instead of repeating them.
 
 ## What works today
 
@@ -49,6 +53,11 @@ metric dump.
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
   the number of paired weeks; it is explicitly an association, not a cause.
+- **Weekly briefing** on the dashboard: current 10K fitness with its 80%
+  range, 4/8/12-week evolution, the four distance predictions, a rule-based
+  weekly message backed by visible evidence, the strongest dimension, the
+  top limiter and the next action. Missing history or a weak signal lowers
+  confidence instead of inventing a conclusion.
 - **Diagnostics** across six dimensions: volume, consistency, intensity, load,
   recovery and specificity. Every score shows its status, confidence, evidence
   and reason codes; missing data lowers confidence instead of inventing a value.
@@ -112,6 +121,13 @@ observed in that week's snapshot. It reports Pearson's correlation and the
 average improvement when the factor was above or below its median. It needs at
 least four paired weeks and labels small samples explicitly; a strong
 correlation is still not evidence that the factor caused the improvement.
+
+The dashboard briefing is deliberately rule-based. It compares the current 10K
+anchor with the closest snapshot before the 4-, 8- and 12-week cutoffs, picks
+the top diagnostic limiter and writes one sentence from those facts. The
+sentence is returned as a code plus parameters, and the underlying numbers and
+evidence are always shown next to it. It never projects a result or replaces a
+race.
 
 ## Quick start
 
@@ -375,7 +391,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M1** | Performance and race predictions, recent best efforts, historical Garmin metrics from the bulk export, 10K fitness anchor. |
 | **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
 | **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. |
-| **M4** | Future scenarios, continuous tracking of predictions, goals and actions. **Current.** |
+| **M4** | Future scenarios, continuous tracking of predictions, goals and actions. |
+| **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. **Current.** |
 
 ## License and disclaimer
 
