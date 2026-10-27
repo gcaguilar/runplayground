@@ -18,6 +18,7 @@ import type {
   GarminMetricPoint,
   GoalHistoryPoint,
   GoalResult,
+  PaceHrGroup,
   PerformanceSnapshot,
   ProgressWeek,
   StreamPoint,
@@ -39,6 +40,7 @@ const TEXT = "#8d9b94";
 const GRID = "rgba(255,255,255,0.07)";
 const ACCENT = "#c9f56a";
 const ORANGE = "#ffab6b";
+const EARLY = "#7bc8ff";
 const PANEL = "rgba(15, 21, 18, 0.94)";
 
 const chartOpts = { renderer: "canvas" as const };
@@ -1096,6 +1098,138 @@ export function GoalTrendChart({
       option={option}
       opts={chartOpts}
       style={{ height: 190, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function PaceHrChart({ group }: { group: PaceHrGroup }) {
+  const { locale, t, units } = useI18n();
+  const points = group.points ?? [];
+  const earlyLine = group.early_line ?? [];
+  const recentLine = group.recent_line ?? [];
+  const early = points
+    .filter((point) => point.period === "early")
+    .map((point) => ({
+      value: [point.avg_hr, point.pace_s_per_km],
+      name: point.activity_name,
+      date: point.date,
+    }));
+  const recent = points
+    .filter((point) => point.period === "recent")
+    .map((point) => ({
+      value: [point.avg_hr, point.pace_s_per_km],
+      name: point.activity_name,
+      date: point.date,
+    }));
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 10, right: 18, top: 30, bottom: 10, containLabel: true },
+      tooltip: {
+        trigger: "item",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const item = (Array.isArray(params) ? params[0] : params) as TooltipItem | undefined;
+          const data = item?.data as
+            | { name?: string; value?: [number, number]; date?: string }
+            | undefined;
+          if (!item || !data || !Array.isArray(data.value)) return "";
+          const [hr, pace] = data.value;
+          return `<div style="font-weight:700;margin-bottom:3px">${data.name ?? ""}</div>
+            <div style="color:#a9b5ae">${formatDate(data.date, locale)}</div>
+            <div style="display:flex;justify-content:space-between;gap:16px;margin-top:5px">
+              <span style="color:#a9b5ae">${t("progress.paceHr.chartHr")}</span>
+              <strong>${formatNumber(hr, locale)} bpm</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
+              <span style="color:#a9b5ae">${t("progress.paceHr.chartPace")}</span>
+              <strong>${formatPace(pace, units)}</strong>
+            </div>`;
+        },
+      },
+      xAxis: {
+        type: "value",
+        name: t("progress.paceHr.chartHr"),
+        nameTextStyle: { color: TEXT, fontSize: 9 },
+        min: Math.max(80, Number(group.hr_min) - 6),
+        max: Number(group.hr_max) + 6,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatNumber(value, locale),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      yAxis: {
+        type: "value",
+        inverse: true,
+        scale: true,
+        name: t("progress.paceHr.chartPace"),
+        nameTextStyle: { color: TEXT, fontSize: 9 },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatPace(value, units, { suffix: false }),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          name: t("progress.paceHr.early"),
+          type: "scatter",
+          data: early,
+          symbolSize: 8,
+          itemStyle: { color: EARLY, opacity: 0.75 },
+        },
+        {
+          name: t("progress.paceHr.recent"),
+          type: "scatter",
+          data: recent,
+          symbolSize: 9,
+          itemStyle: { color: ACCENT },
+        },
+        {
+          name: t("progress.paceHr.early"),
+          type: "line",
+          data: earlyLine.map((line) => [line.hr, line.pace_s_per_km]),
+          showSymbol: false,
+          silent: true,
+          lineStyle: { color: EARLY, width: 1.5, type: "dashed", opacity: 0.7 },
+          itemStyle: { color: EARLY },
+        },
+        {
+          name: t("progress.paceHr.recent"),
+          type: "line",
+          data: recentLine.map((line) => [line.hr, line.pace_s_per_km]),
+          showSymbol: false,
+          silent: true,
+          lineStyle: { color: ACCENT, width: 1.8, type: "dashed" },
+          itemStyle: { color: ACCENT },
+        },
+      ],
+    }),
+    [early, earlyLine, group.hr_max, group.hr_min, locale, recent, recentLine, t, units],
+  );
+
+  if (!points.length) return null;
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 300, width: "100%" }}
       notMerge
       lazyUpdate
     />

@@ -8220,3 +8220,195 @@ svg {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   M6 — comparable pace–heart-rate analysis
+--------------------------------------------------------------------------- */
+
+.pace-hr-panel {
+  min-width: 0;
+}
+
+.pace-hr-warnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.pace-hr-conclusion {
+  margin: 14px 0 0;
+  max-width: 72ch;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pace-hr-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.pace-hr-stat {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.pace-hr-stat span {
+  display: block;
+  color: var(--text-faint);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.pace-hr-stat strong {
+  display: block;
+  margin-top: 5px;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 14px;
+}
+
+.pace-hr-stat strong.is-ahead {
+  color: var(--accent);
+}
+
+.pace-hr-stat strong.is-behind {
+  color: var(--orange);
+}
+
+.pace-hr-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.pace-hr-groups button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.pace-hr-groups button strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.pace-hr-groups button small {
+  color: var(--text-faint);
+  font-size: 9.5px;
+}
+
+.pace-hr-groups button:hover {
+  border-color: var(--line-strong);
+}
+
+.pace-hr-groups button.is-active {
+  border-color: var(--accent);
+  background: rgba(201, 245, 106, 0.08);
+}
+
+.pace-hr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+}
+
+.pace-hr-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pace-hr-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.pace-hr-dot--early {
+  background: #7bc8ff;
+}
+
+.pace-hr-dot--recent {
+  background: var(--accent);
+}
+
+.pace-hr-exclusions {
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+}
+
+.pace-hr-notes {
+  margin: 12px 0 0;
+  padding-left: 16px;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.pace-hr-notes li {
+  margin-top: 3px;
+}
+
+.pace-hr-footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  border-top: 1px solid var(--line);
+  margin: 14px 0 0;
+  padding-top: 10px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.pace-hr-footnote svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+@media (max-width: 1120px) {
+  .pace-hr-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .pace-hr-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .pace-hr-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pace-hr-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}

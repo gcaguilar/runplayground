@@ -37,6 +37,7 @@ import {
   useUpdateRace,
 } from "@/api/queries";
 import { FitnessTrendChart, ProgressWeeksChart } from "@/components/Charts";
+import { PaceHrPanel } from "@/components/comparables";
 import {
   AnalysisMethodCard,
   AnalysisWarnings,
@@ -298,6 +299,8 @@ export function ProgressPage() {
           <FitnessTrendChart points={data.fitness} />
         </Card>
       </section>
+
+      <PaceHrPanel days={days} />
 
       <section className="progress-duo">
         <Card className="panel progress-consistency">

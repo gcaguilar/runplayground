@@ -41,6 +41,7 @@ export const queryKeys = {
   forecast: (weeks: 8 | 12) => ["forecast", weeks] as const,
   tracking: (days: number) => ["tracking", days] as const,
   briefing: ["briefing"] as const,
+  paceHr: (days: number) => ["comparables", "pace-hr", days] as const,
 };
 
 function invalidatePlanData(queryClient: QueryClient) {
@@ -51,6 +52,7 @@ function invalidatePlanData(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: ["forecast"] });
   void queryClient.invalidateQueries({ queryKey: ["tracking"] });
   void queryClient.invalidateQueries({ queryKey: queryKeys.briefing });
+  void queryClient.invalidateQueries({ queryKey: ["comparables"] });
 }
 
 export function useAuthStatus() {
@@ -412,5 +414,13 @@ export function useDeleteTrackingAction() {
       void queryClient.invalidateQueries({ queryKey: ["tracking"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
     },
+  });
+}
+
+export function usePaceHr(days = 180) {
+  return useQuery({
+    queryKey: queryKeys.paceHr(days),
+    queryFn: () => api.paceHr(days),
+    staleTime: 60_000,
   });
 }

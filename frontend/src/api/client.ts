@@ -91,6 +91,10 @@ export type GoalRevision = Schemas["GoalRevisionOut"];
 export type TrackedAction = Schemas["TrackedActionOut"];
 export type ActionUpsert = Schemas["ActionUpsert"];
 export type ActionSuggestion = Schemas["ActionSuggestionOut"];
+export type PaceHrAnalysis = Schemas["PaceHrAnalysisOut"];
+export type PaceHrGroup = Schemas["PaceHrGroupOut"];
+export type PaceHrPoint = Schemas["PaceHrPointOut"];
+export type PaceHrLine = Schemas["PaceHrLineOut"];
 export type BriefingView = Schemas["BriefingView"];
 export type BriefingTrend = Schemas["BriefingTrendOut"];
 export type BriefingDistance = Schemas["BriefingDistanceOut"];
@@ -346,4 +350,11 @@ export const api = {
     ),
   deleteTrackingAction: (dimensionKey: string) =>
     request<void>(`/tracking/actions/${dimensionKey}`, { method: "DELETE" }),
+  paceHr: (days = 180) =>
+    request<PaceHrAnalysis>(
+      `/comparables/pace-hr${queryString({
+        days,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
 };
