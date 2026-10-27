@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M15 — light theme, accessibility and print output.** The dashboard
+> **Status: M15 — final milestone: light theme, accessibility and print output.** The dashboard
 > opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -698,7 +698,15 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. |
 | **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. |
 | **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. |
-| **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Current.** |
+| **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Final.** |
+
+M15 closes the planned roadmap. Further additions are optional product work
+rather than gaps in the current scope: custom analysis windows and dimension
+history, automatic wellness sync (sleep/HRV/weight still come from the Garmin
+export), temperature/terrain adjustment in pace–heart-rate comparisons, plan
+import from CSV, and richer activity-detail zones. The core promise — own the
+data, understand the numbers, see their provenance and confidence, and decide
+what to train next — is implemented without sending anything to a third party.
 
 ## License and disclaimer
 
