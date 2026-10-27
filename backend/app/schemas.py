@@ -796,6 +796,56 @@ class ProgressOverview(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class AdherenceWeekOut(ApiModel):
+    week_start: date
+    phase: str
+    status: str
+    score: float | None = None
+    volume_actual_m: float
+    volume_low_m: float
+    volume_high_m: float
+    volume_status: str
+    longest_actual_m: float
+    long_run_low_m: float
+    long_run_high_m: float
+    long_run_status: str
+    quality_actual: int
+    quality_low: int
+    quality_high: int
+    quality_status: str
+    rest_actual: int
+    rest_planned: int
+    rest_status: str
+    sessions_actual: int
+    sessions_planned: int
+    active_days: int
+    reasons: list[str] = Field(default_factory=list)
+
+
+class AdherenceSummaryOut(ApiModel):
+    weeks: int
+    scored_weeks: int
+    average_score: float | None = None
+    current_score: float | None = None
+    trend: str
+    volume_ratio: float | None = None
+    long_run_ratio: float | None = None
+    quality_ratio: float | None = None
+    rest_ratio: float | None = None
+
+
+class AdherenceOverview(ApiModel):
+    generated_at: datetime
+    model_version: str
+    weeks: int
+    status: str
+    current_week_start: date
+    summary: AdherenceSummaryOut
+    items: list[AdherenceWeekOut] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class ReportNarrativeOut(ApiModel):
     key: str
     tone: str

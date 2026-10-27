@@ -14,6 +14,7 @@ from sqlalchemy import update
 
 from app.api import (
     activities,
+    adherence,
     analysis,
     audit,
     auth,
@@ -119,6 +120,7 @@ api.include_router(imports.router)
 api.include_router(system.router)
 api.include_router(progress.router)
 api.include_router(tracking.router)
+api.include_router(adherence.router)
 api.include_router(recovery.router)
 api.include_router(comparables.router)
 api.include_router(briefing.router)
