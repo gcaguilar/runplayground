@@ -18,6 +18,7 @@ from app.schemas import (
     ActivityPatch,
     ActivityStreams,
     ComparisonView,
+    HrZonesOut,
     LapOut,
     SourceOut,
     StreamPoint,
@@ -25,6 +26,7 @@ from app.schemas import (
 from app.services.analysis import INTENSITY_KEYS, RunRecord, classify_run
 from app.services.analysis_settings import get_analysis_settings
 from app.services.comparison import build_comparison
+from app.services.hr_zones import build_activity_zones
 from app.services.performance import refresh_activity_efforts
 
 router = APIRouter(prefix="/activities", tags=["activities"])
@@ -197,6 +199,14 @@ def get_streams(
         downsampled=downsampled,
         points=points,
     )
+
+
+@router.get("/{activity_id}/zones", response_model=HrZonesOut)
+def get_zones(activity_id: int, db: Session = Depends(get_db)) -> HrZonesOut:
+    zones = build_activity_zones(db, activity_id)
+    if zones is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    return zones
 
 
 def _detail(db: Session, activity_id: int) -> ActivityDetail:

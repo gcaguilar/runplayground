@@ -27,6 +27,7 @@ export const queryKeys = {
   activities: (params: ActivityListParams) => ["activities", params] as const,
   activity: (id: number | string) => ["activity", String(id)] as const,
   streams: (id: number | string) => ["activity", String(id), "streams"] as const,
+  zones: (id: number | string) => ["activity", String(id), "zones"] as const,
   comparison: (leftId: number | string, rightId: number | string) =>
     ["comparison", String(leftId), String(rightId)] as const,
   audit: ["audit"] as const,
@@ -130,6 +131,15 @@ export function useStreams(id: number | string | undefined) {
     queryFn: () => api.streams(id as number | string),
     enabled: id !== undefined && id !== "",
     staleTime: 5 * 60_000,
+  });
+}
+
+export function useActivityZones(id: number | string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.zones(id ?? "none"),
+    queryFn: () => api.zones(id as number | string),
+    enabled: enabled && id !== undefined && id !== "",
+    staleTime: 60_000,
   });
 }
 

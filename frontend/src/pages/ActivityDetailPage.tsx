@@ -20,6 +20,7 @@ import { ApiError } from "@/api/client";
 import type { Lap, SourceOut } from "@/api/client";
 import { useActivity, usePatchActivity, useStreams } from "@/api/queries";
 import { ActivityClassificationCard } from "@/components/ActivityClassificationCard";
+import { ActivityHrZonesCard } from "@/components/ActivityHrZonesCard";
 import { ActivityStreamChart } from "@/components/Charts";
 import { RouteMap } from "@/components/RouteMap";
 import { SportGlyph } from "@/components/SportGlyph";
@@ -298,6 +299,8 @@ export function ActivityDetailPage() {
       </section>
 
       <ActivityClassificationCard activity={data} />
+
+      <ActivityHrZonesCard activity={data} />
 
       <Card className="panel">
         <SectionHeading
