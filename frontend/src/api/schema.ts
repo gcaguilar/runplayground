@@ -159,6 +159,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/backups/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Backup */
+        get: operations["export_backup_api_v1_backups_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backups/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate Backup */
+        post: operations["validate_backup_api_v1_backups_validate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backups/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stage Restore */
+        post: operations["stage_restore_api_v1_backups_restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backups/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Backup Status */
+        get: operations["backup_status_api_v1_backups_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backups/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel Pending Restore */
+        delete: operations["cancel_pending_restore_api_v1_backups_pending_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/summary/weekly": {
         parameters: {
             query?: never;
@@ -1133,6 +1218,112 @@ export interface components {
             /** Authenticated */
             authenticated: boolean;
         };
+        /** BackupManifestOut */
+        BackupManifestOut: {
+            /** Format */
+            format: string;
+            /** Format Version */
+            format_version: number;
+            /** App Version */
+            app_version: string;
+            /** Alembic Revision */
+            alembic_revision: string;
+            /** Created At */
+            created_at: string;
+            /** Counts */
+            counts?: {
+                [key: string]: number;
+            };
+            /**
+             * File Count
+             * @default 0
+             */
+            file_count: number;
+            /**
+             * Total Bytes
+             * @default 0
+             */
+            total_bytes: number;
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** BackupPendingOut */
+        BackupPendingOut: {
+            /**
+             * Staged At
+             * Format: date-time
+             */
+            staged_at: string;
+            /** Original Filename */
+            original_filename: string;
+            /** Archive Size Bytes */
+            archive_size_bytes: number;
+            /** Archive Sha256 */
+            archive_sha256: string;
+            manifest?: components["schemas"]["BackupManifestOut"] | null;
+            /** Warnings */
+            warnings?: string[];
+        };
+        /** BackupRestoreOut */
+        BackupRestoreOut: {
+            /** Staged */
+            staged: boolean;
+            /** Message */
+            message: string;
+            pending?: components["schemas"]["BackupPendingOut"] | null;
+        };
+        /** BackupStatusOut */
+        BackupStatusOut: {
+            pending?: components["schemas"]["BackupPendingOut"] | null;
+            /** Last Restore */
+            last_restore?: {
+                [key: string]: unknown;
+            } | null;
+            /** Max Backup Mb */
+            max_backup_mb: number;
+            /** Max Restore Mb */
+            max_restore_mb: number;
+            /** Database Revision */
+            database_revision?: string | null;
+            /** Head Revision */
+            head_revision?: string | null;
+            /**
+             * Sync Running
+             * @default false
+             */
+            sync_running: boolean;
+            /** Active Ingest */
+            active_ingest?: {
+                [key: string]: unknown;
+            } | null;
+            /** Data Dir */
+            data_dir: string;
+        };
+        /** BackupValidationOut */
+        BackupValidationOut: {
+            /** Valid */
+            valid: boolean;
+            /** Errors */
+            errors?: string[];
+            /** Warnings */
+            warnings?: string[];
+            manifest?: components["schemas"]["BackupManifestOut"] | null;
+            /**
+             * Archive Size Bytes
+             * @default 0
+             */
+            archive_size_bytes: number;
+            /**
+             * Uncompressed Size Bytes
+             * @default 0
+             */
+            uncompressed_size_bytes: number;
+            /**
+             * File Count
+             * @default 0
+             */
+            file_count: number;
+        };
         /** Body_import_files_api_v1_imports_post */
         Body_import_files_api_v1_imports_post: {
             /** Files */
@@ -1140,6 +1331,16 @@ export interface components {
         };
         /** Body_import_garmin_export_zip_api_v1_imports_garmin_export_post */
         Body_import_garmin_export_zip_api_v1_imports_garmin_export_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_stage_restore_api_v1_backups_restore_post */
+        Body_stage_restore_api_v1_backups_restore_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_validate_backup_api_v1_backups_validate_post */
+        Body_validate_backup_api_v1_backups_validate_post: {
             /** File */
             file: string;
         };
@@ -3592,6 +3793,176 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ActivityStreams"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_backup_api_v1_backups_export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_backup_api_v1_backups_validate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_validate_backup_api_v1_backups_validate_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupValidationOut"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupValidationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stage_restore_api_v1_backups_restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_stage_restore_api_v1_backups_restore_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupRestoreOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    backup_status_api_v1_backups_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_pending_restore_api_v1_backups_pending_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
