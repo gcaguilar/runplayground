@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
+  AlertTriangle,
   Archive,
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Download,
+  FileSpreadsheet,
   ListChecks,
   Pencil,
   Plus,
@@ -20,6 +23,7 @@ import {
 import type {
   RegisteredPlan,
   RegisteredPlanCreate,
+  RegisteredPlanCsvPreview,
   RegisteredPlanDetail,
   RegisteredPlanSession,
   RegisteredPlanSessionCreate,
@@ -35,6 +39,7 @@ import {
   useCreateSession,
   useDeletePlan,
   useDeleteSession,
+  useImportPlanCsv,
   useLinkActivity,
   usePlan,
   usePlans,
@@ -42,6 +47,7 @@ import {
   useUpdatePlan,
   useUpdateSession,
 } from "@/api/planQueries";
+import { planApi } from "@/api/planClient";
 import { useActivities, useRaces } from "@/api/queries";
 import {
   Badge,
@@ -60,6 +66,7 @@ import {
   formatDate,
   formatDistance,
   formatDuration,
+  formatNumber,
   formatWeekRange,
   parseUtc,
   toISODate,
@@ -470,6 +477,15 @@ export function PlanPage() {
         </div>
       )}
 
+      <CsvPanel
+        plan={plan.data ?? null}
+        onImported={(imported) => {
+          setSelectedId(imported.id);
+          setNotice(t("plan.csv.imported"));
+        }}
+        onNotice={setNotice}
+      />
+
       {notice ? (
         <div className="form-success plan-notice" role="status">
           {notice}
@@ -481,6 +497,315 @@ export function PlanPage() {
 
       <p className="analysis-note">{t("plan.note")}</p>
     </div>
+  );
+}
+
+
+const CSV_TEMPLATE = [
+  "session_date,type,intensity,distance_km,duration_min,status,notes",
+  "2026-01-05,easy,easy,8,45,planned,Optional note",
+  "2026-01-06,rest,rest,,,planned,",
+  "",
+].join("\n");
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function CsvPanel({
+  plan,
+  onImported,
+  onNotice,
+}: {
+  plan: RegisteredPlanDetail | null;
+  onImported: (plan: RegisteredPlanDetail) => void;
+  onNotice: (message: string) => void;
+}) {
+  const { t, locale } = useI18n();
+  const validate = useImportPlanCsv();
+  const importPlan = useImportPlanCsv();
+  const [file, setFile] = useState<File | null>(null);
+  const [inputKey, setInputKey] = useState(0);
+  const [name, setName] = useState("");
+  const [activate, setActivate] = useState(false);
+  const [preview, setPreview] = useState<RegisteredPlanCsvPreview | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const previewRows = preview?.rows ?? [];
+  const previewErrors = preview?.errors ?? [];
+
+  const handleExport = async () => {
+    if (!plan) return;
+    setExporting(true);
+    try {
+      const { blob, filename } = await planApi.exportCsv(plan.id);
+      downloadBlob(blob, filename);
+      onNotice(t("plan.csv.exported"));
+    } catch (error) {
+      onNotice(error instanceof Error ? error.message : t("plan.csv.exportError"));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleFile = (selected: File | null) => {
+    setFile(selected);
+    setPreview(null);
+    setProblem(null);
+  };
+
+  const handleValidate = (event: FormEvent) => {
+    event.preventDefault();
+    if (!file) {
+      setProblem(t("plan.csv.fileRequired"));
+      return;
+    }
+    setProblem(null);
+    validate.mutate(
+      { file, name: name.trim() || undefined, dryRun: true },
+      {
+        onSuccess: (result) => {
+          if ("valid" in result) setPreview(result);
+          else setProblem(t("plan.csv.importError"));
+        },
+        onError: (error) =>
+          setProblem(error instanceof Error ? error.message : t("plan.csv.importError")),
+      },
+    );
+  };
+
+  const handleImport = () => {
+    if (!file || !preview?.valid) return;
+    setProblem(null);
+    importPlan.mutate(
+      { file, name: name.trim() || undefined, activate, dryRun: false },
+      {
+        onSuccess: (result) => {
+          if ("id" in result) {
+            onImported(result);
+            setFile(null);
+            setInputKey((value) => value + 1);
+            setName("");
+            setActivate(false);
+            setPreview(null);
+          } else {
+            setPreview(result);
+          }
+        },
+        onError: (error) =>
+          setProblem(error instanceof Error ? error.message : t("plan.csv.importError")),
+      },
+    );
+  };
+
+  return (
+    <Card className="panel plan-csv">
+      <SectionHeading
+        title={t("plan.csv.title")}
+        subtitle={t("plan.csv.subtitle")}
+        icon={FileSpreadsheet}
+        action={
+          <div className="plan-actions">
+            {plan ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={exporting}
+                onClick={() => void handleExport()}
+              >
+                <Download size={14} aria-hidden="true" />
+                {exporting ? t("plan.csv.exporting") : t("plan.csv.export")}
+              </Button>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                downloadBlob(
+                  new Blob([CSV_TEMPLATE], { type: "text/csv;charset=utf-8" }),
+                  t("plan.csv.templateName"),
+                )
+              }
+            >
+              <FileSpreadsheet size={14} aria-hidden="true" />
+              {t("plan.csv.template")}
+            </Button>
+          </div>
+        }
+      />
+
+      {!plan ? <p className="plan-csv__hint">{t("plan.csv.noPlan")}</p> : null}
+
+      <div className="plan-csv__grid">
+        <form className="plan-csv__form" onSubmit={handleValidate}>
+          <label className="plan-csv__file">
+            <span>{t("plan.csv.file")}</span>
+            <input
+              key={inputKey}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(event) => handleFile(event.target.files?.[0] ?? null)}
+            />
+            <small>{file ? file.name : t("plan.csv.noFile")}</small>
+          </label>
+          <label>
+            <span>{t("plan.csv.name")}</span>
+            <input
+              type="text"
+              value={name}
+              maxLength={255}
+              placeholder={t("plan.csv.namePlaceholder")}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+          <label className="plan-checkbox plan-csv__check">
+            <input
+              type="checkbox"
+              checked={activate}
+              onChange={(event) => setActivate(event.target.checked)}
+            />
+            {t("plan.csv.activate")}
+          </label>
+          {problem ? (
+            <p className="form-error plan-csv__problem" role="alert">
+              {problem}
+            </p>
+          ) : null}
+          <div className="plan-csv__actions">
+            <Button
+              variant="secondary"
+              size="sm"
+              type="submit"
+              loading={validate.isPending}
+              disabled={importPlan.isPending}
+            >
+              <FileSpreadsheet size={14} aria-hidden="true" />
+              {validate.isPending ? t("plan.csv.validating") : t("plan.csv.validate")}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              loading={importPlan.isPending}
+              disabled={!preview?.valid || validate.isPending}
+              onClick={handleImport}
+            >
+              <Upload size={14} aria-hidden="true" />
+              {importPlan.isPending ? t("plan.csv.importing") : t("plan.csv.import")}
+            </Button>
+          </div>
+          <p className="plan-csv__hint">{t("plan.csv.dryRunHint")}</p>
+        </form>
+
+        <div className="plan-csv__help">
+          <div>
+            <strong>{t("plan.csv.header")}</strong>
+            <code>session_date,type,intensity,distance_km,duration_min,status,notes</code>
+          </div>
+          <p>{t("plan.csv.units")}</p>
+          <p>{t("plan.csv.dateFormat")}</p>
+        </div>
+      </div>
+
+      {preview ? (
+        <div className="plan-csv__preview" aria-live="polite">
+          <div className="plan-csv__preview-head">
+            <div>
+              <strong>{t("plan.csv.previewTitle")}</strong>
+              <span>{t("plan.csv.previewPlan", { name: preview.plan_name })}</span>
+              {preview.start_date && preview.end_date ? (
+                <small>
+                  {t("plan.csv.previewRange", {
+                    start: formatDate(preview.start_date, locale),
+                    end: formatDate(preview.end_date, locale),
+                  })}
+                </small>
+              ) : null}
+            </div>
+            <Badge tone={preview.valid ? "success" : "danger"}>
+              {preview.valid ? t("plan.csv.valid") : t("plan.csv.invalid")}
+            </Badge>
+          </div>
+
+          <div className="plan-csv__counts">
+            <span>{t("plan.csv.previewRowCount", { count: preview.row_count })}</span>
+            <span>{t("plan.csv.errors", { count: previewErrors.length })}</span>
+          </div>
+
+          {previewErrors.length ? (
+            <div className="plan-csv__errors">
+              <strong>
+                <AlertTriangle size={13} aria-hidden="true" />
+                {t("plan.csv.errorsTitle")}
+              </strong>
+              <ul>
+                {previewErrors.map((error, index) => (
+                  <li key={`${error.line}-${index}`}>
+                    <span>{t("plan.csv.line", { line: error.line })}</span>
+                    {error.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {previewRows.length ? (
+            <div className="table-wrap plan-csv__table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t("plan.csv.tableLine")}</th>
+                    <th>{t("plan.csv.tableDate")}</th>
+                    <th>{t("plan.csv.tableType")}</th>
+                    <th>{t("plan.csv.tableIntensity")}</th>
+                    <th>{t("plan.csv.tableDistance")}</th>
+                    <th>{t("plan.csv.tableDuration")}</th>
+                    <th>{t("plan.csv.tableStatus")}</th>
+                    <th>{t("plan.csv.tableNotes")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewRows.map((row) => (
+                    <tr key={`${row.line}-${row.position}`}>
+                      <td>{row.line}</td>
+                      <td>{row.session_date}</td>
+                      <td>
+                        {SESSION_TYPE_KEYS[row.type]
+                          ? t(SESSION_TYPE_KEYS[row.type])
+                          : row.type}
+                      </td>
+                      <td>
+                        {INTENSITY_KEYS[row.intensity]
+                          ? t(INTENSITY_KEYS[row.intensity])
+                          : row.intensity}
+                      </td>
+                      <td>
+                        {row.distance_m == null
+                          ? "—"
+                          : formatNumber(row.distance_m / 1000, locale, 1)}
+                      </td>
+                      <td>
+                        {row.duration_s == null
+                          ? "—"
+                          : formatNumber(row.duration_s / 60, locale, 1)}
+                      </td>
+                      <td>{STATUS_KEYS[row.status] ? t(STATUS_KEYS[row.status]) : row.status}</td>
+                      <td className="plan-csv__notes">{row.notes ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
   );
 }
 
