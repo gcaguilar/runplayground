@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M13 — portability and operation.** The dashboard opens with the
+> **Status: M14 — goal lifecycle and archive.** The dashboard opens with the
 > current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -40,7 +40,10 @@ metric dump.
 > read adherence against those exact targets; while a plan is active it replaces
 > the suggested sessions in the calendar. The Backup page downloads a consistent
 > archive, validates an uploaded ZIP without touching live data, stages a restore
-> for the next startup and reports pending status. Polite in-app notifications
+> for the next startup and reports pending status. A goal can now be closed as
+> achieved, missed or cancelled with its actual time and activity; the closure
+> keeps the target and the prediction in force in an archive and frees the
+> distance for a new goal. Polite in-app notifications
 > announce completed syncs and imports.
 
 ## What works today
@@ -70,6 +73,13 @@ metric dump.
   actual race or best-effort results overlaid on the prediction history.
   Recommendations can be marked pending, in progress or completed, with a
   baseline score so later improvement, stability or decline is explicit.
+- **Goal lifecycle and archive**: an active goal can be closed as achieved,
+  missed or cancelled, optionally with the actual time, the activity that
+  produced it and a note. The closure is a final revision that keeps the target
+  and the prediction that was in force; the active goal is removed so the
+  distance is free for a new target. Closed goals stay visible in a
+  newest-first archive with the outcome against both the target and the
+  prediction, and never reappear as active.
 - **Association analysis**: weekly volume, sessions, longest run, hard
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
@@ -131,13 +141,16 @@ metric dump.
   HR ranges or small samples lower confidence instead of producing a trend.
 - **Calendar and race planning**: real activities, suggested sessions from the
   current plan and several named races in one Monday–Sunday grid. Races carry
-  priority A/B/C, an optional time goal, a location, notes and an optional link
-  to the activity that completed them. Planned races are the only stored M3
-  input; the calendar and its sessions are derived.
+  priority A/B/C, an optional time goal, a location, notes, a
+  planned/completed/cancelled status and an optional link to the activity that
+  completed them. Completed and cancelled races stay visible in the period; only
+  suggested and plan sessions count towards planned distance. Planned races are
+  the only stored M3 input; the calendar and its sessions are derived.
 - **Weekly and monthly reports**: totals, deltas, daily/weekly volume, load,
-  sessions by sport, goal gaps, races and period highlights. Each report opens
-  with a derived reading: main improvement, current limitation and suggested
-  action. Reports are built when requested and never persisted.
+  sessions by sport, goal gaps, races and period highlights. Race rows keep
+  their planned/completed/cancelled status, not only upcoming events. Each
+  report opens with a derived reading: main improvement, current limitation and
+  suggested action. Reports are built when requested and never persisted.
 - **Deduplication and provenance**: every activity records where it came
   from, when it was imported, its raw file hash and the parser version.
   Cross-format duplicates are merged instead of double-counted.
@@ -184,6 +197,14 @@ the prediction line, so the distance between what the model expected and what
 was actually run stays visible. Tracked actions store a baseline diagnostic
 score when they are created, so a later review can say whether the related
 dimension improved, stayed stable or got worse without claiming causality.
+
+Closing a goal is final. The app writes a revision marked achieved, missed or
+cancelled with the optional actual time, activity and note, then deletes the
+active target. That revision is the archive record: it keeps the target, the
+prediction and the 80% range that were in force, so a later change in fitness
+cannot rewrite what was expected. Because the active row is gone, the same
+distance can receive a new goal immediately, while the closure stays in the
+newest-first archive and never reappears as an active target.
 
 The association panel pairs each week of training with the fitness change
 observed in that week's snapshot. It reports Pearson's correlation and the
@@ -625,7 +646,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. |
 | **M11** | Analysis settings and manual corrections: persistent heart-rate/pace thresholds, classification mode and per-activity intensity override with RPE. |
 | **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. |
-| **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. **Current.** |
+| **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. |
+| **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. **Current.** |
 
 ## License and disclaimer
 
