@@ -1,13 +1,16 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BarChart, LineChart, ScatterChart } from "echarts/charts";
 import {
   AxisPointerComponent,
+  AriaComponent,
   DataZoomComponent,
   GridComponent,
+  LegendComponent,
   TooltipComponent,
 } from "echarts/components";
 import * as echarts from "echarts/core";
 import type { EChartsOption } from "echarts";
+import { LegacyGridContainLabel } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/esm/core";
 import { BarChart3, HeartPulse, TrendingUp } from "lucide-react";
@@ -27,6 +30,7 @@ import type {
   WeeklyDay,
 } from "@/api/client";
 import { useI18n, type MessageKey } from "@/i18n";
+import { useTheme } from "@/theme";
 import { EmptyState } from "@/components/ui";
 import {
   formatClock,
@@ -39,23 +43,143 @@ import {
   weekdayKeys,
 } from "@/lib/format";
 
-const TEXT = "#8d9b94";
-const GRID = "rgba(255,255,255,0.07)";
-const ACCENT = "#c9f56a";
-const ORANGE = "#ffab6b";
-const EARLY = "#7bc8ff";
-const PANEL = "rgba(15, 21, 18, 0.94)";
+type ChartPalette = {
+  text: string;
+  textStrong: string;
+  textMuted: string;
+  grid: string;
+  axisPointer: string;
+  border: string;
+  panel: string;
+  accent: string;
+  accentStrong: string;
+  accentDeep: string;
+  accentMuted: string;
+  accentSoft: string;
+  accentFillStart: string;
+  accentZero: string;
+  orange: string;
+  orangeFade: string;
+  orangeZero: string;
+  blue: string;
+  blueFade: string;
+  blueFillStart: string;
+  blueZero: string;
+  red: string;
+  violet: string;
+  animation: boolean;
+  distance: Record<"5k" | "10k" | "half_marathon" | "marathon", string>;
+};
+
+const DARK_PALETTE: ChartPalette = {
+  text: "#8d9b94",
+  textStrong: "#eef5f0",
+  textMuted: "#a9b5ae",
+  grid: "rgba(255,255,255,0.07)",
+  axisPointer: "rgba(255,255,255,0.025)",
+  border: "rgba(255,255,255,0.09)",
+  panel: "rgba(15, 21, 18, 0.94)",
+  accent: "#c9f56a",
+  accentStrong: "#dcff94",
+  accentDeep: "#769e38",
+  accentMuted: "rgba(201, 245, 106, 0.42)",
+  accentSoft: "rgba(201, 245, 106, 0.52)",
+  accentFillStart: "rgba(201, 245, 106, 0.20)",
+  accentZero: "rgba(201, 245, 106, 0)",
+  orange: "#ffab6b",
+  orangeFade: "rgba(255,171,107,0.16)",
+  orangeZero: "rgba(255,171,107,0)",
+  blue: "#7bc8ff",
+  blueFade: "rgba(123, 200, 255, 0.35)",
+  blueFillStart: "rgba(123, 200, 255, 0.20)",
+  blueZero: "rgba(123, 200, 255, 0)",
+  red: "#ff7b7b",
+  violet: "#b79bff",
+  animation: true,
+  distance: {
+    "5k": "#c9f56a",
+    "10k": "#7bc8ff",
+    half_marathon: "#ffab6b",
+    marathon: "#b79bff",
+  },
+};
+
+const LIGHT_PALETTE: ChartPalette = {
+  text: "#4f5f56",
+  textStrong: "#16231b",
+  textMuted: "#5f7166",
+  grid: "rgba(16, 36, 24, 0.14)",
+  axisPointer: "rgba(16, 36, 24, 0.05)",
+  border: "rgba(16, 36, 24, 0.18)",
+  panel: "#ffffff",
+  accent: "#3f6b12",
+  accentStrong: "#2c5108",
+  accentDeep: "#7ea53a",
+  accentMuted: "rgba(63, 107, 18, 0.45)",
+  accentSoft: "rgba(63, 107, 18, 0.55)",
+  accentFillStart: "rgba(63, 107, 18, 0.18)",
+  accentZero: "rgba(63, 107, 18, 0)",
+  orange: "#a34d00",
+  orangeFade: "rgba(163, 77, 0, 0.14)",
+  orangeZero: "rgba(163, 77, 0, 0)",
+  blue: "#0b6ba8",
+  blueFade: "rgba(11, 107, 168, 0.35)",
+  blueFillStart: "rgba(11, 107, 168, 0.18)",
+  blueZero: "rgba(11, 107, 168, 0)",
+  red: "#b42318",
+  violet: "#6a45c2",
+  animation: true,
+  distance: {
+    "5k": "#3f6b12",
+    "10k": "#0b6ba8",
+    half_marathon: "#a34d00",
+    marathon: "#6a45c2",
+  },
+};
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = (event: MediaQueryListEvent) => setReduced(event.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return reduced;
+}
+
+function useChartPalette(): ChartPalette {
+  const { resolved, printing } = useTheme();
+  const reduced = usePrefersReducedMotion();
+  return useMemo(() => {
+    const base = resolved === "light" || printing ? LIGHT_PALETTE : DARK_PALETTE;
+    return printing || reduced ? { ...base, animation: false } : base;
+  }, [printing, reduced, resolved]);
+}
 
 const chartOpts = { renderer: "canvas" as const };
+
+function ariaOption() {
+  return { enabled: true, decal: { show: false } };
+}
 
 echarts.use([
   BarChart,
   LineChart,
   ScatterChart,
   AxisPointerComponent,
+  AriaComponent,
   DataZoomComponent,
   GridComponent,
+  LegendComponent,
   TooltipComponent,
+  LegacyGridContainLabel,
   CanvasRenderer,
 ]);
 
@@ -70,6 +194,7 @@ type TooltipItem = {
 
 export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
   const { locale, units, t } = useI18n();
+  const palette = useChartPalette();
   const volumeUnit = units === "imperial" ? "mi" : "km";
   const values = days.map((day) =>
     Number(
@@ -83,15 +208,17 @@ export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 500,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 6, right: 10, top: 24, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(255,255,255,0.025)" } },
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        axisPointer: { type: "shadow", shadowStyle: { color: palette.axisPointer } },
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = Array.isArray(params) ? params : [params];
           const item = list[0] as TooltipItem | undefined;
@@ -102,8 +229,8 @@ export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
           const value = values[index] ?? 0;
           return `<div style="font-weight:700;margin-bottom:4px">${item.axisValueLabel ?? ""}</div>
             <div style="display:flex;align-items:center;gap:6px">
-              <span style="width:7px;height:7px;border-radius:2px;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("chart.distance")}</span>
+              <span style="width:7px;height:7px;border-radius:2px;background:${palette.accent};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("chart.distance")}</span>
               <strong style="margin-left:auto">${formatNumber(value, locale, value > 0 && value < 100 ? 2 : 1)} ${volumeUnit}</strong>
             </div>`;
         },
@@ -111,20 +238,20 @@ export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
       xAxis: {
         type: "category",
         data: weekdayKeys().map((key) => t(key)),
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
-        axisLabel: { color: TEXT, fontSize: 11, margin: 12, fontFamily: "Manrope Variable" },
+        axisLabel: { color: palette.text, fontSize: 11, margin: 12, fontFamily: "Manrope Variable" },
       },
       yAxis: {
         type: "value",
         splitNumber: 4,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatNumber(value, locale, 0),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -140,16 +267,16 @@ export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: ACCENT },
-                { offset: 1, color: "#769e38" },
+                { offset: 0, color: palette.accent },
+                { offset: 1, color: palette.accentDeep },
               ],
             },
           },
-          emphasis: { itemStyle: { color: "#dcff94" } },
+          emphasis: { itemStyle: { color: palette.accentStrong } },
         },
       ],
     }),
-    [days, locale, t, units, values, volumeUnit],
+    [days, locale, t, units, values, volumeUnit, palette],
   );
 
   if (total <= 0) {
@@ -170,13 +297,14 @@ export function WeeklyVolumeChart({ days }: { days: WeeklyDay[] }) {
       opts={chartOpts}
       style={{ height: 258, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
   const { locale, t, units } = useI18n();
+  const palette = useChartPalette();
   const paceUnit = units === "imperial" ? "mi" : "km";
 
   const series = useMemo(() => {
@@ -223,14 +351,15 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animation: false,
+      aria: ariaOption(),
       grid: { left: 10, right: 12, top: 28, bottom: 10, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           if (!list.length) return "";
@@ -244,20 +373,20 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
                 : `${formatNumber(value, locale)} bpm`;
             return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
               ${item.marker ?? ""}
-              <span style="color:#a9b5ae">${item.seriesName === "pace" ? t("detail.chart.pace") : t("detail.chart.hr")}</span>
+              <span style="color:${palette.textMuted}">${item.seriesName === "pace" ? t("detail.chart.pace") : t("detail.chart.hr")}</span>
               <strong style="margin-left:auto">${formatted}</strong>
             </div>`;
           });
-          return `<div style="font-family:JetBrains Mono Variable;font-size:11px;color:#a9b5ae">${formatClock(time)}</div>${rows.join("")}`;
+          return `<div style="font-family:JetBrains Mono Variable;font-size:11px;color:${palette.textMuted}">${formatClock(time)}</div>${rows.join("")}`;
         },
       },
       xAxis: {
         type: "value",
         min: 0,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => {
@@ -277,18 +406,18 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
           inverse: true,
           scale: true,
           axisLabel: {
-            color: ACCENT,
+            color: palette.accent,
             fontSize: 10,
             fontFamily: "JetBrains Mono Variable",
             formatter: (value: number) => formatPace(value, units, { suffix: false }),
           },
-          splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+          splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
         },
         {
           type: "value",
           scale: true,
           axisLabel: {
-            color: ORANGE,
+            color: palette.orange,
             fontSize: 10,
             fontFamily: "JetBrains Mono Variable",
             formatter: (value: number) => formatNumber(value, locale),
@@ -304,8 +433,8 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
           showSymbol: false,
           smooth: 0.18,
           connectNulls: true,
-          lineStyle: { color: ACCENT, width: 2 },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 2 },
+          itemStyle: { color: palette.accent },
           sampling: "lttb",
           yAxisIndex: 0,
           z: 3,
@@ -316,8 +445,8 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
           data: series.hrData,
           showSymbol: false,
           smooth: 0.25,
-          lineStyle: { color: ORANGE, width: 1.6, opacity: 0.9 },
-          itemStyle: { color: ORANGE },
+          lineStyle: { color: palette.orange, width: 1.6, opacity: 0.9 },
+          itemStyle: { color: palette.orange },
           areaStyle: {
             color: {
               type: "linear",
@@ -326,8 +455,8 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(255,171,107,0.16)" },
-                { offset: 1, color: "rgba(255,171,107,0)" },
+                { offset: 0, color: palette.orangeFade },
+                { offset: 1, color: palette.orangeZero },
               ],
             },
           },
@@ -338,7 +467,7 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
       ],
       dataZoom: [{ type: "inside", filterMode: "none" }],
     }),
-    [locale, paceUnit, series.hrData, series.paceData, t, units],
+    [locale, paceUnit, series.hrData, series.paceData, t, units, palette],
   );
 
   if (!series.hrData.length && !series.paceData.length) {
@@ -354,24 +483,27 @@ export function ActivityStreamChart({ points }: { points: StreamPoint[] }) {
       opts={chartOpts}
       style={{ height: 318, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 const DISTANCE_META = [
-  { key: "5k", label: "distance.5k" as const, color: "#c9f56a" },
-  { key: "10k", label: "distance.10k" as const, color: "#7bc8ff" },
-  { key: "half_marathon", label: "distance.half_marathon" as const, color: "#ffab6b" },
-  { key: "marathon", label: "distance.marathon" as const, color: "#b79bff" },
+  { key: "5k", label: "distance.5k" as const, color: "5k" as const },
+  { key: "10k", label: "distance.10k" as const, color: "10k" as const },
+  { key: "half_marathon", label: "distance.half_marathon" as const, color: "half_marathon" as const },
+  { key: "marathon", label: "distance.marathon" as const, color: "marathon" as const },
 ];
 
 export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[] }) {
   const { locale, t } = useI18n();
+  const palette = useChartPalette();
 
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 16, top: 28, bottom: 8, containLabel: true },
       legend: {
         top: 0,
@@ -379,15 +511,15 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
         icon: "roundRect",
         itemWidth: 9,
         itemHeight: 9,
-        textStyle: { color: TEXT, fontSize: 11, fontFamily: "Manrope Variable" },
+        textStyle: { color: palette.text, fontSize: 11, fontFamily: "Manrope Variable" },
       },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           if (!list.length) return "";
@@ -400,7 +532,7 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
                 if (!Number.isFinite(value)) return "";
                 return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
                   ${item.marker ?? ""}
-                  <span style="color:#a9b5ae">${item.seriesName ?? ""}</span>
+                  <span style="color:${palette.textMuted}">${item.seriesName ?? ""}</span>
                   <strong style="margin-left:auto">${formatClock(value)}</strong>
                 </div>`;
               })
@@ -411,10 +543,10 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
       xAxis: {
         type: "category",
         data: items.map((item) => formatDate(item.date, locale, { day: "numeric", month: "short" })),
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -425,12 +557,12 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
         inverse: true,
         scale: true,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatClock(value),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: DISTANCE_META.map((distance) => ({
         name: t(distance.label),
@@ -444,12 +576,12 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
         connectNulls: true,
         showSymbol: true,
         symbolSize: 5,
-        lineStyle: { color: distance.color, width: 2 },
-        itemStyle: { color: distance.color },
+        lineStyle: { color: palette.distance[distance.color], width: 2 },
+        itemStyle: { color: palette.distance[distance.color] },
         emphasis: { focus: "series" as const },
       })),
     }),
-    [items, locale, t],
+    [items, locale, t, palette],
   );
 
   if (!items.length) {
@@ -470,41 +602,44 @@ export function PerformanceHistoryChart({ items }: { items: PerformanceSnapshot[
       opts={chartOpts}
       style={{ height: 264, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
   const { locale, t } = useI18n();
+  const palette = useChartPalette();
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 6, right: 10, top: 18, bottom: 4, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [9, 11],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const item = list[0];
           if (!item) return "";
           const value = Number((item.value as [number, number] | undefined)?.[1]);
           return `<div style="font-weight:700;margin-bottom:2px">${item.axisValueLabel ?? ""}</div>
-            <span style="color:#a9b5ae">${t("performance.garmin.vo2max")}</span>
+            <span style="color:${palette.textMuted}">${t("performance.garmin.vo2max")}</span>
             <strong style="margin-left:8px">${formatNumber(value, locale, 1)}</strong>`;
         },
       },
       xAxis: {
         type: "category",
         data: points.map((point) => formatDate(point.date, locale, { day: "numeric", month: "short" })),
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -515,11 +650,11 @@ export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
         scale: true,
         splitNumber: 3,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -527,8 +662,8 @@ export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
           data: points.map((point) => point.value),
           showSymbol: false,
           smooth: 0.25,
-          lineStyle: { color: ACCENT, width: 2 },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 2 },
+          itemStyle: { color: palette.accent },
           areaStyle: {
             color: {
               type: "linear",
@@ -537,15 +672,15 @@ export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(201,245,106,0.20)" },
-                { offset: 1, color: "rgba(201,245,106,0)" },
+                { offset: 0, color: palette.accentFillStart },
+                { offset: 1, color: palette.accentZero },
               ],
             },
           },
         },
       ],
     }),
-    [locale, points, t],
+    [locale, points, t, palette],
   );
 
   if (points.length < 2) return null;
@@ -557,13 +692,14 @@ export function Vo2MaxChart({ points }: { points: GarminMetricPoint[] }) {
       opts={chartOpts}
       style={{ height: 150, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
   const { locale, t, units } = useI18n();
+  const palette = useChartPalette();
   const labels = load.weekly.map((point) =>
     formatDate(point.week_start, locale, { day: "numeric", month: "short" }),
   );
@@ -572,15 +708,17 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(255,255,255,0.025)" } },
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        axisPointer: { type: "shadow", shadowStyle: { color: palette.axisPointer } },
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const index = list[0]?.dataIndex ?? 0;
@@ -592,17 +730,17 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
             { day: "numeric", month: "short", year: "numeric" },
           )}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:2px;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("analysis.load.chartLoad")}</span>
+              <span style="width:7px;height:7px;border-radius:2px;background:${palette.accent};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("analysis.load.chartLoad")}</span>
               <strong style="margin-left:auto">${formatNumber(point.load, locale)}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("analysis.load.chartChronic")}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.orange};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("analysis.load.chartChronic")}</span>
               <strong style="margin-left:auto">${formatNumber(load.chronic_weekly, locale)}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="color:#a9b5ae">${t("analysis.load.chartDistance")}</span>
+              <span style="color:${palette.textMuted}">${t("analysis.load.chartDistance")}</span>
               <strong style="margin-left:auto">${formatDistance(
                 point.distance_m,
                 units,
@@ -611,7 +749,7 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
               )}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="color:#a9b5ae">${t("analysis.load.chartSessions")}</span>
+              <span style="color:${palette.textMuted}">${t("analysis.load.chartSessions")}</span>
               <strong style="margin-left:auto">${formatNumber(point.sessions, locale)}</strong>
             </div>`;
         },
@@ -619,10 +757,10 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
       xAxis: {
         type: "category",
         data: labels,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -632,12 +770,12 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
         type: "value",
         splitNumber: 4,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatNumber(value, locale),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -647,24 +785,24 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
             itemStyle: {
               borderRadius: [4, 4, 2, 2],
               color:
-                index === values.length - 1 ? ACCENT : "rgba(201, 245, 106, 0.42)",
+                index === values.length - 1 ? palette.accent : palette.accentMuted,
             },
           })),
           barWidth: "52%",
-          emphasis: { itemStyle: { color: "#dcff94" } },
+          emphasis: { itemStyle: { color: palette.accentStrong } },
         },
         {
           type: "line",
           data: values.map(() => load.chronic_weekly),
           showSymbol: false,
           silent: true,
-          lineStyle: { color: ORANGE, width: 1.4, type: "dashed", opacity: 0.8 },
-          itemStyle: { color: ORANGE },
+          lineStyle: { color: palette.orange, width: 1.4, type: "dashed", opacity: 0.8 },
+          itemStyle: { color: palette.orange },
           z: 3,
         },
       ],
     }),
-    [labels, load.chronic_weekly, load.weekly, locale, t, units, values],
+    [labels, load.chronic_weekly, load.weekly, locale, t, units, values, palette],
   );
 
   if (!values.some((value) => value > 0)) {
@@ -685,13 +823,14 @@ export function WeeklyLoadChart({ load }: { load: AnalysisLoad }) {
       opts={chartOpts}
       style={{ height: 248, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
   const { locale, t, units } = useI18n();
+  const palette = useChartPalette();
   const labels = weeks.map((week) =>
     formatDate(week.week_start, locale, { day: "numeric", month: "short" }),
   );
@@ -701,15 +840,17 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "shadow", shadowStyle: { color: "rgba(255,255,255,0.025)" } },
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        axisPointer: { type: "shadow", shadowStyle: { color: palette.axisPointer } },
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const index = list[0]?.dataIndex ?? 0;
@@ -721,19 +862,19 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
             { day: "numeric", month: "short", year: "numeric" },
           )}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:2px;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("chart.distance")}</span>
+              <span style="width:7px;height:7px;border-radius:2px;background:${palette.accent};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("chart.distance")}</span>
               <strong style="margin-left:auto">${formatDistance(week.distance_m, units, locale, {
                 digits: 1,
               })}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("progress.chart.load")}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.orange};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("progress.chart.load")}</span>
               <strong style="margin-left:auto">${formatNumber(week.load, locale)}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="color:#a9b5ae">${t("progress.chart.sessions")}</span>
+              <span style="color:${palette.textMuted}">${t("progress.chart.sessions")}</span>
               <strong style="margin-left:auto">${formatNumber(week.sessions, locale)}</strong>
             </div>`;
         },
@@ -741,10 +882,10 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
       xAxis: {
         type: "category",
         data: labels,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -755,12 +896,12 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
           type: "value",
           splitNumber: 4,
           axisLabel: {
-            color: TEXT,
+            color: palette.text,
             fontSize: 10,
             fontFamily: "JetBrains Mono Variable",
             formatter: (value: number) => formatNumber(value, locale),
           },
-          splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+          splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
         },
         {
           type: "value",
@@ -776,11 +917,11 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
             value,
             itemStyle: {
               borderRadius: [4, 4, 2, 2],
-              color: value > 0 ? "rgba(201, 245, 106, 0.52)" : "transparent",
+              color: value > 0 ? palette.accentSoft : "transparent",
             },
           })),
           barWidth: "58%",
-          emphasis: { itemStyle: { color: ACCENT } },
+          emphasis: { itemStyle: { color: palette.accent } },
         },
         {
           type: "line",
@@ -788,13 +929,13 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
           data: loads,
           showSymbol: false,
           smooth: true,
-          lineStyle: { color: ORANGE, width: 1.6, opacity: 0.9 },
-          itemStyle: { color: ORANGE },
+          lineStyle: { color: palette.orange, width: 1.6, opacity: 0.9 },
+          itemStyle: { color: palette.orange },
           z: 3,
         },
       ],
     }),
-    [distances, labels, loads, locale, t, units, weeks],
+    [distances, labels, loads, locale, t, units, weeks, palette],
   );
 
   if (!weeks.length || !distances.some((value) => value > 0)) {
@@ -815,13 +956,14 @@ export function ProgressWeeksChart({ weeks }: { weeks: ProgressWeek[] }) {
       opts={chartOpts}
       style={{ height: 252, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
   const { locale, t } = useI18n();
+  const palette = useChartPalette();
   const labels = points.map((point) =>
     formatDate(point.date, locale, { day: "numeric", month: "short" }),
   );
@@ -829,14 +971,16 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const index = list[0]?.dataIndex ?? 0;
@@ -848,14 +992,14 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
             { day: "numeric", month: "short", year: "numeric" },
           )}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("progress.fitness.chart")}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.accent};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("progress.fitness.chart")}</span>
               <strong style="margin-left:auto">${formatClock(point.time_s)}</strong>
             </div>
             ${
               point.low_s !== null && point.low_s !== undefined && point.high_s !== null && point.high_s !== undefined
                 ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-                    <span style="color:#a9b5ae">${t("performance.estimate.range")}</span>
+                    <span style="color:${palette.textMuted}">${t("performance.estimate.range")}</span>
                     <strong style="margin-left:auto">${formatClock(point.low_s)} – ${formatClock(point.high_s)}</strong>
                   </div>`
                 : ""
@@ -865,10 +1009,10 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
       xAxis: {
         type: "category",
         data: labels,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -879,12 +1023,12 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
         inverse: true,
         scale: true,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatClock(value),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -893,8 +1037,8 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
           data: points.map((point) => point.high_s ?? null),
           showSymbol: false,
           connectNulls: true,
-          lineStyle: { color: "rgba(123, 200, 255, 0.35)", width: 1, type: "dashed" },
-          itemStyle: { color: "rgba(123, 200, 255, 0.35)" },
+          lineStyle: { color: palette.blueFade, width: 1, type: "dashed" },
+          itemStyle: { color: palette.blueFade },
         },
         {
           name: t("performance.estimate.range"),
@@ -902,8 +1046,8 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
           data: points.map((point) => point.low_s ?? null),
           showSymbol: false,
           connectNulls: true,
-          lineStyle: { color: "rgba(123, 200, 255, 0.35)", width: 1, type: "dashed" },
-          itemStyle: { color: "rgba(123, 200, 255, 0.35)" },
+          lineStyle: { color: palette.blueFade, width: 1, type: "dashed" },
+          itemStyle: { color: palette.blueFade },
         },
         {
           name: t("progress.fitness.chart"),
@@ -912,8 +1056,8 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
           showSymbol: true,
           symbolSize: 5,
           smooth: true,
-          lineStyle: { color: ACCENT, width: 2.2 },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 2.2 },
+          itemStyle: { color: palette.accent },
           areaStyle: {
             color: {
               type: "linear",
@@ -922,15 +1066,15 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(201, 245, 106, 0.18)" },
-                { offset: 1, color: "rgba(201, 245, 106, 0)" },
+                { offset: 0, color: palette.accentFillStart },
+                { offset: 1, color: palette.accentZero },
               ],
             },
           },
         },
       ],
     }),
-    [labels, locale, points, t],
+    [labels, locale, points, t, palette],
   );
 
   if (!points.length) {
@@ -951,7 +1095,7 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
       opts={chartOpts}
       style={{ height: 252, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
@@ -966,6 +1110,7 @@ export function GoalTrendChart({
   targetTimeS: number;
 }) {
   const { locale, t } = useI18n();
+  const palette = useChartPalette();
   const dates = Array.from(
     new Set([...points.map((point) => point.date), ...results.map((item) => item.date)]),
   ).sort();
@@ -986,14 +1131,16 @@ export function GoalTrendChart({
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const first = list[0];
@@ -1005,16 +1152,16 @@ export function GoalTrendChart({
           const actuals = resultByDate.get(day) ?? [];
           const predictedRow = point
             ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-                <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
-                <span style="color:#a9b5ae">${t("tracking.goal.predicted")}</span>
+                <span style="width:7px;height:7px;border-radius:50%;background:${palette.accent};display:inline-block"></span>
+                <span style="color:${palette.textMuted}">${t("tracking.goal.predicted")}</span>
                 <strong style="margin-left:auto">${formatClock(point.predicted_s)}</strong>
               </div>`
             : "";
           const actualRows = actuals
             .map(
               (actual) => `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-                <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
-                <span style="color:#a9b5ae">${
+                <span style="width:7px;height:7px;border-radius:50%;background:${palette.orange};display:inline-block"></span>
+                <span style="color:${palette.textMuted}">${
                   actual.is_race
                     ? t("tracking.goal.result.race")
                     : t("tracking.goal.result.effort")
@@ -1033,10 +1180,10 @@ export function GoalTrendChart({
       xAxis: {
         type: "category",
         data: labels,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -1047,12 +1194,12 @@ export function GoalTrendChart({
         inverse: true,
         scale: true,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatClock(value),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -1062,17 +1209,17 @@ export function GoalTrendChart({
           showSymbol: predicted.length <= 40,
           symbolSize: 4,
           connectNulls: true,
-          lineStyle: { color: ACCENT, width: 2.2 },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 2.2 },
+          itemStyle: { color: palette.accent },
           markLine: {
             silent: true,
             symbol: "none",
             label: {
-              color: TEXT,
+              color: palette.text,
               fontSize: 9,
               formatter: t("tracking.goal.target"),
             },
-            lineStyle: { color: ORANGE, width: 1.4, type: "dashed" },
+            lineStyle: { color: palette.orange, width: 1.4, type: "dashed" },
             data: [{ yAxis: targetTimeS }],
           },
         },
@@ -1082,15 +1229,15 @@ export function GoalTrendChart({
           data: resultPoints,
           symbolSize: 8,
           itemStyle: {
-            color: ORANGE,
-            borderColor: "#0f1512",
+            color: palette.orange,
+            borderColor: palette.panel,
             borderWidth: 1,
           },
           z: 6,
         },
       ],
     }),
-    [dates, labels, locale, pointByDate, predicted, resultByDate, resultPoints, t, targetTimeS],
+    [dates, labels, locale, pointByDate, predicted, resultByDate, resultPoints, t, targetTimeS, palette],
   );
 
   if (dates.length < 2 && results.length === 0) return null;
@@ -1102,13 +1249,14 @@ export function GoalTrendChart({
       opts={chartOpts}
       style={{ height: 190, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function PaceHrChart({ group }: { group: PaceHrGroup }) {
   const { locale, t, units } = useI18n();
+  const palette = useChartPalette();
   const points = group.points ?? [];
   const earlyLine = group.early_line ?? [];
   const recentLine = group.recent_line ?? [];
@@ -1130,14 +1278,16 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 10, right: 18, top: 30, bottom: 10, containLabel: true },
       tooltip: {
         trigger: "item",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const item = (Array.isArray(params) ? params[0] : params) as TooltipItem | undefined;
           const data = item?.data as
@@ -1146,13 +1296,13 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
           if (!item || !data || !Array.isArray(data.value)) return "";
           const [hr, pace] = data.value;
           return `<div style="font-weight:700;margin-bottom:3px">${data.name ?? ""}</div>
-            <div style="color:#a9b5ae">${formatDate(data.date, locale)}</div>
+            <div style="color:${palette.textMuted}">${formatDate(data.date, locale)}</div>
             <div style="display:flex;justify-content:space-between;gap:16px;margin-top:5px">
-              <span style="color:#a9b5ae">${t("progress.paceHr.chartHr")}</span>
+              <span style="color:${palette.textMuted}">${t("progress.paceHr.chartHr")}</span>
               <strong>${formatNumber(hr, locale)} bpm</strong>
             </div>
             <div style="display:flex;justify-content:space-between;gap:16px;margin-top:3px">
-              <span style="color:#a9b5ae">${t("progress.paceHr.chartPace")}</span>
+              <span style="color:${palette.textMuted}">${t("progress.paceHr.chartPace")}</span>
               <strong>${formatPace(pace, units)}</strong>
             </div>`;
         },
@@ -1160,32 +1310,32 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
       xAxis: {
         type: "value",
         name: t("progress.paceHr.chartHr"),
-        nameTextStyle: { color: TEXT, fontSize: 9 },
+        nameTextStyle: { color: palette.text, fontSize: 9 },
         min: Math.max(80, Number(group.hr_min) - 6),
         max: Number(group.hr_max) + 6,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatNumber(value, locale),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       yAxis: {
         type: "value",
         inverse: true,
         scale: true,
         name: t("progress.paceHr.chartPace"),
-        nameTextStyle: { color: TEXT, fontSize: 9 },
+        nameTextStyle: { color: palette.text, fontSize: 9 },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatPace(value, units, { suffix: false }),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -1193,14 +1343,14 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
           type: "scatter",
           data: early,
           symbolSize: 8,
-          itemStyle: { color: EARLY, opacity: 0.75 },
+          itemStyle: { color: palette.blue, opacity: 0.75 },
         },
         {
           name: t("progress.paceHr.recent"),
           type: "scatter",
           data: recent,
           symbolSize: 9,
-          itemStyle: { color: ACCENT },
+          itemStyle: { color: palette.accent },
         },
         {
           name: t("progress.paceHr.early"),
@@ -1208,8 +1358,8 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
           data: earlyLine.map((line) => [line.hr, line.pace_s_per_km]),
           showSymbol: false,
           silent: true,
-          lineStyle: { color: EARLY, width: 1.5, type: "dashed", opacity: 0.7 },
-          itemStyle: { color: EARLY },
+          lineStyle: { color: palette.blue, width: 1.5, type: "dashed", opacity: 0.7 },
+          itemStyle: { color: palette.blue },
         },
         {
           name: t("progress.paceHr.recent"),
@@ -1217,12 +1367,12 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
           data: recentLine.map((line) => [line.hr, line.pace_s_per_km]),
           showSymbol: false,
           silent: true,
-          lineStyle: { color: ACCENT, width: 1.8, type: "dashed" },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 1.8, type: "dashed" },
+          itemStyle: { color: palette.accent },
         },
       ],
     }),
-    [early, earlyLine, group.hr_max, group.hr_min, locale, recent, recentLine, t, units],
+    [early, earlyLine, group.hr_max, group.hr_min, locale, recent, recentLine, t, units, palette],
   );
 
   if (!points.length) return null;
@@ -1234,25 +1384,28 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
       opts={chartOpts}
       style={{ height: 300, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] }) {
   const { units, t } = useI18n();
+  const palette = useChartPalette();
   const labels = splits.map((split) => `${split.index}`);
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 22, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const index = list[0]?.dataIndex ?? 0;
@@ -1262,13 +1415,13 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
             km: split.index,
           })}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("compare.chart.left")}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.accent};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("compare.chart.left")}</span>
               <strong style="margin-left:auto">${formatPace(split.left_pace_s_per_km, units)}</strong>
             </div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t("compare.chart.right")}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.orange};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t("compare.chart.right")}</span>
               <strong style="margin-left:auto">${formatPace(split.right_pace_s_per_km, units)}</strong>
             </div>`;
         },
@@ -1277,11 +1430,11 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
         type: "category",
         data: labels,
         name: t("compare.chart.kmAxis"),
-        nameTextStyle: { color: TEXT, fontSize: 10 },
-        axisLine: { lineStyle: { color: GRID } },
+        nameTextStyle: { color: palette.text, fontSize: 10 },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
         },
@@ -1291,12 +1444,12 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
         inverse: true,
         scale: true,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => formatPace(value, units, { suffix: false }),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -1306,8 +1459,8 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
           showSymbol: true,
           symbolSize: 4,
           connectNulls: true,
-          lineStyle: { color: ACCENT, width: 2 },
-          itemStyle: { color: ACCENT },
+          lineStyle: { color: palette.accent, width: 2 },
+          itemStyle: { color: palette.accent },
         },
         {
           name: t("compare.chart.right"),
@@ -1316,12 +1469,12 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
           showSymbol: true,
           symbolSize: 4,
           connectNulls: true,
-          lineStyle: { color: ORANGE, width: 2 },
-          itemStyle: { color: ORANGE },
+          lineStyle: { color: palette.orange, width: 2 },
+          itemStyle: { color: palette.orange },
         },
       ],
     }),
-    [labels, splits, t, units],
+    [labels, splits, t, units, palette],
   );
 
   if (splits.length < 2) return null;
@@ -1333,13 +1486,14 @@ export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] })
       opts={chartOpts}
       style={{ height: 240, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }
 
 export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
   const { locale, units, t } = useI18n();
+  const palette = useChartPalette();
   const points = metric.points ?? [];
   const labels = points.map((point) =>
     formatDate(point.date, locale, { day: "numeric", month: "short" }),
@@ -1360,14 +1514,16 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
   const option = useMemo<EChartsOption>(
     () => ({
       animationDuration: 450,
+      animation: palette.animation,
+      aria: ariaOption(),
       grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
       tooltip: {
         trigger: "axis",
-        backgroundColor: PANEL,
-        borderColor: "rgba(255,255,255,0.09)",
+        backgroundColor: palette.panel,
+        borderColor: palette.border,
         borderWidth: 1,
         padding: [10, 12],
-        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        textStyle: { color: palette.textStrong, fontFamily: "Manrope Variable", fontSize: 12 },
         formatter: (params: unknown) => {
           const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
           const item = list[0];
@@ -1381,8 +1537,8 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
             { day: "numeric", month: "short", year: "numeric" },
           )}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${EARLY};display:inline-block"></span>
-              <span style="color:#a9b5ae">${t(`recovery.metric.${metric.key}` as MessageKey)}</span>
+              <span style="width:7px;height:7px;border-radius:50%;background:${palette.blue};display:inline-block"></span>
+              <span style="color:${palette.textMuted}">${t(`recovery.metric.${metric.key}` as MessageKey)}</span>
               <strong style="margin-left:auto">${formatRecoveryValue(
                 metric.key,
                 point.value,
@@ -1395,10 +1551,10 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
       xAxis: {
         type: "category",
         data: labels,
-        axisLine: { lineStyle: { color: GRID } },
+        axisLine: { lineStyle: { color: palette.grid } },
         axisTick: { show: false },
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 9.5,
           fontFamily: "JetBrains Mono Variable",
           hideOverlap: true,
@@ -1409,12 +1565,12 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
         scale: true,
         splitNumber: 4,
         axisLabel: {
-          color: TEXT,
+          color: palette.text,
           fontSize: 10,
           fontFamily: "JetBrains Mono Variable",
           formatter: (value: number) => axisValue(value),
         },
-        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+        splitLine: { lineStyle: { color: palette.grid, type: "dashed" } },
       },
       series: [
         {
@@ -1423,8 +1579,8 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
           showSymbol: values.length <= 45,
           symbolSize: 4,
           smooth: 0.2,
-          lineStyle: { color: EARLY, width: 2.2 },
-          itemStyle: { color: EARLY },
+          lineStyle: { color: palette.blue, width: 2.2 },
+          itemStyle: { color: palette.blue },
           areaStyle: {
             color: {
               type: "linear",
@@ -1433,15 +1589,15 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(123, 200, 255, 0.20)" },
-                { offset: 1, color: "rgba(123, 200, 255, 0)" },
+                { offset: 0, color: palette.blueFillStart },
+                { offset: 1, color: palette.blueZero },
               ],
             },
           },
         },
       ],
     }),
-    [labels, locale, metric.key, points, t, units, values],
+    [labels, locale, metric.key, points, t, units, values, palette],
   );
 
   if (points.length < 2) {
@@ -1462,7 +1618,7 @@ export function RecoveryTrendChart({ metric }: { metric: RecoveryMetric }) {
       opts={chartOpts}
       style={{ height: 260, width: "100%" }}
       notMerge
-      lazyUpdate
+      lazyUpdate={false}
     />
   );
 }

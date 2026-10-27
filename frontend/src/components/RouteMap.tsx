@@ -79,7 +79,7 @@ export function RouteMap({ points }: { points: StreamPoint[] }) {
             <path
               d="M 42 0 L 0 0 0 42"
               fill="none"
-              stroke="rgba(255,255,255,0.045)"
+              stroke="var(--line)"
               strokeWidth="1"
             />
           </pattern>
@@ -95,7 +95,7 @@ export function RouteMap({ points }: { points: StreamPoint[] }) {
         <path
           d={geometry.path}
           fill="none"
-          stroke="rgba(201,245,106,0.13)"
+          stroke="rgb(var(--accent-rgb) / 0.18)"
           strokeWidth="11"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -103,14 +103,14 @@ export function RouteMap({ points }: { points: StreamPoint[] }) {
         <path
           d={geometry.path}
           fill="none"
-          stroke="#c9f56a"
+          stroke="var(--accent)"
           strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
           filter="url(#route-glow)"
         />
-        <circle cx={geometry.start.x} cy={geometry.start.y} r="8" fill="#0d1210" stroke="#c9f56a" strokeWidth="3" />
-        <circle cx={geometry.end.x} cy={geometry.end.y} r="8" fill="#c9f56a" stroke="#0d1210" strokeWidth="3" />
+        <circle cx={geometry.start.x} cy={geometry.start.y} r="8" fill="var(--surface)" stroke="var(--accent)" strokeWidth="3" />
+        <circle cx={geometry.end.x} cy={geometry.end.y} r="8" fill="var(--accent)" stroke="var(--surface)" strokeWidth="3" />
       </svg>
       <div className="route-map__legend">
         <span>

@@ -8,6 +8,23 @@
       name="description"
       content="Run — panel personal de entrenamiento. Tus datos de Garmin, en tu servidor."
     />
+    <script>
+      // Apply the stored theme before the first paint to avoid a dark flash.
+      (() => {
+        try {
+          const stored = localStorage.getItem("run.theme");
+          const light = window.matchMedia("(prefers-color-scheme: light)").matches;
+          const theme =
+            stored === "light" || stored === "dark" ? stored : light ? "light" : "dark";
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", theme === "light" ? "#f4f7f0" : "#080b0a");
+        } catch {
+          // The React provider applies the theme once the app boots.
+        }
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Run — Panel de entrenamiento</title>
   </head>
