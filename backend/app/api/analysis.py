@@ -10,10 +10,15 @@ from app.schemas import (
     AnalysisSettingsOut,
     AnalysisSettingsUpdate,
     DiagnosticsOverview,
+    DiagnosticsTrendOut,
     TrainingPlan,
 )
 from app.services.analysis_settings import get_analysis_settings, put_analysis_settings
-from app.services.diagnostics import build_diagnostics, build_training_plan
+from app.services.diagnostics import (
+    build_diagnostics,
+    build_diagnostics_trend,
+    build_training_plan,
+)
 from app.services.performance import ensure_efforts
 
 router = APIRouter(tags=["analysis"])
@@ -26,6 +31,15 @@ def diagnostics_overview(
 ) -> DiagnosticsOverview:
     ensure_efforts(db)
     return build_diagnostics(db, tz_offset_minutes=tz_offset_minutes)
+
+
+@router.get("/diagnostics/trend", response_model=DiagnosticsTrendOut)
+def diagnostics_trend(
+    tz_offset_minutes: int = Query(0, ge=-14 * 60, le=14 * 60),
+    db: Session = Depends(get_db),
+) -> DiagnosticsTrendOut:
+    ensure_efforts(db)
+    return build_diagnostics_trend(db, tz_offset_minutes=tz_offset_minutes)
 
 
 @router.get("/training", response_model=TrainingPlan)

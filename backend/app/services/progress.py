@@ -631,7 +631,7 @@ def build_progress(
 ) -> ProgressOverview:
     reference = now or utcnow()
     offset = timedelta(minutes=tz_offset_minutes)
-    days = max(30, min(days, 730))
+    days = max(7, min(days, 730))
     today = _local_date(reference, offset)
     start = today - timedelta(days=days - 1)
     previous_end = start - timedelta(days=1)

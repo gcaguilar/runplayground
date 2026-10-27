@@ -601,6 +601,38 @@ class DiagnosticsOverview(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+TrendDirection = Literal["improving", "stable", "worsening", "unknown"]
+
+
+class TrendPointOut(ApiModel):
+    window_days: int
+    window_weeks: int
+    score: float | None = None
+    status: str
+    confidence: str
+    confidence_score: float | None = None
+    delta: float | None = None
+
+
+class TrendSeriesOut(ApiModel):
+    key: str
+    windows: list[TrendPointOut]
+    current: TrendPointOut
+    delta: float | None = None
+    trend: TrendDirection = "unknown"
+
+
+class DiagnosticsTrendOut(ApiModel):
+    generated_at: datetime
+    model_version: str
+    current_window_days: int
+    windows: list[int]
+    dimensions: list[TrendSeriesOut]
+    overall: TrendSeriesOut
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class TrainingFocusOut(ApiModel):
     dimension_key: str
     priority: int

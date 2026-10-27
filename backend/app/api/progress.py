@@ -40,7 +40,7 @@ def _check_activity(db: Session, activity_id: int | None) -> None:
 
 @router.get("/progress", response_model=ProgressOverview)
 def progress_overview(
-    days: int = Query(180, ge=30, le=730),
+    days: int = Query(180, ge=7, le=730),
     tz_offset_minutes: int = Query(0, ge=-14 * 60, le=14 * 60),
     db: Session = Depends(get_db),
 ) -> ProgressOverview:
