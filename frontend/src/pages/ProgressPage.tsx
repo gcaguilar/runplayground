@@ -123,7 +123,7 @@ const HIGHLIGHT_KEYS: Record<string, MessageKey> = {
   fastest_5k: "progress.highlight.fastest_5k",
 };
 
-const WINDOWS = [90, 180, 365] as const;
+const WINDOWS = [28, 56, 84, 180, 365, 730] as const;
 
 const DISTANCE_PRESETS = [
   { key: "5k", meters: 5000, label: "distance.5k" as MessageKey },
@@ -200,19 +200,6 @@ export function ProgressPage() {
         description={t("progress.page.subtitle")}
         actions={
           <div className="progress-actions">
-            <div className="segmented" role="group" aria-label={t("progress.window.label")}>
-              {WINDOWS.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={cn(days === value && "is-active")}
-                  aria-pressed={days === value}
-                  onClick={() => setDays(value)}
-                >
-                  {t(`progress.window.${value}` as MessageKey)}
-                </button>
-              ))}
-            </div>
             <Button
               variant="secondary"
               size="sm"
@@ -237,6 +224,27 @@ export function ProgressPage() {
           </div>
         }
       />
+
+      <div className="progress-toolbar">
+        <span className="progress-toolbar__label">{t("progress.window.label")}</span>
+        <div
+          className="segmented progress-windows"
+          role="group"
+          aria-label={t("progress.window.label")}
+        >
+          {WINDOWS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={cn(days === value && "is-active")}
+              aria-pressed={days === value}
+              onClick={() => setDays(value)}
+            >
+              {t(`progress.window.${value}` as MessageKey)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <AnalysisWarnings warnings={data.warnings} />
 
@@ -307,7 +315,7 @@ export function ProgressPage() {
         </Card>
       </section>
 
-      <PaceHrPanel days={days} />
+      <PaceHrPanel days={Math.max(30, days)} />
 
       <section className="progress-duo">
         <Card className="panel progress-consistency">

@@ -38,6 +38,7 @@ export const queryKeys = {
   goalArchive: ["performance", "goals", "archive"] as const,
   performanceReference: ["performance", "reference"] as const,
   diagnostics: ["diagnostics"] as const,
+  diagnosticsTrend: ["diagnostics", "trend"] as const,
   analysisSettings: ["analysis", "settings"] as const,
   training: ["training"] as const,
   adherence: (weeks: number) => ["adherence", weeks] as const,
@@ -277,6 +278,14 @@ export function useDiagnostics() {
   return useQuery({
     queryKey: queryKeys.diagnostics,
     queryFn: api.diagnostics,
+    staleTime: 60_000,
+  });
+}
+
+export function useDiagnosticsTrend() {
+  return useQuery({
+    queryKey: queryKeys.diagnosticsTrend,
+    queryFn: api.diagnosticsTrend,
     staleTime: 60_000,
   });
 }

@@ -238,10 +238,12 @@ export function DimensionCard({
   dimension,
   locale,
   units,
+  id,
 }: {
   dimension: AnalysisDimension;
   locale: Locale;
   units: Units;
+  id?: string;
 }) {
   const { t } = useI18n();
   const meta = DIMENSION_META[dimension.key];
@@ -252,6 +254,7 @@ export function DimensionCard({
 
   return (
     <Card
+      id={id}
       className="dimension-card"
       style={{ ["--dimension-accent" as string]: meta?.color ?? "var(--accent)" }}
     >
