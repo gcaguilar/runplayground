@@ -290,6 +290,35 @@ class RaceGoal(Base):
     )
 
 
+class PlannedRace(Base):
+    """A race the athlete intends to run, with its own target and priority.
+
+    ``race_goals`` remains the canonical goal per standard distance used by the
+    prediction models. Planned races add the calendar view: several named
+    events, A/B/C priorities and an optional link to the activity that
+    eventually completes them.
+    """
+
+    __tablename__ = "planned_races"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    race_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    distance_m: Mapped[float] = mapped_column(Float, nullable=False)
+    goal_time_s: Mapped[float | None] = mapped_column(Float)
+    priority: Mapped[str] = mapped_column(String(1), default="B", nullable=False)
+    location: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), default="planned", nullable=False)
+    activity_id: Mapped[int | None] = mapped_column(
+        ForeignKey("activities.id", ondelete="SET NULL"), index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+
 class PerformanceSnapshot(Base):
     """One prediction set per day, used to draw the evolution over time."""
 
