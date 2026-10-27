@@ -22,6 +22,7 @@ from app.api import (
     comparables,
     imports,
     performance,
+    plans,
     progress,
     recovery,
     summary,
@@ -124,6 +125,7 @@ api.include_router(adherence.router)
 api.include_router(recovery.router)
 api.include_router(comparables.router)
 api.include_router(briefing.router)
+api.include_router(plans.router)
 app.include_router(api)
 
 

@@ -22,6 +22,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -418,4 +419,99 @@ class ExternalMetric(Base):
             name="uq_external_metric_source_metric_date_distance",
         ),
         Index("ix_external_metrics_metric_date_lookup", "metric", "metric_date"),
+    )
+
+
+class TrainingPlan(Base):
+    """A registered training plan with explicit sessions and dates (M12).
+
+    Unlike the reconstructed suggested plan, this is user-owned data: every
+    session has a date, a type and an optional target. Only one plan can be
+    active at a time; a SQLite partial unique index enforces that rule while
+    still allowing any number of inactive or archived plans.
+    """
+
+    __tablename__ = "training_plans"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    goal_race_id: Mapped[int | None] = mapped_column(
+        ForeignKey("planned_races.id", ondelete="SET NULL"), index=True
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    parent_plan_id: Mapped[int | None] = mapped_column(
+        ForeignKey("training_plans.id", ondelete="SET NULL")
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime)
+    source: Mapped[str] = mapped_column(String(20), default="manual", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+    sessions: Mapped[list[TrainingPlanSession]] = relationship(
+        back_populates="plan",
+        cascade="all, delete-orphan",
+        order_by=(
+            "TrainingPlanSession.session_date, TrainingPlanSession.position, TrainingPlanSession.id"
+        ),
+        lazy="selectin",
+    )
+    goal_race: Mapped[PlannedRace | None] = relationship(lazy="joined")
+
+    __table_args__ = (
+        Index(
+            "uq_training_plans_single_active",
+            "is_active",
+            unique=True,
+            sqlite_where=text("is_active = 1"),
+        ),
+    )
+
+
+class TrainingPlanSession(Base):
+    """One dated session inside a registered plan.
+
+    ``status`` is the plan decision (planned, completed, skipped), while the
+    presence of ``activity_id`` records the measured session that fulfilled it.
+    An activity can only satisfy one planned session.
+    """
+
+    __tablename__ = "training_plan_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plan_id: Mapped[int] = mapped_column(
+        ForeignKey("training_plans.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    session_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    type: Mapped[str] = mapped_column(String(30), nullable=False)
+    intensity: Mapped[str] = mapped_column(String(20), default="easy", nullable=False)
+    distance_m: Mapped[float | None] = mapped_column(Float)
+    duration_s: Mapped[float | None] = mapped_column(Float)
+    status: Mapped[str] = mapped_column(String(20), default="planned", nullable=False)
+    activity_id: Mapped[int | None] = mapped_column(
+        ForeignKey("activities.id", ondelete="SET NULL"), index=True
+    )
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+    plan: Mapped[TrainingPlan] = relationship(back_populates="sessions")
+    activity: Mapped[Activity | None] = relationship(lazy="joined")
+
+    __table_args__ = (
+        Index("ix_training_plan_sessions_plan_date", "plan_id", "session_date", "position"),
+        Index(
+            "uq_training_plan_sessions_activity",
+            "activity_id",
+            unique=True,
+            sqlite_where=text("activity_id IS NOT NULL"),
+        ),
     )

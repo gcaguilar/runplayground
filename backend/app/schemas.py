@@ -746,16 +746,27 @@ class PlannedRaceUpdate(ApiModel):
 class CalendarEntryOut(ApiModel):
     id: str
     date: Date
-    kind: Literal["activity", "race", "session"]
+    kind: Literal["activity", "race", "session", "plan"]
     title: str
     sport: str | None = None
     activity_id: int | None = None
     race_id: int | None = None
+    plan_id: int | None = None
+    session_id: int | None = None
     distance_m: float | None = None
     duration_s: float | None = None
     intensity: str | None = None
     status: str | None = None
     is_race: bool = False
+
+
+class CalendarActivePlanOut(ApiModel):
+    id: int
+    name: str
+    start_date: date
+    end_date: date
+    goal_race_id: int | None = None
+    goal_race_name: str | None = None
 
 
 class CalendarDayOut(ApiModel):
@@ -777,6 +788,7 @@ class CalendarView(ApiModel):
     end: date
     today: date
     weeks: list[CalendarWeekOut]
+    active_plan: CalendarActivePlanOut | None = None
 
 
 class ProgressOverview(ApiModel):
@@ -796,11 +808,31 @@ class ProgressOverview(ApiModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class AdherenceSessionItemOut(ApiModel):
+    session_id: int | None = None
+    date: date
+    type: str
+    intensity: str
+    status: str
+    outcome: Literal["completed", "skipped", "missed", "pending"]
+    distance_low_m: float | None = None
+    distance_high_m: float | None = None
+    duration_low_s: float | None = None
+    duration_high_s: float | None = None
+    actual_distance_m: float | None = None
+    actual_duration_s: float | None = None
+    activity_id: int | None = None
+    compliance_pct: float | None = None
+
+
 class AdherenceWeekOut(ApiModel):
     week_start: date
     phase: str
     status: str
     score: float | None = None
+    basis: Literal["registered", "suggested"] = "suggested"
+    plan_id: int | None = None
+    plan_name: str | None = None
     volume_actual_m: float
     volume_low_m: float
     volume_high_m: float
@@ -818,8 +850,13 @@ class AdherenceWeekOut(ApiModel):
     rest_status: str
     sessions_actual: int
     sessions_planned: int
+    sessions_completed: int = 0
+    sessions_skipped: int = 0
+    sessions_missed: int = 0
+    completion_rate: float | None = None
     active_days: int
     reasons: list[str] = Field(default_factory=list)
+    session_items: list[AdherenceSessionItemOut] = Field(default_factory=list)
 
 
 class AdherenceSummaryOut(ApiModel):
@@ -832,6 +869,10 @@ class AdherenceSummaryOut(ApiModel):
     long_run_ratio: float | None = None
     quality_ratio: float | None = None
     rest_ratio: float | None = None
+    sessions_completed: int = 0
+    sessions_skipped: int = 0
+    sessions_missed: int = 0
+    completion_rate: float | None = None
 
 
 class AdherenceOverview(ApiModel):
@@ -840,6 +881,11 @@ class AdherenceOverview(ApiModel):
     weeks: int
     status: str
     current_week_start: date
+    basis: Literal["registered", "suggested", "mixed"] = "suggested"
+    plan_id: int | None = None
+    plan_name: str | None = None
+    registered_weeks: int = 0
+    suggested_weeks: int = 0
     summary: AdherenceSummaryOut
     items: list[AdherenceWeekOut] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
