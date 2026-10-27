@@ -35,6 +35,8 @@ export type PerformanceEffort = Schemas["EffortOut"];
 export type FitnessAnchor = Schemas["FitnessAnchorOut"];
 export type PerformanceGoal = Schemas["GoalOut"];
 export type GoalUpsert = Schemas["GoalUpsert"];
+export type GoalArchive = Schemas["GoalArchiveOut"];
+export type GoalClose = Schemas["GoalCloseRequest"];
 export type PerformanceHistory = Schemas["PerformanceHistory"];
 export type PerformanceSnapshot = Schemas["PerformanceSnapshotOut"];
 export type PerformanceRecomputeResponse = Schemas["PerformanceRecomputeResponse"];
@@ -370,6 +372,12 @@ export const api = {
   performanceHistory: (days = 180) =>
     request<PerformanceHistory>(`/performance/history?days=${days}`),
   performanceGoals: () => request<PerformanceGoal[]>("/performance/goals"),
+  goalArchive: () => request<GoalArchive[]>("/performance/goals/archive"),
+  closeGoal: (distanceKey: string, payload: GoalClose) =>
+    request<GoalArchive>(`/performance/goals/${distanceKey}/close`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   upsertGoal: (distanceKey: string, goal: GoalUpsert) =>
     request<PerformanceGoal>(`/performance/goals/${distanceKey}`, {
       method: "PUT",

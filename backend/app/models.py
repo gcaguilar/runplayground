@@ -329,6 +329,11 @@ class GoalRevision(Base):
     date changes we append a revision so the tracking view can show what was
     asked for and what the model predicted at that moment. Re-saving an
     identical target does not create noise.
+
+    A revision can also close the goal (M14). ``status`` is ``recorded`` for a
+    normal target revision and ``achieved``, ``missed`` or ``cancelled`` for a
+    final one. The final revision keeps the target, the prediction and the
+    outcome, so archiving the goal is a change of state instead of a deletion.
     """
 
     __tablename__ = "goal_revisions"
@@ -343,9 +348,19 @@ class GoalRevision(Base):
     prediction_low_s: Mapped[float | None] = mapped_column(Float)
     prediction_high_s: Mapped[float | None] = mapped_column(Float)
     confidence: Mapped[str | None] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(20), default="recorded", nullable=False)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime)
+    outcome_time_s: Mapped[float | None] = mapped_column(Float)
+    outcome_activity_id: Mapped[int | None] = mapped_column(
+        ForeignKey("activities.id", ondelete="SET NULL"), index=True
+    )
+    outcome_note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
-    __table_args__ = (Index("ix_goal_revisions_distance_created", "distance_m", "created_at"),)
+    __table_args__ = (
+        Index("ix_goal_revisions_distance_created", "distance_m", "created_at"),
+        Index("ix_goal_revisions_closed_at", "closed_at"),
+    )
 
 
 class TrackedAction(Base):

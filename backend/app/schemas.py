@@ -337,6 +337,30 @@ class GoalUpsert(ApiModel):
     notes: str | None = Field(default=None, max_length=2000)
 
 
+class GoalCloseRequest(ApiModel):
+    status: Literal["achieved", "missed", "cancelled"]
+    outcome_time_s: float | None = Field(default=None, gt=0, le=24 * 3600)
+    activity_id: int | None = Field(default=None, ge=1)
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class GoalArchiveOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    target_time_s: float
+    target_date: date | None = None
+    race_name: str | None = None
+    status: str
+    closed_at: datetime
+    outcome_time_s: float | None = None
+    activity_id: int | None = None
+    activity_name: str | None = None
+    note: str | None = None
+    prediction_time_s: float | None = None
+    outcome_vs_prediction_s: float | None = None
+    outcome_vs_target_s: float | None = None
+
+
 class PredictionEstimateOut(ApiModel):
     time_s: float
     low_s: float

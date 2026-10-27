@@ -754,6 +754,17 @@ function ReportRaceRow({
       </div>
       <div className="report-race__meta">
         <Badge tone={race.priority === "A" ? "accent" : "neutral"}>{race.priority}</Badge>
+        <Badge
+          tone={
+            race.status === "completed"
+              ? "success"
+              : race.status === "cancelled"
+                ? "warning"
+                : "neutral"
+          }
+        >
+          {t(`progress.race.status.${race.status}` as MessageKey)}
+        </Badge>
         <span>
           {READINESS_KEYS[race.readiness] ? t(READINESS_KEYS[race.readiness]) : race.readiness}
         </span>

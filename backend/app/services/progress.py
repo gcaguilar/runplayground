@@ -743,7 +743,6 @@ def build_calendar(
     races = db.scalars(
         select(PlannedRace)
         .where(
-            PlannedRace.status != "cancelled",
             PlannedRace.race_date >= grid_start,
             PlannedRace.race_date <= grid_end,
         )
@@ -1001,7 +1000,6 @@ def _report_races(
     races = db.scalars(
         select(PlannedRace)
         .where(
-            PlannedRace.status != "cancelled",
             PlannedRace.race_date >= start,
             PlannedRace.race_date <= end + timedelta(days=REPORT_UPCOMING_DAYS),
         )

@@ -23,6 +23,8 @@ from app.schemas import (
     GarminMetricPoint,
     GarminRacePrediction,
     GarminReference,
+    GoalArchiveOut,
+    GoalCloseRequest,
     GoalOut,
     GoalUpsert,
     PerformanceDataSummary,
@@ -466,7 +468,10 @@ def _record_goal_revision(db: Session, goal: RaceGoal) -> None:
 
     latest = db.scalar(
         select(GoalRevision)
-        .where(GoalRevision.distance_m == goal.distance_m)
+        .where(
+            GoalRevision.distance_m == goal.distance_m,
+            GoalRevision.status == "recorded",
+        )
         .order_by(GoalRevision.created_at.desc(), GoalRevision.id.desc())
     )
     if (
@@ -516,6 +521,118 @@ def delete_goal(db: Session, distance_m: float) -> bool:
     db.delete(goal)
     db.commit()
     return True
+
+
+def close_goal(
+    db: Session,
+    distance_m: float,
+    payload: GoalCloseRequest,
+) -> GoalArchiveOut | None:
+    """Archive the active goal and free the distance.
+
+    The final revision keeps the target and the prediction that was in force at
+    closing time. The active ``race_goals`` row is deleted so a later goal on
+    the same distance starts clean; the archive is the only history.
+    """
+
+    goal = get_goal(db, distance_m)
+    if goal is None:
+        return None
+
+    outcome_activity = (
+        db.get(Activity, payload.activity_id) if payload.activity_id is not None else None
+    )
+
+    ensure_efforts(db)
+    overview = build_overview(db)
+    planning = _planning_for_distance(overview, goal.distance_m)
+    confidence = _confidence_for_distance(overview, goal.distance_m)
+    closed_at = utcnow()
+    revision = GoalRevision(
+        distance_m=goal.distance_m,
+        target_time_s=goal.target_time_s,
+        target_date=goal.target_date,
+        race_name=goal.race_name,
+        notes=goal.notes,
+        prediction_time_s=planning.time_s if planning else None,
+        prediction_low_s=planning.low_s if planning else None,
+        prediction_high_s=planning.high_s if planning else None,
+        confidence=confidence,
+        status=payload.status,
+        closed_at=closed_at,
+        outcome_time_s=payload.outcome_time_s,
+        outcome_activity_id=payload.activity_id,
+        outcome_note=payload.note.strip() if payload.note else None,
+    )
+    db.add(revision)
+    db.delete(goal)
+    db.commit()
+    db.refresh(revision)
+    return _archive_out(revision, outcome_activity)
+
+
+def list_goal_archive(db: Session) -> list[GoalArchiveOut]:
+    rows = db.execute(
+        select(GoalRevision, Activity)
+        .outerjoin(Activity, GoalRevision.outcome_activity_id == Activity.id)
+        .where(GoalRevision.closed_at.is_not(None))
+        .order_by(GoalRevision.closed_at.desc(), GoalRevision.id.desc())
+    ).all()
+    return [_archive_out(revision, activity) for revision, activity in rows]
+
+
+def _planning_for_distance(overview: PerformanceOverview, distance_m: float):
+    return next(
+        (
+            item.planning
+            for item in overview.distances
+            if abs(item.distance_m - distance_m) / max(1.0, item.distance_m) <= 0.025
+        ),
+        None,
+    )
+
+
+def _confidence_for_distance(overview: PerformanceOverview, distance_m: float) -> str | None:
+    return next(
+        (
+            item.confidence
+            for item in overview.distances
+            if abs(item.distance_m - distance_m) / max(1.0, item.distance_m) <= 0.025
+        ),
+        None,
+    )
+
+
+def _distance_key(distance_m: float) -> str:
+    for key, standard in STANDARD_DISTANCES:
+        if abs(standard - distance_m) / standard <= 0.025:
+            return key
+    return f"{distance_m / 1000.0:.1f}k"
+
+
+def _archive_out(revision: GoalRevision, activity: Activity | None) -> GoalArchiveOut:
+    outcome = revision.outcome_time_s
+    predicted = revision.prediction_time_s
+    return GoalArchiveOut(
+        distance_key=_distance_key(revision.distance_m),
+        distance_m=revision.distance_m,
+        target_time_s=round(revision.target_time_s, 1),
+        target_date=revision.target_date,
+        race_name=revision.race_name,
+        status=revision.status,
+        closed_at=revision.closed_at,
+        outcome_time_s=round(outcome, 1) if outcome is not None else None,
+        activity_id=revision.outcome_activity_id,
+        activity_name=activity.name if activity is not None else None,
+        note=revision.outcome_note,
+        prediction_time_s=round(predicted, 1) if predicted is not None else None,
+        outcome_vs_prediction_s=(
+            round(outcome - predicted, 1) if outcome is not None and predicted is not None else None
+        ),
+        outcome_vs_target_s=(
+            round(outcome - revision.target_time_s, 1) if outcome is not None else None
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------

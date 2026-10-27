@@ -1455,6 +1455,127 @@
         }
       }
     },
+    "/api/v1/performance/goals/archive": {
+      "get": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Performance Goal Archive",
+        "operationId": "performance_goal_archive_api_v1_performance_goals_archive_get",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GoalArchiveOut"
+                  },
+                  "title": "Response Performance Goal Archive Api V1 Performance Goals Archive Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/performance/goals/{distance_key}/close": {
+      "post": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Close Performance Goal",
+        "operationId": "close_performance_goal_api_v1_performance_goals__distance_key__close_post",
+        "parameters": [
+          {
+            "name": "distance_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Distance Key"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCloseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalArchiveOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/performance/goals/{distance_key}": {
       "put": {
         "tags": [
@@ -8732,6 +8853,195 @@
           "cached"
         ],
         "title": "GarminTokenStatus"
+      },
+      "GoalArchiveOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "target_time_s": {
+            "type": "number",
+            "title": "Target Time S"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Closed At"
+          },
+          "outcome_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Time S"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "prediction_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Time S"
+          },
+          "outcome_vs_prediction_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Vs Prediction S"
+          },
+          "outcome_vs_target_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Vs Target S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "target_time_s",
+          "status",
+          "closed_at"
+        ],
+        "title": "GoalArchiveOut"
+      },
+      "GoalCloseRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "achieved",
+              "missed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "outcome_time_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 86400.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Time S"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "GoalCloseRequest"
       },
       "GoalHistoryPointOut": {
         "properties": {

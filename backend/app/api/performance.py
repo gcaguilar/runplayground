@@ -6,8 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.models import Activity
 from app.schemas import (
     GarminReference,
+    GoalArchiveOut,
+    GoalCloseRequest,
     GoalOut,
     GoalUpsert,
     PerformanceHistory,
@@ -16,10 +19,12 @@ from app.schemas import (
 )
 from app.services.performance import (
     build_overview,
+    close_goal,
     delete_goal,
     ensure_efforts,
     garmin_reference,
     get_history,
+    list_goal_archive,
     list_goals,
     mark_efforts_refreshed,
     refresh_all_efforts,
@@ -71,6 +76,30 @@ def performance_history(
 @router.get("/goals", response_model=list[GoalOut])
 def performance_goals(db: Session = Depends(get_db)) -> list[GoalOut]:
     return list_goals(db)
+
+
+@router.get("/goals/archive", response_model=list[GoalArchiveOut])
+def performance_goal_archive(db: Session = Depends(get_db)) -> list[GoalArchiveOut]:
+    return list_goal_archive(db)
+
+
+def _check_activity(db: Session, activity_id: int | None) -> None:
+    if activity_id is not None and db.get(Activity, activity_id) is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+
+@router.post("/goals/{distance_key}/close", response_model=GoalArchiveOut)
+def close_performance_goal(
+    distance_key: str,
+    payload: GoalCloseRequest,
+    db: Session = Depends(get_db),
+) -> GoalArchiveOut:
+    distance = _distance_or_404(distance_key)
+    _check_activity(db, payload.activity_id)
+    archived = close_goal(db, distance, payload)
+    if archived is None:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return archived
 
 
 @router.put("/goals/{distance_key}", response_model=GoalOut)

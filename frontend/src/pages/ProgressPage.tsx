@@ -30,6 +30,7 @@ import type {
   ProgressHighlight,
 } from "@/api/client";
 import {
+  useActivities,
   useCreateRace,
   useDeleteRace,
   useProgress,
@@ -131,6 +132,7 @@ const DISTANCE_PRESETS = [
 ] as const;
 
 type Priority = "A" | "B" | "C";
+type RaceStatus = "planned" | "completed" | "cancelled";
 
 function presetKey(distanceM: number): string {
   const match = DISTANCE_PRESETS.find(
@@ -799,11 +801,9 @@ function RaceCard({
             {t(readiness)}
           </Badge>
           <Badge tone="neutral">{t(priority)}</Badge>
-          {race.status !== "planned" ? (
-            <Badge tone="info">
-              {t(`progress.race.status.${race.status}` as MessageKey)}
-            </Badge>
-          ) : null}
+          <Badge tone={race.status === "completed" ? "success" : race.status === "cancelled" ? "warning" : "neutral"}>
+            {t(`progress.race.status.${race.status}` as MessageKey)}
+          </Badge>
         </div>
       </div>
 
@@ -929,7 +929,7 @@ function RaceMetric({
 }
 
 function RaceForm({ race, onClose }: { race?: PlannedRace; onClose: () => void }) {
-  const { t } = useI18n();
+  const { t, locale, units } = useI18n();
   const create = useCreateRace();
   const update = useUpdateRace();
   const [name, setName] = useState(race?.name ?? "");
@@ -946,10 +946,21 @@ function RaceForm({ race, onClose }: { race?: PlannedRace; onClose: () => void }
     race?.goal_time_s ? formatClock(race.goal_time_s) : "",
   );
   const [priority, setPriority] = useState<Priority>((race?.priority as Priority) ?? "B");
+  const [status, setStatus] = useState<RaceStatus>(
+    (race?.status as RaceStatus) ?? "planned",
+  );
+  const [activityId, setActivityId] = useState<number | null>(race?.activity_id ?? null);
   const [location, setLocation] = useState(race?.location ?? "");
   const [notes, setNotes] = useState(race?.notes ?? "");
   const [problem, setProblem] = useState<string | null>(null);
   const pending = create.isPending || update.isPending;
+  const activities = useActivities({
+    from: raceDate,
+    to: raceDate,
+    limit: 100,
+    sport: "running",
+  });
+  const activityItems = activities.data?.items ?? [];
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -976,7 +987,8 @@ function RaceForm({ race, onClose }: { race?: PlannedRace; onClose: () => void }
       priority,
       location: location.trim() || null,
       notes: notes.trim() || null,
-      status: (race?.status as PlannedRaceCreate["status"]) ?? "planned",
+      status,
+      activity_id: activityId,
     };
     const onError = (error: unknown) => {
       setProblem(error instanceof Error ? error.message : t("progress.race.error"));
@@ -1012,8 +1024,39 @@ function RaceForm({ race, onClose }: { race?: PlannedRace; onClose: () => void }
         <input
           type="date"
           value={raceDate}
-          onChange={(event) => setRaceDate(event.target.value)}
+          onChange={(event) => {
+            setRaceDate(event.target.value);
+            setActivityId(null);
+          }}
         />
+      </label>
+      <label>
+        <span>{t("progress.race.status")}</span>
+        <select
+          value={status}
+          onChange={(event) => setStatus(event.target.value as RaceStatus)}
+        >
+          <option value="planned">{t("progress.race.status.planned")}</option>
+          <option value="completed">{t("progress.race.status.completed")}</option>
+          <option value="cancelled">{t("progress.race.status.cancelled")}</option>
+        </select>
+      </label>
+      <label>
+        <span>{t("progress.race.activity")}</span>
+        <select
+          value={activityId ?? ""}
+          onChange={(event) =>
+            setActivityId(event.target.value ? Number(event.target.value) : null)
+          }
+        >
+          <option value="">{t("progress.race.noActivity")}</option>
+          {activityItems.map((activity) => (
+            <option key={activity.id} value={activity.id}>
+              {activity.name || t("calendar.legend.activity")} ·{" "}
+              {formatDistance(activity.distance_m, units, locale, { digits: 1 })}
+            </option>
+          ))}
+        </select>
       </label>
       <label>
         <span>{t("progress.race.distance")}</span>
