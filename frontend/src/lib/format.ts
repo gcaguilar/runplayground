@@ -287,3 +287,33 @@ export function titleCase(value: string): string {
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
+
+export function parseTimeInput(value: string): number | null {
+  const text = value.trim();
+  if (!text) return null;
+  const parts = text.split(":").map((part) => Number(part));
+  if (parts.some((part) => !Number.isFinite(part) || part < 0)) return null;
+  if (parts.length === 1) {
+    const minutes = parts[0];
+    return minutes > 0 ? Math.round(minutes * 60) : null;
+  }
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    if (seconds >= 60) return null;
+    const total = minutes * 60 + seconds;
+    return total > 0 ? Math.round(total) : null;
+  }
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    if (minutes >= 60 || seconds >= 60) return null;
+    const total = hours * 3600 + minutes * 60 + seconds;
+    return total > 0 ? Math.round(total) : null;
+  }
+  return null;
+}
+
+export function toISODate(value: Date): string {
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(
+    value.getDate(),
+  ).padStart(2, "0")}`;
+}

@@ -50,6 +50,7 @@ import {
   formatDistance,
   formatNumber,
   formatPace,
+  parseTimeInput,
 } from "@/lib/format";
 
 const REASON_KEYS: Record<string, MessageKey> = {
@@ -873,28 +874,4 @@ function gapTone(gapPct: number | null | undefined): string {
   if (absolute >= 4) return "is-wide";
   if (absolute >= 1.5) return "is-moderate";
   return "is-close";
-}
-
-export function parseTimeInput(value: string): number | null {
-  const text = value.trim();
-  if (!text) return null;
-  const parts = text.split(":").map((part) => Number(part));
-  if (parts.some((part) => !Number.isFinite(part) || part < 0)) return null;
-  if (parts.length === 1) {
-    const minutes = parts[0];
-    return minutes > 0 ? Math.round(minutes * 60) : null;
-  }
-  if (parts.length === 2) {
-    const [minutes, seconds] = parts;
-    if (seconds >= 60) return null;
-    const total = minutes * 60 + seconds;
-    return total > 0 ? Math.round(total) : null;
-  }
-  if (parts.length === 3) {
-    const [hours, minutes, seconds] = parts;
-    if (minutes >= 60 || seconds >= 60) return null;
-    const total = hours * 3600 + minutes * 60 + seconds;
-    return total > 0 ? Math.round(total) : null;
-  }
-  return null;
 }
