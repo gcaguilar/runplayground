@@ -1,10 +1,17 @@
-"""Comparable pace–heart-rate analysis (M6).
+"""Comparable pace–heart-rate analysis (M6, environmental context in M18).
 
 The question is not "is my average pace better?" but "at the same heart rate
 and in a comparable run, am I faster than before?". The service groups aerobic
 runs by distance band and terrain, removes the within-group heart-rate effect
 with a simple linear adjustment, and compares the earlier and later halves of
 each group.
+
+M18 adds an optional environmental correction. Elevation per kilometre yields
+a conservative estimated terrain cost, and the mean temperature of the
+activity's stream yields a capped heat cost. The headline early/recent change
+uses the environment- plus heart-rate-adjusted pace; raw pace and the
+heart-rate-only adjustment remain available for compatibility. Both
+corrections are estimates and never raise confidence.
 
 It is deliberately an association, not a physiological test. Groups need a
 minimum of sessions and a minimum time span; if heart rate, elevation or the
@@ -18,10 +25,10 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from statistics import median
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Activity
+from app.models import Activity, StreamSample
 from app.schemas import (
     PaceHrAnalysisOut,
     PaceHrGroupOut,
@@ -33,7 +40,7 @@ from app.services.analysis_settings import get_analysis_settings
 from app.services.performance import build_overview, ensure_efforts
 from app.utils import as_utc, utcnow
 
-MODEL_VERSION = "m6.0"
+MODEL_VERSION = "m18.0"
 MIN_DISTANCE_M = 4000.0
 MIN_DURATION_S = 1200.0
 MIN_GROUP_SESSIONS = 4
@@ -42,6 +49,20 @@ MIN_SPAN_DAYS = 28
 STABLE_CHANGE_S = 1.5
 PACE_MIN = 180.0
 PACE_MAX = 900.0
+# Terrain: a conservative linear cost of 1 s/km for every metre gained per km.
+# Runs under 5 m/km are treated as flat and left uncorrected, matching the
+# terrain bands. It is an estimate, capped so a bad elevation reading cannot
+# dominate the pace.
+TERRAIN_MIN_PER_KM = 5.0
+TERRAIN_S_PER_KM_PER_M_PER_KM = 1.0
+TERRAIN_ADJUSTMENT_CAP_S_PER_KM = 25.0
+# Temperature: only stream averages within a plausible physiological range are
+# used. Heat costs 0.3 % of pace per degree above 15 °C, capped at 6 %.
+TEMPERATURE_MIN_C = -20.0
+TEMPERATURE_MAX_C = 50.0
+HEAT_BASELINE_C = 15.0
+HEAT_PCT_PER_C = 0.003
+HEAT_ADJUSTMENT_CAP_PCT = 0.06
 DISTANCE_BANDS: tuple[tuple[float, float, str], ...] = (
     (4000.0, 8000.0, "short"),
     (8000.0, 12000.0, "medium"),
@@ -63,7 +84,17 @@ class ComparableRun:
     distance_band: str
     terrain_band: str
     group_key: str
+    # Raw pace is the observed average. The environment-adjusted pace subtracts
+    # the estimated terrain and heat costs; the HR-adjusted pace additionally
+    # corrects to the group's reference heart rate.
     adjusted_pace_s_per_km: float | None = None
+    elevation_per_km_m: float | None = None
+    terrain_adjustment_s_per_km: float = 0.0
+    temperature_c: float | None = None
+    temperature_samples: int = 0
+    heat_adjustment_s_per_km: float = 0.0
+    environment_adjusted_pace_s_per_km: float | None = None
+    environment_hr_adjusted_pace_s_per_km: float | None = None
     period: str = ""
 
 
@@ -78,6 +109,19 @@ class GroupedRuns:
     recent_pace: float | None = None
     change_s: float | None = None
     change_pct: float | None = None
+    raw_early_pace: float | None = None
+    raw_recent_pace: float | None = None
+    environment_early_pace: float | None = None
+    environment_recent_pace: float | None = None
+    environment_change_s: float | None = None
+    temperature_c: float | None = None
+    temperature_sessions: int = 0
+    temperature_coverage: float | None = None
+    avg_elevation_per_km_m: float | None = None
+    avg_terrain_adjustment_s_per_km: float | None = None
+    avg_heat_adjustment_s_per_km: float | None = None
+    terrain_adjusted: bool = False
+    temperature_adjusted: bool = False
     status: str = "unknown"
     confidence_score: float = 0.0
     reasons: list[str] = field(default_factory=list)
@@ -101,6 +145,63 @@ def _terrain_band(activity: Activity) -> str:
     if per_km <= 12.0:
         return "rolling"
     return "hilly"
+
+
+def _elevation_per_km(activity: Activity) -> float | None:
+    if activity.elevation_gain_m is None or activity.distance_m <= 0:
+        return None
+    return float(activity.elevation_gain_m) / (activity.distance_m / 1000.0)
+
+
+def _terrain_adjustment(elevation_per_km_m: float | None) -> float:
+    """Estimated flat-equivalent saving in s/km for the gained elevation."""
+
+    if elevation_per_km_m is None or elevation_per_km_m < TERRAIN_MIN_PER_KM:
+        return 0.0
+    raw = elevation_per_km_m * TERRAIN_S_PER_KM_PER_M_PER_KM
+    return round(clamp(raw, 0.0, TERRAIN_ADJUSTMENT_CAP_S_PER_KM), 1)
+
+
+def _heat_adjustment(pace_s_per_km: float, temperature_c: float | None) -> float:
+    """Estimated flat/cool-equivalent saving in s/km for the heat cost."""
+
+    if temperature_c is None or not (TEMPERATURE_MIN_C <= temperature_c <= TEMPERATURE_MAX_C):
+        return 0.0
+    excess = max(0.0, temperature_c - HEAT_BASELINE_C)
+    fraction = min(excess * HEAT_PCT_PER_C, HEAT_ADJUSTMENT_CAP_PCT)
+    return round(pace_s_per_km * fraction, 1)
+
+
+def _temperatures_by_activity(
+    db: Session, activity_ids: list[int]
+) -> dict[int, tuple[float | None, int]]:
+    """One aggregate query: mean and count of plausible stream temperatures.
+
+    Reading every sample would make the endpoint proportional to the stream
+    size. The database computes the per-activity mean instead, and the
+    plausibility filter keeps implausible sensor readings out of the average.
+    """
+
+    if not activity_ids:
+        return {}
+    rows = db.execute(
+        select(
+            StreamSample.activity_id,
+            func.avg(StreamSample.temperature_c),
+            func.count(StreamSample.temperature_c),
+        )
+        .where(
+            StreamSample.activity_id.in_(activity_ids),
+            StreamSample.temperature_c.is_not(None),
+            StreamSample.temperature_c >= TEMPERATURE_MIN_C,
+            StreamSample.temperature_c <= TEMPERATURE_MAX_C,
+        )
+        .group_by(StreamSample.activity_id)
+    ).all()
+    return {
+        int(activity_id): (float(average) if average is not None else None, int(count or 0))
+        for activity_id, average, count in rows
+    }
 
 
 def _hr_reference(rows: list[Activity]) -> float | None:
@@ -163,7 +264,13 @@ def _group_confidence(group: GroupedRuns) -> tuple[float, list[str]]:
         reasons.append("narrow_hr_range")
     if not group.early_line or not group.recent_line:
         reasons.append("no_regression")
-    reasons.append("temperature_not_controlled")
+    missing_temperature = sum(1 for run in group.runs if run.temperature_c is None)
+    if missing_temperature:
+        reasons.append("temperature_not_available")
+    if missing_temperature == sessions:
+        # Backwards-compatible caveat, now only used when no stream carried a
+        # plausible temperature.
+        reasons.append("temperature_not_controlled")
     return round(clamp(score, 0.05, 0.92), 2), reasons
 
 
@@ -177,17 +284,31 @@ def _build_group(key: str, runs: list[ComparableRun]) -> GroupedRuns:
         runs=ordered,
         reference_hr=round(reference_hr, 1),
     )
-    values = [(float(run.avg_hr), run.pace_s_per_km) for run in ordered]
-    slope, intercept = _fit(values)
-    if slope is not None and intercept is not None:
-        for run in ordered:
+    # Existing contract: raw pace adjusted for heart rate only.
+    raw_slope, raw_intercept = _fit([(float(run.avg_hr), run.pace_s_per_km) for run in ordered])
+    # Headline: environment-adjusted pace additionally corrected by heart rate.
+    env_slope, env_intercept = _fit(
+        [
+            (float(run.avg_hr), run.environment_adjusted_pace_s_per_km or run.pace_s_per_km)
+            for run in ordered
+        ]
+    )
+    for run in ordered:
+        if raw_slope is not None and raw_intercept is not None:
             run.adjusted_pace_s_per_km = round(
-                run.pace_s_per_km - slope * (run.avg_hr - reference_hr),
+                run.pace_s_per_km - raw_slope * (run.avg_hr - reference_hr),
                 1,
             )
-    else:
-        for run in ordered:
+        else:
             run.adjusted_pace_s_per_km = round(run.pace_s_per_km, 1)
+        environment = run.environment_adjusted_pace_s_per_km or run.pace_s_per_km
+        if env_slope is not None and env_intercept is not None:
+            run.environment_hr_adjusted_pace_s_per_km = round(
+                environment - env_slope * (run.avg_hr - reference_hr),
+                1,
+            )
+        else:
+            run.environment_hr_adjusted_pace_s_per_km = round(environment, 1)
 
     split = len(ordered) // 2
     early = ordered[:split]
@@ -198,12 +319,29 @@ def _build_group(key: str, runs: list[ComparableRun]) -> GroupedRuns:
         run.period = "recent"
 
     if len(early) >= 2 and len(recent) >= 2:
+        group.raw_early_pace = round(median(run.pace_s_per_km for run in early), 1)
+        group.raw_recent_pace = round(median(run.pace_s_per_km for run in recent), 1)
+        group.environment_early_pace = round(
+            median(run.environment_adjusted_pace_s_per_km or run.pace_s_per_km for run in early),
+            1,
+        )
+        group.environment_recent_pace = round(
+            median(run.environment_adjusted_pace_s_per_km or run.pace_s_per_km for run in recent),
+            1,
+        )
+        group.environment_change_s = round(
+            group.environment_recent_pace - group.environment_early_pace, 1
+        )
+        # The change uses the environment + heart-rate adjusted pace. A slow
+        # session on a hot or hilly day should not read as lost fitness.
         group.early_pace = round(
-            median(run.adjusted_pace_s_per_km or run.pace_s_per_km for run in early),
+            median(run.environment_hr_adjusted_pace_s_per_km or run.pace_s_per_km for run in early),
             1,
         )
         group.recent_pace = round(
-            median(run.adjusted_pace_s_per_km or run.pace_s_per_km for run in recent),
+            median(
+                run.environment_hr_adjusted_pace_s_per_km or run.pace_s_per_km for run in recent
+            ),
             1,
         )
         group.change_s = round(group.recent_pace - group.early_pace, 1)
@@ -216,6 +354,29 @@ def _build_group(key: str, runs: list[ComparableRun]) -> GroupedRuns:
             group.status = "worsening"
         else:
             group.status = "stable"
+
+    temperatures = [run.temperature_c for run in ordered if run.temperature_c is not None]
+    group.temperature_sessions = len(temperatures)
+    group.temperature_c = round(sum(temperatures) / len(temperatures), 1) if temperatures else None
+    group.temperature_coverage = round(len(temperatures) / len(ordered), 2) if ordered else None
+    with_elevation = [run for run in ordered if run.elevation_per_km_m is not None]
+    if with_elevation:
+        group.avg_elevation_per_km_m = round(
+            sum(run.elevation_per_km_m or 0.0 for run in with_elevation) / len(with_elevation),
+            1,
+        )
+        group.avg_terrain_adjustment_s_per_km = round(
+            sum(run.terrain_adjustment_s_per_km for run in with_elevation) / len(with_elevation),
+            1,
+        )
+    if ordered:
+        group.avg_heat_adjustment_s_per_km = round(
+            sum(run.heat_adjustment_s_per_km for run in ordered) / len(ordered), 1
+        )
+    group.terrain_adjusted = bool(with_elevation) and any(
+        run.terrain_adjustment_s_per_km > 0 for run in with_elevation
+    )
+    group.temperature_adjusted = any(run.heat_adjustment_s_per_km > 0 for run in ordered)
 
     group.early_line = _line([(float(run.avg_hr), run.pace_s_per_km) for run in early])
     group.recent_line = _line([(float(run.avg_hr), run.pace_s_per_km) for run in recent])
@@ -238,6 +399,19 @@ def _group_out(group: GroupedRuns) -> PaceHrGroupOut:
         recent_pace_s_per_km=group.recent_pace,
         change_s_per_km=group.change_s,
         change_pct=group.change_pct,
+        raw_early_pace_s_per_km=group.raw_early_pace,
+        raw_recent_pace_s_per_km=group.raw_recent_pace,
+        environment_early_pace_s_per_km=group.environment_early_pace,
+        environment_recent_pace_s_per_km=group.environment_recent_pace,
+        environment_change_s_per_km=group.environment_change_s,
+        temperature_c=group.temperature_c,
+        temperature_sessions=group.temperature_sessions,
+        temperature_coverage=group.temperature_coverage,
+        avg_elevation_per_km_m=group.avg_elevation_per_km_m,
+        avg_terrain_adjustment_s_per_km=group.avg_terrain_adjustment_s_per_km,
+        avg_heat_adjustment_s_per_km=group.avg_heat_adjustment_s_per_km,
+        terrain_adjusted=group.terrain_adjusted,
+        temperature_adjusted=group.temperature_adjusted,
         status=group.status,
         confidence=confidence_label(group.confidence_score),
         confidence_score=group.confidence_score,
@@ -250,10 +424,19 @@ def _group_out(group: GroupedRuns) -> PaceHrGroupOut:
                 avg_hr=run.avg_hr,
                 pace_s_per_km=round(run.pace_s_per_km, 1),
                 adjusted_pace_s_per_km=run.adjusted_pace_s_per_km,
+                environment_adjusted_pace_s_per_km=run.environment_adjusted_pace_s_per_km,
+                environment_hr_adjusted_pace_s_per_km=(run.environment_hr_adjusted_pace_s_per_km),
                 distance_m=round(run.distance_m, 1),
                 elevation_gain_m=(
                     round(run.elevation_gain_m, 1) if run.elevation_gain_m is not None else None
                 ),
+                elevation_per_km_m=(
+                    round(run.elevation_per_km_m, 1) if run.elevation_per_km_m is not None else None
+                ),
+                terrain_adjustment_s_per_km=run.terrain_adjustment_s_per_km,
+                temperature_c=run.temperature_c,
+                temperature_samples=run.temperature_samples,
+                heat_adjustment_s_per_km=run.heat_adjustment_s_per_km,
                 period=run.period,
             )
             for run in group.runs
@@ -346,6 +529,7 @@ def build_pace_hr(
             continue
         distance_band = _distance_band(activity.distance_m)
         terrain_band = _terrain_band(activity)
+        elevation_per_km = _elevation_per_km(activity)
         key = f"{distance_band}_{terrain_band}"
         grouped.setdefault(key, []).append(
             ComparableRun(
@@ -360,7 +544,24 @@ def build_pace_hr(
                 distance_band=distance_band,
                 terrain_band=terrain_band,
                 group_key=key,
+                elevation_per_km_m=elevation_per_km,
+                terrain_adjustment_s_per_km=_terrain_adjustment(elevation_per_km),
             )
+        )
+
+    # Temperature is read once for every eligible activity, not sample by
+    # sample. Activities without streams or without temperature stay at zero
+    # adjustment and are reported as missing context.
+    all_runs = [run for runs in grouped.values() for run in runs]
+    temperatures = _temperatures_by_activity(db, [run.activity_id for run in all_runs])
+    for run in all_runs:
+        temperature, samples = temperatures.get(run.activity_id, (None, 0))
+        run.temperature_c = round(temperature, 1) if temperature is not None else None
+        run.temperature_samples = samples
+        run.heat_adjustment_s_per_km = _heat_adjustment(run.pace_s_per_km, temperature)
+        run.environment_adjusted_pace_s_per_km = round(
+            run.pace_s_per_km - run.terrain_adjustment_s_per_km - run.heat_adjustment_s_per_km,
+            1,
         )
 
     groups = [
@@ -370,6 +571,42 @@ def build_pace_hr(
     primary = groups[0] if groups else None
 
     sessions = sum(len(runs) for runs in grouped.values())
+    all_eligible = [run for runs in grouped.values() for run in runs]
+    temperature_values = [
+        run.temperature_c for run in all_eligible if run.temperature_c is not None
+    ]
+    temperature_sessions = len(temperature_values)
+    temperature_c = (
+        round(sum(temperature_values) / len(temperature_values), 1) if temperature_values else None
+    )
+    temperature_coverage = round(temperature_sessions / sessions, 2) if sessions else None
+    with_elevation = [run for run in all_eligible if run.elevation_per_km_m is not None]
+    avg_elevation_per_km = (
+        round(
+            sum(run.elevation_per_km_m or 0.0 for run in with_elevation) / len(with_elevation),
+            1,
+        )
+        if with_elevation
+        else None
+    )
+    avg_terrain_adjustment = (
+        round(
+            sum(run.terrain_adjustment_s_per_km for run in with_elevation) / len(with_elevation),
+            1,
+        )
+        if with_elevation
+        else None
+    )
+    avg_heat_adjustment = (
+        round(sum(run.heat_adjustment_s_per_km for run in all_eligible) / len(all_eligible), 1)
+        if all_eligible
+        else None
+    )
+    terrain_adjusted = bool(with_elevation) and any(
+        run.terrain_adjustment_s_per_km > 0 for run in with_elevation
+    )
+    temperature_adjusted = any(run.heat_adjustment_s_per_km > 0 for run in all_eligible)
+
     warnings: list[str] = []
     if not rows:
         warnings.append("no_running_activities")
@@ -379,6 +616,8 @@ def build_pace_hr(
         warnings.append("no_comparable_sessions")
     elif sessions < MIN_CONFIDENT_SESSIONS:
         warnings.append("few_sessions")
+    if sessions and temperature_sessions == 0:
+        warnings.append("temperature_not_available")
     if primary is not None:
         span = (primary.runs[-1].local_date - primary.runs[0].local_date).days
         if span < MIN_SPAN_DAYS:
@@ -413,16 +652,32 @@ def build_pace_hr(
         "reference_hr": primary.reference_hr if primary else None,
         "distance_band": primary.distance_band if primary else None,
         "terrain_band": primary.terrain_band if primary else None,
+        "temperature_c": primary.temperature_c if primary else temperature_c,
+        "avg_terrain_adjustment_s_per_km": (
+            primary.avg_terrain_adjustment_s_per_km if primary else avg_terrain_adjustment
+        ),
+        "avg_heat_adjustment_s_per_km": (
+            primary.avg_heat_adjustment_s_per_km if primary else avg_heat_adjustment
+        ),
     }
 
     notes = [
         "pace_hr_is_observational",
         "same_distance_and_terrain",
         "hr_adjusted_line",
-        "temperature_not_controlled",
+        "environment_adjusted_pace",
+        "terrain_adjustment_estimated",
+        "environment_context_only",
         "load_is_estimated",
         "not_medical_advice",
     ]
+    if temperature_sessions:
+        notes.append("temperature_from_streams")
+    else:
+        notes.append("temperature_not_available")
+        notes.append("temperature_not_controlled")
+    if temperature_adjusted:
+        notes.append("heat_adjustment_applied")
     if excluded_races:
         notes.append("races_excluded")
     if excluded_hard:
@@ -443,6 +698,14 @@ def build_pace_hr(
         primary_group=primary.key if primary else None,
         conclusion=conclusion,
         conclusion_params=params,
+        temperature_c=temperature_c,
+        temperature_sessions=temperature_sessions,
+        temperature_coverage=temperature_coverage,
+        avg_elevation_per_km_m=avg_elevation_per_km,
+        avg_terrain_adjustment_s_per_km=avg_terrain_adjustment,
+        avg_heat_adjustment_s_per_km=avg_heat_adjustment,
+        terrain_adjusted=terrain_adjusted,
+        temperature_adjusted=temperature_adjusted,
         warnings=warnings,
         notes=notes,
     )
