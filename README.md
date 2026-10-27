@@ -6,7 +6,7 @@ place for the numbers, with their provenance and confidence — not another
 metric dump.
 
 > **Status: M15 — final planned milestone, plus optional M16 analysis windows,
-> M17 heart-rate zones and M18 environmental context.**
+> M17 heart-rate zones, M18 environmental context and M19 plan CSV import/export.**
 > M15 delivered the light theme, accessibility and print output. M16 adds
 > explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows and a
 > read-only diagnostics trend by dimension. M17 adds optional heart-rate zones
@@ -14,7 +14,10 @@ metric dump.
 > coverage and the reference used, with no database migration. M18 adds
 > optional terrain and temperature context to the pace–heart-rate comparison:
 > stream temperature aggregated per activity, conservative elevation and heat
-> adjustments, and an environment-adjusted change, with no database migration. The dashboard
+> adjustments, and an environment-adjusted change, with no database migration.
+> M19 adds CSV export and atomic CSV import for registered training plans, with
+> a non-writing dry run, line-numbered errors, column aliases and optional
+> activation, with no database migration. The dashboard
 > opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -103,6 +106,13 @@ metric dump.
   one session. While the plan covers a week, the calendar shows its sessions
   instead of the suggestion and adherence scores those exact targets; outside
   the range, or with no active plan, the suggested plan is used unchanged.
+- **Plan CSV import and export**: a registered plan downloads as UTF-8 CSV with
+  one row per session and a stable header (`session_date,type,intensity,
+  distance_km,duration_min,status,notes`), ordered by date and position. Import
+  validates the whole file before writing anything, previews normalized rows
+  and line-numbered errors on a dry run, accepts common column aliases and
+  metric or explicit metre/second units, and optionally activates the new
+  plan in the same transaction. The limit is 400 session rows.
 - **Suggested-plan adherence**: the training page reconstructs the plan that
   each recent week would have received from the phase and 28-day base volume,
   then compares actual volume, longest run, hard sessions and rest against it.
@@ -428,6 +438,40 @@ pending) plus a distance compliance percentage. Weeks not covered keep the
 M10 suggested engine, so a window can mix both and says so. The score keeps the
 M10 weights (volume 45%, long run 30%, quality 15%, rest 10%), the current week
 stays in progress with no score, and archived plans are ignored.
+
+### Plan CSV import and export
+
+A registered plan can leave and re-enter Run as a spreadsheet without touching
+the database schema. Export is `GET /api/v1/training-plans/{plan_id}/export.csv`:
+`text/csv` in UTF-8, ISO dates (`YYYY-MM-DD`), dot decimals and the stable
+header `session_date,type,intensity,distance_km,duration_min,status,notes`.
+Rows are sorted by session date, then position, then id. The download name is a
+safe ASCII slug of the plan plus a UTC timestamp, so an accented or long plan
+name cannot break the `Content-Disposition` header. The notes field is quoted
+when needed and a missing distance or duration is an empty cell.
+
+Import is `POST /api/v1/training-plans/import` with a multipart `file` and the
+optional fields `name`, `activate` and `dry_run`. The header is mandatory and
+its order is free; matching is case-insensitive. Required columns are
+`session_date` (or `date`/`fecha`), `type` (or `tipo`) and `intensity` (or
+`intensidad`). Distance accepts `distance_km` (also `distance`/`distancia_km`)
+or `distance_m`, exactly one per row; duration accepts `duration_min` (also
+`duration`/`duracion_min`) or `duration_s`, exactly one per row. `status` and
+`notes` are optional. Types, intensities, statuses and the rest/no-target rules
+are the same ones the CRUD applies: a rest row needs the rest intensity and no
+targets, and every other row needs a distance or a duration. The plan range is
+derived from the minimum and maximum session date, `source` is `import`, and the
+name comes from the field or the file name without its extension.
+
+Files must be UTF-8 (a BOM is tolerated), contain at least one data row and at
+most 400 rows, and stay under 1 MiB. Missing headers, duplicate columns,
+inconsistent column counts, invalid dates, non-positive or non-finite numbers
+and over-long notes are rejected with the physical line number. A dry run always
+returns a preview with `valid`, the derived name and dates, normalized rows
+(distance in metres, duration in seconds) and every error, and writes nothing.
+A real import with any error returns HTTP 422 and also writes nothing; creation
+of the plan, all sessions and the optional activation is one transaction, and
+activating replaces the previous active plan.
 
 ### Backup and restore
 
@@ -804,11 +848,12 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M16** | Optional enhancement: explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows, plus a read-only diagnostics trend by dimension across 4, 8 and 12 weeks. No migration. |
 | **M17** | Optional enhancement: heart-rate zones in the running activity detail, with five zones, explicit bpm cuts, per-zone time and share, coverage, warnings and the max/threshold reference from Settings. No migration. |
 | **M18** | Optional enhancement: environmental context in the pace–heart-rate comparison, with elevation per km, conservative terrain and heat adjustments, stream temperature aggregation, explicit notes/flags and the change computed on adjusted pace. No migration. |
+| **M19** | Optional enhancement: CSV export and atomic import for registered training plans, with a stable header, ISO dates, metric or metre/second units, column aliases, a non-writing dry run with line-numbered errors, a 400-row limit and optional activation. No migration. |
 
-M15 closes the planned roadmap. M16, M17 and M18 are optional enhancements
+M15 closes the planned roadmap. M16, M17, M18 and M19 are optional enhancements
 rather than gaps in the current scope. Further additions remain optional
 product work: automatic wellness sync (sleep/HRV/weight still come from the
-Garmin export) and plan import from CSV. The core promise — own the data,
+Garmin export). The core promise — own the data,
 understand the numbers, see their provenance and confidence, and decide what to
 train next — is implemented without sending anything to a third party.
 
