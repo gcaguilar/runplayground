@@ -3,6 +3,7 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  Archive,
   ArrowLeftRight,
   CalendarDays,
   Database,
@@ -29,8 +30,10 @@ import {
   useSyncStatus,
   useSystemStatus,
 } from "@/api/queries";
+import { ToastStack } from "@/components/Notifications";
 import { cn } from "@/lib/cn";
 import { formatDateTime, formatRelative } from "@/lib/format";
+import { notifyToast } from "@/lib/toast";
 import { useI18n, type MessageKey } from "@/i18n";
 
 type NavItem = {
@@ -49,6 +52,7 @@ type NavItem = {
     | "/compare"
     | "/imports"
     | "/data"
+    | "/backup"
     | "/settings";
   label: MessageKey;
   icon: LucideIcon;
@@ -73,6 +77,7 @@ const libraryNav: NavItem[] = [
   { to: "/compare", label: "nav.compare", icon: ArrowLeftRight },
   { to: "/imports", label: "nav.imports", icon: Upload },
   { to: "/data", label: "nav.data", icon: Database },
+  { to: "/backup", label: "nav.backup", icon: Archive },
 ];
 
 function pageKey(pathname: string): MessageKey {
@@ -80,6 +85,7 @@ function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/compare")) return "nav.compare";
   if (pathname.startsWith("/imports")) return "nav.imports";
   if (pathname.startsWith("/data")) return "nav.data";
+  if (pathname.startsWith("/backup")) return "nav.backup";
   if (pathname.startsWith("/settings")) return "nav.settings";
   if (pathname.startsWith("/performance")) return "nav.performance";
   if (pathname.startsWith("/forecast")) return "nav.forecast";
@@ -102,6 +108,7 @@ export function AppShell() {
   const { locale, setLocale, t } = useI18n();
   const queryClient = useQueryClient();
   const wasRunning = useRef(false);
+  const lastSyncSeen = useRef<{ id: number; status: string } | null>(readLastSyncSeen());
 
   useEffect(() => {
     setMenuOpen(false);
@@ -130,6 +137,40 @@ export function AppShell() {
     }
     wasRunning.current = running;
   }, [sync.data?.running, queryClient]);
+
+  useEffect(() => {
+    const run = sync.data?.last_run;
+    if (!run) return;
+    const current = { id: run.id, status: run.status };
+    const previous = lastSyncSeen.current;
+    if (previous && previous.id === current.id && previous.status === current.status) return;
+    if (previous && previous.id > current.id) return;
+    writeLastSyncSeen(current);
+    lastSyncSeen.current = current;
+    // The first observed run is a baseline, not a fresh notification.
+    if (!previous) return;
+    if (!["success", "partial", "error"].includes(run.status)) return;
+
+    const failed = run.status === "error";
+    notifyToast({
+      tone: failed ? "danger" : run.status === "partial" ? "warning" : "success",
+      titleKey: failed ? "toast.sync.failedTitle" : "toast.sync.title",
+      messageKey:
+        run.status === "success"
+          ? "toast.sync.success"
+          : run.status === "partial"
+            ? "toast.sync.partial"
+            : "toast.sync.error",
+      values: {
+        created: run.activities_created,
+        updated: run.activities_updated,
+        skipped: run.activities_skipped,
+        errors: run.errors_count,
+      },
+      href: failed ? "/settings" : "/data",
+      linkKey: failed ? "toast.sync.openSettings" : "toast.sync.openData",
+    });
+  }, [sync.data?.last_run]);
 
   const garminConfigured = sync.data?.garmin_configured ?? system.data?.garmin_configured ?? false;
   const running = Boolean(sync.data?.running);
@@ -287,8 +328,31 @@ export function AppShell() {
           <span className="mono">v{version}</span>
         </footer>
       </div>
+      <ToastStack />
     </div>
   );
+}
+
+const LAST_SYNC_KEY = "run.sync.lastSeen";
+
+function readLastSyncSeen(): { id: number; status: string } | null {
+  try {
+    const raw = localStorage.getItem(LAST_SYNC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { id?: unknown; status?: unknown };
+    if (typeof parsed.id !== "number" || typeof parsed.status !== "string") return null;
+    return { id: parsed.id, status: parsed.status };
+  } catch {
+    return null;
+  }
+}
+
+function writeLastSyncSeen(value: { id: number; status: string }): void {
+  try {
+    localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(value));
+  } catch {
+    // Private browsing or a full quota must not break the shell.
+  }
 }
 
 function NavLink({ item }: { item: NavItem }) {

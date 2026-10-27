@@ -5,6 +5,8 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 
+import { notifyToast } from "@/lib/toast";
+
 import {
   api,
   type ActionUpsert,
@@ -46,6 +48,7 @@ export const queryKeys = {
   briefing: ["briefing"] as const,
   paceHr: (days: number) => ["comparables", "pace-hr", days] as const,
   recovery: (days: number) => ["recovery", days] as const,
+  backups: ["backups"] as const,
 };
 
 function invalidatePlanData(queryClient: QueryClient) {
@@ -194,7 +197,7 @@ export function useImportFiles() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (files: File[]) => api.uploadFiles(files),
-    onSuccess: () => {
+    onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.imports });
       void queryClient.invalidateQueries({ queryKey: ["activities"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
@@ -206,6 +209,22 @@ export function useImportFiles() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
       void queryClient.invalidateQueries({ queryKey: queryKeys.training });
       invalidatePlanData(queryClient);
+      const failed = response.results.filter((item) => item.status === "error").length;
+      notifyToast({
+        tone: failed ? "warning" : "success",
+        titleKey: "toast.import.title",
+        messageKey: failed ? "toast.import.partial" : "toast.import.success",
+        values: { imported: response.results.length - failed, failed },
+        href: "/imports",
+        linkKey: "toast.import.open",
+      });
+    },
+    onError: (error) => {
+      notifyToast({
+        tone: "danger",
+        titleKey: "toast.import.errorTitle",
+        message: error instanceof Error ? error.message : undefined,
+      });
     },
   });
 }
@@ -460,5 +479,40 @@ export function useRecovery(days = 90) {
     queryKey: queryKeys.recovery(days),
     queryFn: () => api.recovery(days),
     staleTime: 60_000,
+  });
+}
+
+export function useBackupStatus() {
+  return useQuery({
+    queryKey: queryKeys.backups,
+    queryFn: api.backupStatus,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useValidateBackup() {
+  return useMutation({
+    mutationFn: (file: File) => api.validateBackup(file),
+  });
+}
+
+export function useStageRestore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => api.stageRestore(file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.backups });
+    },
+  });
+}
+
+export function useCancelPendingRestore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.cancelPendingRestore,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.backups });
+    },
   });
 }
