@@ -17,6 +17,7 @@ from app.api import (
     analysis,
     audit,
     auth,
+    briefing,
     imports,
     performance,
     progress,
@@ -116,6 +117,7 @@ api.include_router(imports.router)
 api.include_router(system.router)
 api.include_router(progress.router)
 api.include_router(tracking.router)
+api.include_router(briefing.router)
 app.include_router(api)
 
 

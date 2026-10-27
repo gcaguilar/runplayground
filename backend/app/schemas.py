@@ -979,6 +979,72 @@ class TrackingOverview(ApiModel):
     notes: list[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Weekly briefing (M5)
+
+
+class BriefingTrendOut(ApiModel):
+    window_days: int
+    as_of: date | None = None
+    current_s: float | None = None
+    previous_s: float | None = None
+    change_s: float | None = None
+    change_pct: float | None = None
+    status: str
+
+
+class BriefingDistanceOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    time_s: float | None = None
+    low_s: float | None = None
+    high_s: float | None = None
+    goal_time_s: float | None = None
+    goal_gap_s: float | None = None
+    confidence: str
+
+
+class BriefingSignalOut(ApiModel):
+    key: str
+    score: float | None = None
+    status: str
+    confidence: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class BriefingInsightOut(ApiModel):
+    key: str
+    dimension_key: str | None = None
+    value: float | None = None
+    reasons: list[str] = Field(default_factory=list)
+
+
+class BriefingActionOut(ApiModel):
+    dimension_key: str
+    score: float | None = None
+    reasons: list[str] = Field(default_factory=list)
+
+
+class BriefingView(ApiModel):
+    generated_at: datetime
+    model_version: str
+    status: str
+    as_of: date
+    confidence: str
+    confidence_score: float
+    fitness_anchor: FitnessAnchorOut | None = None
+    trends: list[BriefingTrendOut] = Field(default_factory=list)
+    distances: list[BriefingDistanceOut] = Field(default_factory=list)
+    signals: list[BriefingSignalOut] = Field(default_factory=list)
+    headline: str
+    headline_params: dict[str, float | int | str | None] = Field(default_factory=dict)
+    improvement: BriefingInsightOut | None = None
+    limitation: BriefingInsightOut | None = None
+    action: BriefingActionOut | None = None
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class AuditReport(ApiModel):
     score: int
     generated_at: datetime
