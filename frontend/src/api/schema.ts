@@ -398,6 +398,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/performance/goals/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Performance Goal Archive */
+        get: operations["performance_goal_archive_api_v1_performance_goals_archive_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/performance/goals/{distance_key}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close Performance Goal */
+        post: operations["close_performance_goal_api_v1_performance_goals__distance_key__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/performance/goals/{distance_key}": {
         parameters: {
             query?: never;
@@ -2400,6 +2434,54 @@ export interface components {
             expires_at?: number | null;
             /** Expires In Seconds */
             expires_in_seconds?: number | null;
+        };
+        /** GoalArchiveOut */
+        GoalArchiveOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Target Time S */
+            target_time_s: number;
+            /** Target Date */
+            target_date?: string | null;
+            /** Race Name */
+            race_name?: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Closed At
+             * Format: date-time
+             */
+            closed_at: string;
+            /** Outcome Time S */
+            outcome_time_s?: number | null;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Activity Name */
+            activity_name?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Prediction Time S */
+            prediction_time_s?: number | null;
+            /** Outcome Vs Prediction S */
+            outcome_vs_prediction_s?: number | null;
+            /** Outcome Vs Target S */
+            outcome_vs_target_s?: number | null;
+        };
+        /** GoalCloseRequest */
+        GoalCloseRequest: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "achieved" | "missed" | "cancelled";
+            /** Outcome Time S */
+            outcome_time_s?: number | null;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Note */
+            note?: string | null;
         };
         /** GoalHistoryPointOut */
         GoalHistoryPointOut: {
@@ -4982,6 +5064,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GoalOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    performance_goal_archive_api_v1_performance_goals_archive_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalArchiveOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    close_performance_goal_api_v1_performance_goals__distance_key__close_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                distance_key: string;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCloseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalArchiveOut"];
                 };
             };
             /** @description Validation Error */
