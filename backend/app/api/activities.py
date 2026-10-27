@@ -16,10 +16,12 @@ from app.schemas import (
     ActivityOut,
     ActivityPatch,
     ActivityStreams,
+    ComparisonView,
     LapOut,
     SourceOut,
     StreamPoint,
 )
+from app.services.comparison import build_comparison
 from app.services.performance import refresh_activity_efforts
 
 router = APIRouter(prefix="/activities", tags=["activities"])
@@ -91,6 +93,20 @@ def sports_breakdown(db: Session = Depends(get_db)) -> list[dict]:
         {"sport": sport, "activities": count, "distance_m": distance or 0}
         for sport, count, distance in rows
     ]
+
+
+@router.get("/compare", response_model=ComparisonView)
+def compare_activities(
+    left_id: int = Query(..., ge=1),
+    right_id: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+) -> ComparisonView:
+    if left_id == right_id:
+        raise HTTPException(status_code=422, detail="Choose two different activities")
+    comparison = build_comparison(db, left_id, right_id)
+    if comparison is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    return comparison
 
 
 @router.get("/{activity_id}", response_model=ActivityDetail)

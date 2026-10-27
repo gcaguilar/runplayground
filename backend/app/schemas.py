@@ -129,6 +129,72 @@ class ActivityStreams(ApiModel):
     points: list[StreamPoint]
 
 
+# ---------------------------------------------------------------------------
+# Workout comparison (M7)
+
+
+class ComparisonSideOut(ApiModel):
+    activity_id: int
+    name: str
+    sport: str
+    sub_sport: str | None = None
+    start_time_utc: datetime
+    distance_m: float
+    duration_s: float
+    pace_s_per_km: float | None = None
+    avg_hr: int | None = None
+    max_hr: int | None = None
+    cadence_spm: float | None = None
+    power_w: float | None = None
+    elevation_gain_m: float | None = None
+    is_race: bool
+    has_streams: bool
+    has_gps: bool
+    training_effect: float | None = None
+    training_load: float | None = None
+
+
+class ComparisonMetricOut(ApiModel):
+    key: str
+    left: float | None = None
+    right: float | None = None
+    delta: float | None = None
+    delta_pct: float | None = None
+    direction: str = "context"
+    better: str = "unknown"
+
+
+class ComparisonSplitOut(ApiModel):
+    index: int
+    distance_m: float
+    left_pace_s_per_km: float | None = None
+    right_pace_s_per_km: float | None = None
+    left_hr: int | None = None
+    right_hr: int | None = None
+    pace_delta_s: float | None = None
+
+
+class ComparisonInsightOut(ApiModel):
+    key: str
+    value: float | None = None
+    params: dict[str, float | int | str | None] = Field(default_factory=dict)
+
+
+class ComparisonView(ApiModel):
+    generated_at: datetime
+    model_version: str
+    status: str
+    comparability: float
+    left: ComparisonSideOut
+    right: ComparisonSideOut
+    metrics: list[ComparisonMetricOut] = Field(default_factory=list)
+    splits: list[ComparisonSplitOut] = Field(default_factory=list)
+    insights: list[ComparisonInsightOut] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class ActivityPatch(ApiModel):
     name: str | None = Field(default=None, max_length=255)
     is_race: bool | None = None
