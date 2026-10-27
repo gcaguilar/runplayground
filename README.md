@@ -41,6 +41,10 @@ metric dump.
   prediction in force at the time; goals show their 28-day trend and gap.
   Recommendations can be marked pending, in progress or completed, with a
   baseline score so later improvement, stability or decline is explicit.
+- **Association analysis**: weekly volume, sessions, longest run, hard
+  sessions, active days and estimated load are paired with the change in the
+  10K fitness anchor. Each factor reports its correlation, a median split and
+  the number of paired weeks; it is explicitly an association, not a cause.
 - **Diagnostics** across six dimensions: volume, consistency, intensity, load,
   recovery and specificity. Every score shows its status, confidence, evidence
   and reason codes; missing data lowers confidence instead of inventing a value.
@@ -96,6 +100,12 @@ for and what the model predicted at that moment. Re-saving the same target
 does not create noise. Tracked actions store a baseline diagnostic score when
 they are created, so a later review can say whether the related dimension
 improved, stayed stable or got worse without claiming causality.
+
+The association panel pairs each week of training with the fitness change
+observed in that week's snapshot. It reports Pearson's correlation and the
+average improvement when the factor was above or below its median. It needs at
+least four paired weeks and labels small samples explicitly; a strong
+correlation is still not evidence that the factor caused the improvement.
 
 ## Quick start
 
