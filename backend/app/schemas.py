@@ -767,6 +767,19 @@ class ScenarioProjectionOut(ApiModel):
     confidence_score: float
 
 
+class ForecastGoalOut(ApiModel):
+    distance_key: str
+    distance_m: float
+    name: str | None = None
+    source: str
+    target_time_s: float | None = None
+    target_date: date | None = None
+    days_to_target: int | None = None
+    baseline_gap_s: float | None = None
+    baseline_gap_pct: float | None = None
+    baseline_status: str = "unknown"
+
+
 class ForecastBaselineOut(ApiModel):
     anchor_time_s: float | None = None
     anchor_low_s: float | None = None
@@ -786,6 +799,9 @@ class ScenarioOut(ApiModel):
     anchor_high_s: float | None = None
     delta_s: float | None = None
     delta_pct: float | None = None
+    goal_gap_s: float | None = None
+    goal_gap_pct: float | None = None
+    goal_status: str = "unknown"
     confidence: str
     confidence_score: float
     confidence_reasons: list[str] = Field(default_factory=list)
@@ -801,6 +817,7 @@ class ForecastView(ApiModel):
     focus_distance_key: str
     focus_distance_m: float
     focus_source: str
+    goal: ForecastGoalOut | None = None
     baseline: ForecastBaselineOut
     scenarios: list[ScenarioOut] = Field(default_factory=list)
     training: dict[str, float | int | None] = Field(default_factory=dict)
@@ -851,6 +868,15 @@ class GoalHistoryPointOut(ApiModel):
     gap_s: float | None = None
 
 
+class GoalResultOut(ApiModel):
+    date: date
+    time_s: float
+    activity_id: int
+    activity_name: str
+    is_race: bool
+    source: str
+
+
 class GoalRevisionOut(ApiModel):
     created_at: datetime
     target_time_s: float
@@ -883,6 +909,7 @@ class GoalTrackingOut(ApiModel):
     days_to_target: int | None = None
     last_reviewed_at: datetime
     history: list[GoalHistoryPointOut] = Field(default_factory=list)
+    results: list[GoalResultOut] = Field(default_factory=list)
     revisions: list[GoalRevisionOut] = Field(default_factory=list)
 
 

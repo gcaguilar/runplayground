@@ -38,6 +38,7 @@ from app.schemas import (
     ActionSuggestionOut,
     ActionUpsert,
     GoalHistoryPointOut,
+    GoalResultOut,
     GoalRevisionOut,
     GoalTrackingOut,
     PredictionAccuracyOut,
@@ -256,6 +257,44 @@ def _goal_history(
     return points
 
 
+def _results_for_distance(
+    db: Session,
+    distance_m: float,
+    start: date,
+    end: date,
+    offset: timedelta,
+) -> list[GoalResultOut]:
+    rows = db.execute(
+        select(BestEffort, Activity)
+        .join(Activity, BestEffort.activity_id == Activity.id)
+        .where(
+            Activity.sport == "running",
+            Activity.start_time_utc
+            >= datetime(start.year, start.month, start.day) - offset - timedelta(days=2),
+            Activity.start_time_utc
+            <= datetime(end.year, end.month, end.day) - offset + timedelta(days=1),
+            BestEffort.distance_m == distance_m,
+            Activity.duration_s > 0,
+        )
+        .order_by(Activity.start_time_utc)
+    ).all()
+    output: list[GoalResultOut] = []
+    for _effort, activity in rows:
+        if activity.sub_sport == "trail_running":
+            continue
+        output.append(
+            GoalResultOut(
+                date=(as_utc(activity.start_time_utc) + offset).date(),
+                time_s=round(activity.duration_s, 1),
+                activity_id=activity.id,
+                activity_name=activity.name,
+                is_race=activity.is_race,
+                source="race" if activity.is_race else "effort",
+            )
+        )
+    return output[-100:]
+
+
 def _goal_trend(
     history: list[GoalHistoryPointOut],
     current_time_s: float | None,
@@ -291,6 +330,7 @@ def _goal_out(
     goal: RaceGoal,
     current: tuple[float | None, float | None, float | None, str | None],
     history: list[GoalHistoryPointOut],
+    results: list[GoalResultOut],
     revisions: list[GoalRevision],
     today: date,
 ) -> GoalTrackingOut:
@@ -359,6 +399,7 @@ def _goal_out(
         days_to_target=days_to_target,
         last_reviewed_at=goal.updated_at,
         history=history,
+        results=results,
         revisions=revision_out,
     )
 
@@ -523,6 +564,7 @@ def build_tracking(
                 goal,
                 _prediction_for_distance(overview, goal.distance_m),
                 _goal_history(snapshots, key, goal.target_time_s),
+                _results_for_distance(db, goal.distance_m, start, today, offset),
                 revisions,
                 today,
             )

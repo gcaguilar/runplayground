@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from app.models import Activity, PlannedRace
 from app.schemas import (
     ForecastBaselineOut,
+    ForecastGoalOut,
     ForecastView,
     ScenarioOut,
     ScenarioProjectionOut,
@@ -83,6 +84,16 @@ SCENARIO_SIGMA = {
 }
 SCENARIO_KEYS = ("maintain", "consistency", "specificity", "recovery")
 DISTANCE_KEYS = {key for key, _distance in STANDARD_DISTANCES}
+
+
+@dataclass
+class FocusTarget:
+    distance_key: str
+    distance_m: float
+    source: str
+    target_time_s: float | None = None
+    target_date: date | None = None
+    name: str | None = None
 
 
 @dataclass
@@ -195,10 +206,17 @@ def _focus(
     db: Session,
     diagnostics,
     today: date,
-) -> tuple[str, float, str]:
+) -> FocusTarget:
     goal = diagnostics.goal
     if goal is not None and goal.target_date is not None and goal.target_date >= today:
-        return _distance_key(goal.distance_m), goal.distance_m, "goal"
+        return FocusTarget(
+            distance_key=_distance_key(goal.distance_m),
+            distance_m=goal.distance_m,
+            source="goal",
+            target_time_s=goal.target_time_s,
+            target_date=goal.target_date,
+            name=goal.race_name,
+        )
 
     race = db.scalar(
         select(PlannedRace)
@@ -206,11 +224,46 @@ def _focus(
         .order_by(PlannedRace.race_date, PlannedRace.id)
     )
     if race is not None:
-        return _distance_key(race.distance_m), race.distance_m, "race"
+        return FocusTarget(
+            distance_key=_distance_key(race.distance_m),
+            distance_m=race.distance_m,
+            source="race",
+            target_time_s=race.goal_time_s,
+            target_date=race.race_date,
+            name=race.name,
+        )
 
     if goal is not None:
-        return _distance_key(goal.distance_m), goal.distance_m, "goal"
-    return FOCUS_DEFAULT, 10000.0, "default"
+        return FocusTarget(
+            distance_key=_distance_key(goal.distance_m),
+            distance_m=goal.distance_m,
+            source="goal",
+            target_time_s=goal.target_time_s,
+            target_date=goal.target_date,
+            name=goal.race_name,
+        )
+    return FocusTarget(
+        distance_key=FOCUS_DEFAULT,
+        distance_m=10000.0,
+        source="default",
+    )
+
+
+def _goal_gap(
+    predicted_s: float | None,
+    target_s: float | None,
+) -> tuple[float | None, float | None, str]:
+    if predicted_s is None or target_s is None:
+        return None, None, "unknown"
+    gap = round(target_s - predicted_s, 1)
+    gap_pct = round(gap / max(1.0, predicted_s) * 100.0, 1)
+    if predicted_s <= target_s:
+        status = "ahead"
+    elif predicted_s <= target_s * 1.02:
+        status = "close"
+    else:
+        status = "behind"
+    return gap, gap_pct, status
 
 
 def _consistency_gap(state: TrainingState) -> float:
@@ -454,12 +507,35 @@ def build_forecast(
     overview = build_overview(db, reference)
     store_snapshot(db, overview)
     state = _training_state(db, diagnostics, today, offset)
-    focus_key, focus_distance, focus_source = _focus(db, diagnostics, today)
+    focus = _focus(db, diagnostics, today)
+    focus_key = focus.distance_key
+    focus_distance = focus.distance_m
+    focus_source = focus.source
 
     baseline = _baseline(overview)
     baseline_by_key = {item.distance_key: item for item in baseline.distances}
     focus_baseline = baseline_by_key.get(focus_key)
     anchor = overview.fitness_anchor
+    goal_gap, goal_gap_pct, goal_status = _goal_gap(
+        focus_baseline.time_s if focus_baseline else None,
+        focus.target_time_s,
+    )
+    goal = (
+        ForecastGoalOut(
+            distance_key=focus_key,
+            distance_m=focus_distance,
+            name=focus.name,
+            source=focus.source,
+            target_time_s=focus.target_time_s,
+            target_date=focus.target_date,
+            days_to_target=(focus.target_date - today).days if focus.target_date else None,
+            baseline_gap_s=goal_gap,
+            baseline_gap_pct=goal_gap_pct,
+            baseline_status=goal_status,
+        )
+        if focus.target_time_s is not None
+        else None
+    )
 
     scenarios: list[ScenarioOut] = []
     base_score = anchor.confidence_score if anchor else 0.2
@@ -504,6 +580,10 @@ def build_forecast(
             focus_projection.confidence = label
             focus_projection.confidence_score = score
 
+        scenario_gap, scenario_gap_pct, scenario_goal_status = _goal_gap(
+            focus_projection.time_s if focus_projection else None,
+            focus.target_time_s,
+        )
         scenarios.append(
             ScenarioOut(
                 key=scenario,
@@ -515,6 +595,9 @@ def build_forecast(
                 anchor_high_s=focus_projection.high_s if focus_projection else None,
                 delta_s=focus_projection.delta_s if focus_projection else None,
                 delta_pct=focus_projection.delta_pct if focus_projection else None,
+                goal_gap_s=scenario_gap,
+                goal_gap_pct=scenario_gap_pct,
+                goal_status=scenario_goal_status,
                 confidence=label,
                 confidence_score=score,
                 confidence_reasons=reasons,
@@ -534,6 +617,8 @@ def build_forecast(
         warnings.append("no_load_data")
     if focus_source == "default":
         warnings.append("no_goal")
+    if goal is not None and goal.days_to_target is not None and goal.days_to_target > weeks * 7:
+        warnings.append("horizon_before_goal")
 
     status = "ok" if anchor is not None and focus_baseline and focus_baseline.time_s else "partial"
     if anchor is None:
@@ -556,6 +641,7 @@ def build_forecast(
         focus_distance_key=focus_key,
         focus_distance_m=focus_distance,
         focus_source=focus_source,
+        goal=goal,
         baseline=baseline,
         scenarios=scenarios,
         training={

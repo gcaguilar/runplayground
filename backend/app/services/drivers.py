@@ -286,7 +286,7 @@ def build_drivers(
     if not fitness_weeks:
         warnings.append("no_snapshots")
     elif len(fitness_weeks) < 6:
-        warnings.append("short_history")
+        warnings.append("short_driver_history")
     if len(pairs) < 6:
         warnings.append("few_paired_weeks")
     if not any(week.sessions > 0 for week in weeks):
