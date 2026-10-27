@@ -2378,6 +2378,79 @@
         }
       }
     },
+    "/api/v1/recovery": {
+      "get": {
+        "tags": [
+          "recovery"
+        ],
+        "summary": "Recovery",
+        "operationId": "recovery_api_v1_recovery_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 730,
+              "minimum": 7,
+              "default": 90,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/comparables/pace-hr": {
       "get": {
         "tags": [
@@ -8778,6 +8851,189 @@
           "duration_s"
         ],
         "title": "RaceCandidate"
+      },
+      "RecoveryMetricOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "latest_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Value"
+          },
+          "latest_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Date"
+          },
+          "avg_7d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg 7D"
+          },
+          "avg_28d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg 28D"
+          },
+          "change_28d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change 28D"
+          },
+          "change_28d_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change 28D Pct"
+          },
+          "samples": {
+            "type": "integer",
+            "title": "Samples",
+            "default": 0
+          },
+          "coverage_days": {
+            "type": "integer",
+            "title": "Coverage Days",
+            "default": 0
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/RecoveryMetricPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "unit"
+        ],
+        "title": "RecoveryMetricOut"
+      },
+      "RecoveryMetricPointOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "value"
+        ],
+        "title": "RecoveryMetricPointOut"
+      },
+      "RecoveryOverview": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "imported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported At"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/RecoveryMetricOut"
+            },
+            "type": "array",
+            "title": "Metrics"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "days",
+          "status"
+        ],
+        "title": "RecoveryOverview"
       },
       "ReportNarrativeOut": {
         "properties": {

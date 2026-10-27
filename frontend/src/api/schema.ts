@@ -555,6 +555,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recovery */
+        get: operations["recovery_api_v1_recovery_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/comparables/pace-hr": {
         parameters: {
             query?: never;
@@ -2517,6 +2534,69 @@ export interface components {
             /** Duration S */
             duration_s: number;
         };
+        /** RecoveryMetricOut */
+        RecoveryMetricOut: {
+            /** Key */
+            key: string;
+            /** Unit */
+            unit: string;
+            /** Latest Value */
+            latest_value?: number | null;
+            /** Latest Date */
+            latest_date?: string | null;
+            /** Avg 7D */
+            avg_7d?: number | null;
+            /** Avg 28D */
+            avg_28d?: number | null;
+            /** Change 28D */
+            change_28d?: number | null;
+            /** Change 28D Pct */
+            change_28d_pct?: number | null;
+            /**
+             * Samples
+             * @default 0
+             */
+            samples: number;
+            /**
+             * Coverage Days
+             * @default 0
+             */
+            coverage_days: number;
+            /** Points */
+            points?: components["schemas"]["RecoveryMetricPointOut"][];
+        };
+        /** RecoveryMetricPointOut */
+        RecoveryMetricPointOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Value */
+            value: number;
+        };
+        /** RecoveryOverview */
+        RecoveryOverview: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Days */
+            days: number;
+            /** Status */
+            status: string;
+            /** Imported At */
+            imported_at?: string | null;
+            /** Metrics */
+            metrics?: components["schemas"]["RecoveryMetricOut"][];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
         /** ReportNarrativeOut */
         ReportNarrativeOut: {
             /** Key */
@@ -4334,6 +4414,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recovery_api_v1_recovery_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryOverview"];
+                };
             };
             /** @description Validation Error */
             422: {
