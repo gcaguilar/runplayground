@@ -5,22 +5,23 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M5 — weekly briefing.** The dashboard now opens with the current
+> **Status: M6 — comparable training.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
-> the next action. Sync, import,
-> activities, weekly summary and data audit work. Performance turns your
-> efforts into 5K/10K/half/marathon predictions with ranges and confidence.
-> Diagnostics scores six training dimensions and explains every limiter;
-> Training turns that reading and your goal into a conservative seven-day
-> plan. Progress adds trends, personal bests, goals and named races; the
-> calendar merges real activities, suggested sessions and planned races;
-> reports are generated on demand for any week or month. Scenarios compare
-> four 8- or 12-week training hypotheses with explicit assumptions and capped
-> effects and the projected goal gap; Tracking compares past predictions
-> with real results, follows goal revisions and training actions over time,
-> and pairs training factors with fitness changes as associations. The
-> briefing composes those views instead of repeating them.
+> the next action. Sync, import, activities, weekly summary and data audit
+> work. Performance turns your efforts into 5K/10K/half/marathon predictions
+> with ranges and confidence. Diagnostics scores six training dimensions and
+> explains every limiter; Training turns that reading and your goal into a
+> conservative seven-day plan. Progress adds trends, personal bests, goals and
+> named races, plus a pace–heart-rate comparison that groups similar aerobic
+> runs and asks whether you are faster at the same effort. The calendar merges
+> real activities, suggested sessions and planned races; reports are generated
+> on demand for any week or month. Scenarios compare four 8- or 12-week
+> training hypotheses with explicit assumptions, capped effects and the
+> projected goal gap; Tracking compares past predictions with real results,
+> follows goal revisions and training actions, and pairs training factors with
+> fitness changes as associations. The briefing composes those views instead
+> of repeating them.
 
 ## What works today
 
@@ -72,6 +73,11 @@ metric dump.
   10K fitness trend with its 80% range, streak and active-day stats, personal
   bests per standard distance, goal progress against the B forecast, and
   period highlights.
+- **Pace–heart-rate comparison**: aerobic runs are grouped by distance band
+  and terrain. Each group removes the within-group heart-rate effect, compares
+  the earlier and recent halves, and reports the pace change at the same heart
+  rate with a confidence score. Hard sessions and races are excluded; narrow
+  HR ranges or small samples lower confidence instead of producing a trend.
 - **Calendar and race planning**: real activities, suggested sessions from the
   current plan and several named races in one Monday–Sunday grid. Races carry
   priority A/B/C, an optional time goal, a location, notes and an optional link
@@ -121,6 +127,14 @@ observed in that week's snapshot. It reports Pearson's correlation and the
 average improvement when the factor was above or below its median. It needs at
 least four paired weeks and labels small samples explicitly; a strong
 correlation is still not evidence that the factor caused the improvement.
+
+The pace–heart-rate comparison only uses aerobic runs of at least 4 km, groups
+them by distance and terrain, and fits pace against heart rate inside each
+group. It then compares the median heart-rate-adjusted pace of the earlier and
+recent halves. Races and hard sessions are excluded because they answer a
+different question. A narrow heart-rate range, fewer than six sessions or a
+span under four weeks lowers confidence; the panel shows a provisional
+sentence instead of a definitive gain.
 
 The dashboard briefing is deliberately rule-based. It compares the current 10K
 anchor with the closest snapshot before the 4-, 8- and 12-week cutoffs, picks
@@ -392,7 +406,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M2** | Diagnostics and training analysis: six dimensions, intensity distribution, load, limiting factors, recommendations. |
 | **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. |
 | **M4** | Future scenarios, continuous tracking of predictions, goals and actions. |
-| **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. **Current.** |
+| **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. |
+| **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. **Current.** |
 
 ## License and disclaimer
 
