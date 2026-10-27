@@ -3,6 +3,7 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  ArrowLeftRight,
   CalendarDays,
   Database,
   Dumbbell,
@@ -43,6 +44,7 @@ type NavItem = {
     | "/diagnostics"
     | "/training"
     | "/activities"
+    | "/compare"
     | "/imports"
     | "/data"
     | "/settings";
@@ -65,12 +67,14 @@ const primaryNav: NavItem[] = [
 
 const libraryNav: NavItem[] = [
   { to: "/activities", label: "nav.activities", icon: Activity },
+  { to: "/compare", label: "nav.compare", icon: ArrowLeftRight },
   { to: "/imports", label: "nav.imports", icon: Upload },
   { to: "/data", label: "nav.data", icon: Database },
 ];
 
 function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/activities")) return "nav.activities";
+  if (pathname.startsWith("/compare")) return "nav.compare";
   if (pathname.startsWith("/imports")) return "nav.imports";
   if (pathname.startsWith("/data")) return "nav.data";
   if (pathname.startsWith("/settings")) return "nav.settings";

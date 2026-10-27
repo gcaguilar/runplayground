@@ -14,6 +14,7 @@ import { BarChart3, HeartPulse, TrendingUp } from "lucide-react";
 
 import type {
   AnalysisLoad,
+  ComparisonSplit,
   FitnessPoint,
   GarminMetricPoint,
   GoalHistoryPoint,
@@ -1230,6 +1231,105 @@ export function PaceHrChart({ group }: { group: PaceHrGroup }) {
       option={option}
       opts={chartOpts}
       style={{ height: 300, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function ComparisonSplitsChart({ splits }: { splits: ComparisonSplit[] }) {
+  const { units, t } = useI18n();
+  const labels = splits.map((split) => `${split.index}`);
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 22, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const index = list[0]?.dataIndex ?? 0;
+          const split = splits[index];
+          if (!split) return "";
+          return `<div style="font-weight:700;margin-bottom:4px">${t("compare.chart.km", {
+            km: split.index,
+          })}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("compare.chart.left")}</span>
+              <strong style="margin-left:auto">${formatPace(split.left_pace_s_per_km, units)}</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ORANGE};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("compare.chart.right")}</span>
+              <strong style="margin-left:auto">${formatPace(split.right_pace_s_per_km, units)}</strong>
+            </div>`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        name: t("compare.chart.kmAxis"),
+        nameTextStyle: { color: TEXT, fontSize: 10 },
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+        },
+      },
+      yAxis: {
+        type: "value",
+        inverse: true,
+        scale: true,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatPace(value, units, { suffix: false }),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          name: t("compare.chart.left"),
+          type: "line",
+          data: splits.map((split) => split.left_pace_s_per_km),
+          showSymbol: true,
+          symbolSize: 4,
+          connectNulls: true,
+          lineStyle: { color: ACCENT, width: 2 },
+          itemStyle: { color: ACCENT },
+        },
+        {
+          name: t("compare.chart.right"),
+          type: "line",
+          data: splits.map((split) => split.right_pace_s_per_km),
+          showSymbol: true,
+          symbolSize: 4,
+          connectNulls: true,
+          lineStyle: { color: ORANGE, width: 2 },
+          itemStyle: { color: ORANGE },
+        },
+      ],
+    }),
+    [labels, splits, t, units],
+  );
+
+  if (splits.length < 2) return null;
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 240, width: "100%" }}
       notMerge
       lazyUpdate
     />

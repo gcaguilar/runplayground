@@ -3,6 +3,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import {
   Activity as ActivityIcon,
   ArrowLeft,
+  ArrowLeftRight,
   Check,
   Clock3,
   Flame,
@@ -225,6 +226,14 @@ export function ActivityDetailPage() {
         </div>
 
         <div className="detail-hero__actions">
+          <Link
+            to="/compare"
+            search={{ left: data.id }}
+            className="button button--secondary button--sm"
+          >
+            <ArrowLeftRight size={14} aria-hidden="true" />
+            {t("nav.compare")}
+          </Link>
           {!editing ? (
             <Button variant="secondary" size="sm" onClick={startEditing}>
               <Pencil size={14} aria-hidden="true" />

@@ -9,6 +9,7 @@ import { useI18n } from "@/i18n";
 import { ActivitiesPage } from "@/pages/ActivitiesPage";
 import { CalendarPage } from "@/pages/CalendarPage";
 import { ActivityDetailPage } from "@/pages/ActivityDetailPage";
+import { ComparePage } from "@/pages/ComparePage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DataQualityPage } from "@/pages/DataQualityPage";
 import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
@@ -148,6 +149,17 @@ const activityDetailRoute = createRoute({
   component: ActivityDetailPage,
 });
 
+const compareRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compare",
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = search.left;
+    const value = typeof raw === "number" ? raw : typeof raw === "string" ? Number(raw) : NaN;
+    return { left: Number.isFinite(value) && value > 0 ? value : undefined };
+  },
+  component: ComparePage,
+});
+
 const importsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/imports",
@@ -178,6 +190,7 @@ const routeTree = rootRoute.addChildren([
   trainingRoute,
   activitiesRoute,
   activityDetailRoute,
+  compareRoute,
   importsRoute,
   dataRoute,
   settingsRoute,

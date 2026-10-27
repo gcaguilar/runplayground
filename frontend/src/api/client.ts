@@ -91,6 +91,11 @@ export type GoalRevision = Schemas["GoalRevisionOut"];
 export type TrackedAction = Schemas["TrackedActionOut"];
 export type ActionUpsert = Schemas["ActionUpsert"];
 export type ActionSuggestion = Schemas["ActionSuggestionOut"];
+export type ComparisonView = Schemas["ComparisonView"];
+export type ComparisonSide = Schemas["ComparisonSideOut"];
+export type ComparisonMetric = Schemas["ComparisonMetricOut"];
+export type ComparisonSplit = Schemas["ComparisonSplitOut"];
+export type ComparisonInsight = Schemas["ComparisonInsightOut"];
 export type PaceHrAnalysis = Schemas["PaceHrAnalysisOut"];
 export type PaceHrGroup = Schemas["PaceHrGroupOut"];
 export type PaceHrPoint = Schemas["PaceHrPointOut"];
@@ -214,6 +219,13 @@ export const api = {
     request<ActivityList>(`/activities${queryString(params)}`),
 
   activity: (id: number | string) => request<ActivityDetail>(`/activities/${id}`),
+
+  compareActivities: (leftId: number | string, rightId: number | string) =>
+    request<ComparisonView>(
+      `/activities/compare?left_id=${encodeURIComponent(String(leftId))}&right_id=${encodeURIComponent(
+        String(rightId),
+      )}`,
+    ),
 
   streams: (id: number | string, maxPoints = 1500) =>
     request<ActivityStreams>(`/activities/${id}/streams?max_points=${maxPoints}`),

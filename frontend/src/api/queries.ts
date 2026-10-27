@@ -23,6 +23,8 @@ export const queryKeys = {
   activities: (params: ActivityListParams) => ["activities", params] as const,
   activity: (id: number | string) => ["activity", String(id)] as const,
   streams: (id: number | string) => ["activity", String(id), "streams"] as const,
+  comparison: (leftId: number | string, rightId: number | string) =>
+    ["comparison", String(leftId), String(rightId)] as const,
   audit: ["audit"] as const,
   sync: ["sync"] as const,
   imports: ["imports"] as const,
@@ -97,6 +99,20 @@ export function useActivity(id: number | string | undefined) {
   });
 }
 
+export function useComparison(leftId?: number | string, rightId?: number | string) {
+  return useQuery({
+    queryKey: queryKeys.comparison(leftId ?? "none", rightId ?? "none"),
+    queryFn: () => api.compareActivities(leftId as number | string, rightId as number | string),
+    enabled:
+      leftId !== undefined &&
+      leftId !== "" &&
+      rightId !== undefined &&
+      rightId !== "" &&
+      String(leftId) !== String(rightId),
+    staleTime: 60_000,
+  });
+}
+
 export function useStreams(id: number | string | undefined) {
   return useQuery({
     queryKey: queryKeys.streams(id ?? "none"),
@@ -152,6 +168,7 @@ export function usePatchActivity() {
       void queryClient.invalidateQueries({ queryKey: ["activities"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
+      void queryClient.invalidateQueries({ queryKey: ["comparison"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
@@ -179,6 +196,7 @@ export function useImportFiles() {
       void queryClient.invalidateQueries({ queryKey: ["activities"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.audit });
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
+      void queryClient.invalidateQueries({ queryKey: ["comparison"] });
       void queryClient.invalidateQueries({ queryKey: queryKeys.system });
       void queryClient.invalidateQueries({ queryKey: queryKeys.performance });
       void queryClient.invalidateQueries({ queryKey: ["performance", "history"] });
