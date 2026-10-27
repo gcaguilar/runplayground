@@ -26,6 +26,7 @@ from app.parsers.fit import parse_fit
 from app.services.garmin import GarminApiError, GarminAuthError, GarminClient, GarminError
 from app.services.garmin_mapping import merge_fit_with_garmin, parsed_from_garmin
 from app.services.ingest import ingest_garmin
+from app.services.performance import build_overview, ensure_efforts, store_snapshot
 from app.services.state import set_state
 from app.utils import fingerprint, utcnow
 
@@ -198,6 +199,15 @@ def run_garmin_sync(db: Session, run_id: int, mode: str) -> None:
             },
         )
         db.commit()
+        # A sync is the most natural moment to close the day's prediction
+        # snapshot, even if nobody opens the dashboard. Failure here must not
+        # turn a successful sync into an error.
+        try:
+            ensure_efforts(db)
+            store_snapshot(db, build_overview(db))
+        except Exception as exc:  # noqa: BLE001 - snapshot is best effort
+            db.rollback()
+            logger.warning("Could not store performance snapshot after sync: %s", exc)
         logger.info("Garmin sync finished: %s", message)
     except (GarminAuthError, GarminError) as exc:
         _fail_run(db, run_id, str(exc))

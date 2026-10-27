@@ -57,7 +57,7 @@ from app.services.analysis import (
     target_weekly_distance,
     week_start,
 )
-from app.services.performance import build_overview, ensure_efforts
+from app.services.performance import build_overview, ensure_efforts, store_snapshot
 from app.services.performance_models import (
     STANDARD_DISTANCES,
     riegel_time,
@@ -646,6 +646,11 @@ def build_progress(
     races = _upcoming_races(db, overview, today, base_weekly)
     highlights = _highlights(current_activities, weeks, best_efforts, offset)
     warnings = _warnings(current_records, best_efforts, goals, races, consistency, fitness)
+
+    # Visiting progress is one of the natural daily check-ins in M4. Keep one
+    # prediction snapshot per day so tracking has a continuous series even when
+    # the performance page is never opened.
+    store_snapshot(db, overview)
 
     status = "ok" if current_records and consistency.weeks_with_data >= 2 else "insufficient"
     return ProgressOverview(

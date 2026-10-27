@@ -23,6 +23,7 @@ from app.api import (
     summary,
     sync,
     system,
+    tracking,
 )
 from app.auth import require_auth
 from app.config import configure_logging, get_settings
@@ -114,6 +115,7 @@ api.include_router(sync.router)
 api.include_router(imports.router)
 api.include_router(system.router)
 api.include_router(progress.router)
+api.include_router(tracking.router)
 app.include_router(api)
 
 

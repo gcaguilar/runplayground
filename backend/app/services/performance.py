@@ -11,6 +11,7 @@ from app.models import (
     Activity,
     BestEffort,
     ExternalMetric,
+    GoalRevision,
     PerformanceSnapshot,
     RaceGoal,
     StreamSample,
@@ -452,7 +453,60 @@ def upsert_goal(db: Session, distance_m: float, payload: GoalUpsert) -> GoalOut:
     goal.notes = payload.notes.strip() if payload.notes else None
     db.commit()
     db.refresh(goal)
+    _record_goal_revision(db, goal)
     return _goal_out(goal)
+
+
+def _record_goal_revision(db: Session, goal: RaceGoal) -> None:
+    """Append a revision only when the target itself changed.
+
+    Notes alone are not a target change; re-saving the same goal should not fill
+    the history with duplicate rows.
+    """
+
+    latest = db.scalar(
+        select(GoalRevision)
+        .where(GoalRevision.distance_m == goal.distance_m)
+        .order_by(GoalRevision.created_at.desc(), GoalRevision.id.desc())
+    )
+    if (
+        latest is not None
+        and abs(latest.target_time_s - goal.target_time_s) < 0.5
+        and latest.target_date == goal.target_date
+        and (latest.race_name or None) == (goal.race_name or None)
+    ):
+        return
+
+    overview = build_overview(db)
+    planning = next(
+        (
+            item.planning
+            for item in overview.distances
+            if abs(item.distance_m - goal.distance_m) / max(1.0, item.distance_m) <= 0.025
+        ),
+        None,
+    )
+    db.add(
+        GoalRevision(
+            distance_m=goal.distance_m,
+            target_time_s=goal.target_time_s,
+            target_date=goal.target_date,
+            race_name=goal.race_name,
+            notes=goal.notes,
+            prediction_time_s=planning.time_s if planning else None,
+            prediction_low_s=planning.low_s if planning else None,
+            prediction_high_s=planning.high_s if planning else None,
+            confidence=next(
+                (
+                    item.confidence
+                    for item in overview.distances
+                    if abs(item.distance_m - goal.distance_m) / max(1.0, item.distance_m) <= 0.025
+                ),
+                None,
+            ),
+        )
+    )
+    db.commit()
 
 
 def delete_goal(db: Session, distance_m: float) -> bool:
