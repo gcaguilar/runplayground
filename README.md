@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M8 — narrative reports.** The dashboard opens with the current
+> **Status: M9 — recovery context.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -25,7 +25,10 @@ metric dump.
 > they are comparable, and only reads the difference when the data supports it.
 > Reports now open with a derived period reading: the strongest measured
 > change, the current main limitation and the next action, with an explicit
-> fallback when there are not enough fitness snapshots.
+> fallback when there are not enough fitness snapshots. Recovery adds sleep,
+> HRV, resting heart rate, Body Battery and weight from the Garmin data
+> export; it is context only and never changes the fitness or diagnostics
+> scores.
 
 ## What works today
 
@@ -58,6 +61,11 @@ metric dump.
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
   the number of paired weeks; it is explicitly an association, not a cause.
+- **Recovery context**: sleep duration and score, HRV, resting heart rate,
+  Body Battery and weight imported from the Garmin data export. Each metric
+  shows its latest value, 7/28-day averages, 28-day change and coverage. The
+  page states explicitly that recovery is context and does not feed the
+  fitness, prediction or diagnostics models.
 - **Workout comparison**: two sessions side by side with distance, duration,
   pace, heart rate, cadence, power, elevation, training effect and load. The
   page scores comparability first, lists why it is limited, and only computes
@@ -144,6 +152,14 @@ diagnostics limiter and its recommended action, and state that the limitation
 belongs to the current profile. The reading is rebuilt on every request and
 never stored.
 
+Recovery metrics come from the Garmin export and stay deliberately separate
+from the performance models. The parser recognises sleep duration and score,
+HRV, resting heart rate, Body Battery and weight from the wellness JSON files,
+stores them as external metrics and tolerates nested or renamed fields. The
+Recovery page shows the latest value, averages, change and coverage; an
+incomplete or stale export lowers confidence instead of filling gaps. A bad
+night is never read as a loss of fitness.
+
 ### Comparing two workouts
 
 Comparison starts with a comparability check: different sports, a distance
@@ -227,8 +243,10 @@ imports any FIT files contained in the archive. Re-uploading the same ZIP is
 idempotent. These values appear as a separate Garmin reference; they do not
 feed the internal A/B prediction models or the diagnostics score.
 
-The dashboard syncs activities and their FIT files. Sleep, HRV, Body Battery
-and weight are still outside the current scope.
+The dashboard syncs activities and their FIT files. Sleep, HRV, resting heart
+rate, Body Battery and weight are read from the Garmin data export and shown
+as recovery context; they are not synced from the activity API and never change
+the performance or diagnostics scores.
 
 ### Try it without a watch
 
@@ -436,7 +454,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. |
 | **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. |
 | **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. |
-| **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. **Current.** |
+| **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. |
+| **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. **Current.** |
 
 ## License and disclaimer
 
