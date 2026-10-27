@@ -71,6 +71,9 @@ export type CalendarView = Schemas["CalendarView"];
 export type CalendarWeek = Schemas["CalendarWeekOut"];
 export type CalendarDay = Schemas["CalendarDayOut"];
 export type CalendarEntry = Schemas["CalendarEntryOut"];
+export type AdherenceOverview = Schemas["AdherenceOverview"];
+export type AdherenceWeek = Schemas["AdherenceWeekOut"];
+export type AdherenceSummary = Schemas["AdherenceSummaryOut"];
 export type ReportPeriod = "week" | "month";
 export type Report = Schemas["ReportOut"];
 export type ReportNarrative = Schemas["ReportNarrativeOut"];
@@ -346,6 +349,13 @@ export const api = {
   forecast: (weeks: 8 | 12 = 8) =>
     request<ForecastView>(
       `/forecast${queryString({
+        weeks,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  adherence: (weeks = 8) =>
+    request<AdherenceOverview>(
+      `/adherence${queryString({
         weeks,
         tz_offset_minutes: -new Date().getTimezoneOffset(),
       })}`,

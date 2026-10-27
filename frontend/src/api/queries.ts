@@ -34,6 +34,7 @@ export const queryKeys = {
   performanceReference: ["performance", "reference"] as const,
   diagnostics: ["diagnostics"] as const,
   training: ["training"] as const,
+  adherence: (weeks: number) => ["adherence", weeks] as const,
   progress: (days: number) => ["progress", days] as const,
   calendar: (start: string | undefined, weeks: number) =>
     ["calendar", start ?? "current", weeks] as const,
@@ -54,6 +55,7 @@ function invalidatePlanData(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.races });
   void queryClient.invalidateQueries({ queryKey: ["forecast"] });
   void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+  void queryClient.invalidateQueries({ queryKey: ["adherence"] });
   void queryClient.invalidateQueries({ queryKey: queryKeys.briefing });
   void queryClient.invalidateQueries({ queryKey: ["comparables"] });
 }
@@ -402,6 +404,14 @@ export function useForecast(weeks: 8 | 12 = 8) {
   return useQuery({
     queryKey: queryKeys.forecast(weeks),
     queryFn: () => api.forecast(weeks),
+    staleTime: 60_000,
+  });
+}
+
+export function useAdherence(weeks = 8) {
+  return useQuery({
+    queryKey: queryKeys.adherence(weeks),
+    queryFn: () => api.adherence(weeks),
     staleTime: 60_000,
   });
 }

@@ -9016,3 +9016,240 @@ svg {
     gap: 2px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   M10 — suggested-plan adherence
+--------------------------------------------------------------------------- */
+
+.training-adherence {
+  min-width: 0;
+}
+
+.adherence-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: center;
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.adherence-score {
+  min-width: 92px;
+}
+
+.adherence-score span {
+  display: block;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.adherence-score small {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-faint);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.adherence-summary__meta {
+  display: grid;
+  gap: 8px;
+}
+
+.adherence-summary__meta > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.adherence-ratios {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.adherence-ratio span,
+.adherence-ratio small {
+  display: block;
+  color: var(--text-faint);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.adherence-ratio strong {
+  display: block;
+  margin: 3px 0;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 15px;
+}
+
+.adherence-weeks {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.adherence-week {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.adherence-week.is-current {
+  border-color: rgba(201, 245, 106, 0.35);
+  background: rgba(201, 245, 106, 0.035);
+}
+
+.adherence-week__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.adherence-week__head strong {
+  font-size: 12.5px;
+}
+
+.adherence-week__head small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.adherence-week__badges {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.adherence-week__score {
+  min-width: 34px;
+  color: var(--text);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 18px;
+  text-align: right;
+}
+
+.adherence-week__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.adherence-metric {
+  border-left: 2px solid var(--line-strong);
+  padding-left: 8px;
+}
+
+.adherence-metric.is-under {
+  border-left-color: var(--red);
+}
+
+.adherence-metric.is-over {
+  border-left-color: var(--orange);
+}
+
+.adherence-metric.is-within {
+  border-left-color: var(--accent);
+}
+
+.adherence-metric span,
+.adherence-metric small {
+  display: block;
+  color: var(--text-faint);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.adherence-metric strong {
+  display: block;
+  margin: 3px 0;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 13px;
+}
+
+.adherence-metric small {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.adherence-week__foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  color: var(--text-faint);
+  font-size: 10.5px;
+}
+
+.adherence-week__foot .progress {
+  flex: 1;
+  margin: 0;
+}
+
+.adherence-notes {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.adherence-notes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.adherence-notes svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+@media (max-width: 960px) {
+  .adherence-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .adherence-ratios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .adherence-week__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .adherence-ratios,
+  .adherence-week__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .adherence-week__head {
+    align-items: flex-start;
+  }
+}

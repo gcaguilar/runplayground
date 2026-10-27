@@ -123,8 +123,10 @@ export function AppShell() {
       void queryClient.invalidateQueries({ queryKey: ["reports"] });
       void queryClient.invalidateQueries({ queryKey: ["forecast"] });
       void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+      void queryClient.invalidateQueries({ queryKey: ["adherence"] });
       void queryClient.invalidateQueries({ queryKey: ["recovery"] });
       void queryClient.invalidateQueries({ queryKey: ["briefing"] });
+      void queryClient.invalidateQueries({ queryKey: ["comparables"] });
     }
     wasRunning.current = running;
   }, [sync.data?.running, queryClient]);

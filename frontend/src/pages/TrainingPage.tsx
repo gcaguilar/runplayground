@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -17,11 +18,13 @@ import {
 } from "lucide-react";
 
 import type {
+  AdherenceOverview,
+  AdherenceWeek,
   TrainingFocus,
   TrainingPlan,
   TrainingSession,
 } from "@/api/client";
-import { useTraining } from "@/api/queries";
+import { useAdherence, useTraining } from "@/api/queries";
 import {
   AnalysisConfidence,
   AnalysisMethodCard,
@@ -122,6 +125,50 @@ const NOTE_KEYS: Record<string, MessageKey> = {
   goal_missing: "training.notes.goal_missing",
   goal_without_date: "training.notes.goal_without_date",
   insufficient_data: "training.notes.insufficient_data",
+};
+
+const ADHERENCE_STATUS_KEYS: Record<string, MessageKey> = {
+  ok: "training.adherence.status.ok",
+  partial: "training.adherence.status.partial",
+  low: "training.adherence.status.low",
+  in_progress: "training.adherence.status.in_progress",
+  insufficient: "training.adherence.status.insufficient",
+};
+
+const ADHERENCE_STATUS_TONE: Record<
+  string,
+  "success" | "warning" | "danger" | "info" | "neutral"
+> = {
+  ok: "success",
+  partial: "warning",
+  low: "danger",
+  in_progress: "info",
+  insufficient: "neutral",
+};
+
+const ADHERENCE_TREND_KEYS: Record<string, MessageKey> = {
+  improving: "training.adherence.trend.improving",
+  stable: "training.adherence.trend.stable",
+  worsening: "training.adherence.trend.worsening",
+  unknown: "training.adherence.trend.unknown",
+};
+
+const ADHERENCE_WARNING_KEYS: Record<string, MessageKey> = {
+  no_activities: "training.adherence.warning.no_activities",
+  short_history: "training.adherence.warning.short_history",
+  no_completed_weeks: "training.adherence.warning.no_completed_weeks",
+  no_goal: "training.adherence.warning.no_goal",
+  current_week_in_progress: "training.adherence.warning.current_week_in_progress",
+};
+
+const ADHERENCE_NOTE_KEYS: Record<string, MessageKey> = {
+  suggested_plan_not_registered: "training.adherence.notes.suggested_plan_not_registered",
+  adherence_is_heuristic: "training.adherence.notes.adherence_is_heuristic",
+  current_week_excluded: "training.adherence.notes.current_week_excluded",
+  rest_days_derived: "training.adherence.notes.rest_days_derived",
+  classification_uses_current_anchor:
+    "training.adherence.notes.classification_uses_current_anchor",
+  not_medical_advice: "training.adherence.notes.not_medical_advice",
 };
 
 const DISTANCE_LABELS: Array<[number, MessageKey]> = [
@@ -326,6 +373,8 @@ export function TrainingPage() {
             </div>
           </Card>
 
+          <AdherenceCard />
+
           <Card className="panel training-sessions-panel">
             <SectionHeading
               title={t("training.sessions.title")}
@@ -395,6 +444,249 @@ export function TrainingPage() {
           },
         ]}
       />
+    </div>
+  );
+}
+
+function AdherenceCard() {
+  const { t, locale, units } = useI18n();
+  const [weeks, setWeeks] = useState<4 | 8 | 12>(8);
+  const adherence = useAdherence(weeks);
+
+  if (adherence.isLoading) {
+    return (
+      <Card className="panel training-adherence">
+        <Skeleton className="skeleton--line" />
+        <Skeleton className="skeleton--block" />
+      </Card>
+    );
+  }
+
+  if (adherence.isError || !adherence.data) {
+    return (
+      <Card className="panel training-adherence">
+        <ErrorState
+          message={
+            adherence.error instanceof Error ? adherence.error.message : t("common.error")
+          }
+          onRetry={() => void adherence.refetch()}
+        />
+      </Card>
+    );
+  }
+
+  const data = adherence.data;
+  return (
+    <Card className="panel training-adherence">
+      <SectionHeading
+        title={t("training.adherence.title")}
+        subtitle={t("training.adherence.subtitle")}
+        icon={CalendarRange}
+        action={
+          <div className="segmented" role="group" aria-label={t("training.adherence.title")}>
+            {([4, 8, 12] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={cn(weeks === value && "is-active")}
+                aria-pressed={weeks === value}
+                onClick={() => setWeeks(value)}
+              >
+                {t("training.adherence.window", { weeks: value })}
+              </button>
+            ))}
+          </div>
+        }
+      />
+
+      {(data.warnings ?? []).length ? (
+        <div className="analysis-warnings" role="status">
+          <div className="analysis-warnings__list">
+            {(data.warnings ?? []).map((warning) => (
+              <Badge key={warning} tone="warning" dot>
+                {ADHERENCE_WARNING_KEYS[warning] ? t(ADHERENCE_WARNING_KEYS[warning]) : warning}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="adherence-summary">
+        <div className="adherence-score">
+          <span>{data.summary.average_score == null ? "—" : Math.round(data.summary.average_score)}</span>
+          <small>{t("training.adherence.average")}</small>
+        </div>
+        <div className="adherence-summary__meta">
+          <div>
+            <span>{t("training.adherence.current")}</span>
+            <AdherenceStatusBadge status={currentWeekStatus(data)} />
+          </div>
+          <div>
+            <span>{t("training.adherence.trend")}</span>
+            <Badge tone={trendTone(data.summary.trend)}>
+              {t(ADHERENCE_TREND_KEYS[data.summary.trend] ?? "training.adherence.trend.unknown")}
+            </Badge>
+          </div>
+        </div>
+        <div className="adherence-ratios">
+          <Ratio label={t("training.adherence.volume")} value={data.summary.volume_ratio} />
+          <Ratio label={t("training.adherence.longRun")} value={data.summary.long_run_ratio} />
+          <Ratio label={t("training.adherence.quality")} value={data.summary.quality_ratio} />
+          <Ratio label={t("training.adherence.rest")} value={data.summary.rest_ratio} />
+        </div>
+      </div>
+
+      <div className="adherence-weeks">
+        {(data.items ?? []).map((item) => (
+          <AdherenceRow key={item.week_start} item={item} locale={locale} units={units} />
+        ))}
+      </div>
+
+      <ul className="adherence-notes">
+        {(data.notes ?? [])
+          .filter((note) => ADHERENCE_NOTE_KEYS[note])
+          .map((note) => (
+            <li key={note}>
+              <Info size={13} aria-hidden="true" />
+              <span>{t(ADHERENCE_NOTE_KEYS[note])}</span>
+            </li>
+          ))}
+      </ul>
+    </Card>
+  );
+}
+
+function currentWeekStatus(data: AdherenceOverview): string {
+  const item = (data.items ?? []).find((entry) => entry.week_start === data.current_week_start);
+  return item?.status ?? "insufficient";
+}
+
+function AdherenceStatusBadge({ status }: { status: string }) {
+  const { t } = useI18n();
+  return (
+    <Badge tone={ADHERENCE_STATUS_TONE[status] ?? "neutral"}>
+      {t(ADHERENCE_STATUS_KEYS[status] ?? "training.adherence.status.insufficient")}
+    </Badge>
+  );
+}
+
+function trendTone(trend: string): "success" | "warning" | "danger" | "neutral" {
+  if (trend === "improving") return "success";
+  if (trend === "worsening") return "danger";
+  return "neutral";
+}
+
+function Ratio({ label, value }: { label: string; value: number | null | undefined }) {
+  const { t } = useI18n();
+  return (
+    <div className="adherence-ratio">
+      <span>{label}</span>
+      <strong>{value == null ? "—" : `${Math.round(value * 100)}%`}</strong>
+      <small>{t("training.adherence.ratio")}</small>
+    </div>
+  );
+}
+
+function AdherenceRow({
+  item,
+  locale,
+  units,
+}: {
+  item: AdherenceWeek;
+  locale: Locale;
+  units: Units;
+}) {
+  const { t } = useI18n();
+  const score = item.score;
+  const tone = score == null ? "info" : score >= 80 ? "accent" : score >= 50 ? "warning" : "danger";
+  return (
+    <div className={cn("adherence-week", item.status === "in_progress" && "is-current")}>
+      <div className="adherence-week__head">
+        <div>
+          <strong>
+            {t("training.adherence.week", {
+              date: formatDate(item.week_start, locale),
+            })}
+          </strong>
+          <small>{PHASE_KEYS[item.phase] ? t(PHASE_KEYS[item.phase]) : item.phase}</small>
+        </div>
+        <div className="adherence-week__badges">
+          <AdherenceStatusBadge status={item.status} />
+          <span className="adherence-week__score">{score == null ? "—" : Math.round(score)}</span>
+        </div>
+      </div>
+
+      <div className="adherence-week__grid">
+        <AdherenceMetric
+          label={t("training.adherence.volume")}
+          actual={formatDistance(item.volume_actual_m, units, locale, { digits: 1 })}
+          planned={`${formatDistance(item.volume_low_m, units, locale, { digits: 1 })} – ${formatDistance(
+            item.volume_high_m,
+            units,
+            locale,
+            { digits: 1 },
+          )}`}
+          status={item.volume_status}
+        />
+        <AdherenceMetric
+          label={t("training.adherence.longRun")}
+          actual={formatDistance(item.longest_actual_m, units, locale, { digits: 1 })}
+          planned={`${formatDistance(item.long_run_low_m, units, locale, { digits: 1 })} – ${formatDistance(
+            item.long_run_high_m,
+            units,
+            locale,
+            { digits: 1 },
+          )}`}
+          status={item.long_run_status}
+        />
+        <AdherenceMetric
+          label={t("training.adherence.quality")}
+          actual={String(item.quality_actual)}
+          planned={`${item.quality_low} – ${item.quality_high}`}
+          status={item.quality_status}
+        />
+        <AdherenceMetric
+          label={t("training.adherence.rest")}
+          actual={String(item.rest_actual)}
+          planned={String(item.rest_planned)}
+          status={item.rest_status}
+        />
+      </div>
+
+      <div className="adherence-week__foot">
+        <span>
+          {t("training.adherence.sessions", {
+            actual: item.sessions_actual,
+            planned: item.sessions_planned,
+          })}
+        </span>
+        {score != null ? (
+          <ProgressBar value={score} tone={tone} label={t("training.adherence.score")} />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function AdherenceMetric({
+  label,
+  actual,
+  planned,
+  status,
+}: {
+  label: string;
+  actual: string;
+  planned: string;
+  status: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <div className={cn("adherence-metric", `is-${status}`)}>
+      <span>{label}</span>
+      <strong>{actual}</strong>
+      <small>
+        {t("training.adherence.planned")}: {planned}
+      </small>
     </div>
   );
 }
