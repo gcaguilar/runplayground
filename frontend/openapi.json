@@ -2655,6 +2655,899 @@
           }
         }
       }
+    },
+    "/api/v1/training-plans": {
+      "get": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "List Plans",
+        "operationId": "list_plans_api_v1_training_plans_get",
+        "parameters": [
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingPlanOut"
+                  },
+                  "title": "Response List Plans Api V1 Training Plans Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Create Plan",
+        "operationId": "create_plan_api_v1_training_plans_post",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/from-suggested": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Create From Suggested",
+        "operationId": "create_from_suggested_api_v1_training_plans_from_suggested_post",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanFromSuggested"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}": {
+      "get": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Get Plan",
+        "operationId": "get_plan_api_v1_training_plans__plan_id__get",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Patch Plan",
+        "operationId": "patch_plan_api_v1_training_plans__plan_id__patch",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Delete Plan",
+        "operationId": "delete_plan_api_v1_training_plans__plan_id__delete",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/activate": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Activate Plan",
+        "operationId": "activate_plan_api_v1_training_plans__plan_id__activate_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanActivationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/archive": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Archive Plan",
+        "operationId": "archive_plan_api_v1_training_plans__plan_id__archive_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/sessions": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_api_v1_training_plans__plan_id__sessions_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanSessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanSessionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/sessions/bulk": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Bulk Create Sessions",
+        "operationId": "bulk_create_sessions_api_v1_training_plans__plan_id__sessions_bulk_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanSessionsBulk"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanBulkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/sessions/{session_id}": {
+      "patch": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Patch Session",
+        "operationId": "patch_session_api_v1_training_plans__plan_id__sessions__session_id__patch",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanSessionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanSessionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Delete Session",
+        "operationId": "delete_session_api_v1_training_plans__plan_id__sessions__session_id__delete",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training-plans/{plan_id}/sessions/{session_id}/activity": {
+      "post": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Link Activity",
+        "operationId": "link_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingPlanLinkActivity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanSessionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "training-plans"
+        ],
+        "summary": "Unlink Activity",
+        "operationId": "unlink_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_delete",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPlanSessionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3647,6 +4540,48 @@
             "format": "date",
             "title": "Current Week Start"
           },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "suggested",
+              "mixed"
+            ],
+            "title": "Basis",
+            "default": "suggested"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name"
+          },
+          "registered_weeks": {
+            "type": "integer",
+            "title": "Registered Weeks",
+            "default": 0
+          },
+          "suggested_weeks": {
+            "type": "integer",
+            "title": "Suggested Weeks",
+            "default": 0
+          },
           "summary": {
             "$ref": "#/components/schemas/AdherenceSummaryOut"
           },
@@ -3682,6 +4617,145 @@
           "summary"
         ],
         "title": "AdherenceOverview"
+      },
+      "AdherenceSessionItemOut": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "intensity": {
+            "type": "string",
+            "title": "Intensity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "skipped",
+              "missed",
+              "pending"
+            ],
+            "title": "Outcome"
+          },
+          "distance_low_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Low M"
+          },
+          "distance_high_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance High M"
+          },
+          "duration_low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Low S"
+          },
+          "duration_high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration High S"
+          },
+          "actual_distance_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Distance M"
+          },
+          "actual_duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Duration S"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "compliance_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliance Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "type",
+          "intensity",
+          "status",
+          "outcome"
+        ],
+        "title": "AdherenceSessionItemOut"
       },
       "AdherenceSummaryOut": {
         "properties": {
@@ -3762,6 +4836,32 @@
               }
             ],
             "title": "Rest Ratio"
+          },
+          "sessions_completed": {
+            "type": "integer",
+            "title": "Sessions Completed",
+            "default": 0
+          },
+          "sessions_skipped": {
+            "type": "integer",
+            "title": "Sessions Skipped",
+            "default": 0
+          },
+          "sessions_missed": {
+            "type": "integer",
+            "title": "Sessions Missed",
+            "default": 0
+          },
+          "completion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Rate"
           }
         },
         "type": "object",
@@ -3797,6 +4897,37 @@
               }
             ],
             "title": "Score"
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "suggested"
+            ],
+            "title": "Basis",
+            "default": "suggested"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "plan_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Name"
           },
           "volume_actual_m": {
             "type": "number",
@@ -3866,6 +4997,32 @@
             "type": "integer",
             "title": "Sessions Planned"
           },
+          "sessions_completed": {
+            "type": "integer",
+            "title": "Sessions Completed",
+            "default": 0
+          },
+          "sessions_skipped": {
+            "type": "integer",
+            "title": "Sessions Skipped",
+            "default": 0
+          },
+          "sessions_missed": {
+            "type": "integer",
+            "title": "Sessions Missed",
+            "default": 0
+          },
+          "completion_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Rate"
+          },
           "active_days": {
             "type": "integer",
             "title": "Active Days"
@@ -3876,6 +5033,13 @@
             },
             "type": "array",
             "title": "Reasons"
+          },
+          "session_items": {
+            "items": {
+              "$ref": "#/components/schemas/AdherenceSessionItemOut"
+            },
+            "type": "array",
+            "title": "Session Items"
           }
         },
         "type": "object",
@@ -4734,6 +5898,58 @@
         ],
         "title": "BriefingView"
       },
+      "CalendarActivePlanOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          },
+          "goal_race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start_date",
+          "end_date"
+        ],
+        "title": "CalendarActivePlanOut"
+      },
       "CalendarDayOut": {
         "properties": {
           "date": {
@@ -4781,7 +5997,8 @@
             "enum": [
               "activity",
               "race",
-              "session"
+              "session",
+              "plan"
             ],
             "title": "Kind"
           },
@@ -4821,6 +6038,28 @@
               }
             ],
             "title": "Race Id"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
           },
           "distance_m": {
             "anyOf": [
@@ -4904,6 +6143,16 @@
             },
             "type": "array",
             "title": "Weeks"
+          },
+          "active_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalendarActivePlanOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -10864,6 +12113,901 @@
           "load"
         ],
         "title": "TrainingPlan"
+      },
+      "TrainingPlanActivationOut": {
+        "properties": {
+          "plan_id": {
+            "type": "integer",
+            "title": "Plan Id"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "replaced_plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replaced Plan Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "is_active"
+        ],
+        "title": "TrainingPlanActivationOut"
+      },
+      "TrainingPlanBulkOut": {
+        "properties": {
+          "created": {
+            "type": "integer",
+            "title": "Created"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingPlanSessionOut"
+            },
+            "type": "array",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created"
+        ],
+        "title": "TrainingPlanBulkOut"
+      },
+      "TrainingPlanCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "suggested",
+              "import"
+            ],
+            "title": "Source",
+            "default": "manual"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "start_date",
+          "end_date"
+        ],
+        "title": "TrainingPlanCreate"
+      },
+      "TrainingPlanDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          },
+          "goal_race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "parent_plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Plan Id"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "sessions_total": {
+            "type": "integer",
+            "title": "Sessions Total",
+            "default": 0
+          },
+          "sessions_completed": {
+            "type": "integer",
+            "title": "Sessions Completed",
+            "default": 0
+          },
+          "sessions_skipped": {
+            "type": "integer",
+            "title": "Sessions Skipped",
+            "default": 0
+          },
+          "planned_distance_m": {
+            "type": "number",
+            "title": "Planned Distance M",
+            "default": 0.0
+          },
+          "planned_duration_s": {
+            "type": "number",
+            "title": "Planned Duration S",
+            "default": 0.0
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingPlanSessionOut"
+            },
+            "type": "array",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start_date",
+          "end_date",
+          "is_active",
+          "version",
+          "source",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TrainingPlanDetailOut"
+      },
+      "TrainingPlanFromSuggested": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "weeks": {
+            "type": "integer",
+            "enum": [
+              4,
+              8,
+              12
+            ],
+            "title": "Weeks",
+            "default": 4
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          },
+          "activate": {
+            "type": "boolean",
+            "title": "Activate",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "TrainingPlanFromSuggested"
+      },
+      "TrainingPlanLinkActivity": {
+        "properties": {
+          "activity_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Activity Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activity_id"
+        ],
+        "title": "TrainingPlanLinkActivity"
+      },
+      "TrainingPlanOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          },
+          "goal_race_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "parent_plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Plan Id"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "sessions_total": {
+            "type": "integer",
+            "title": "Sessions Total",
+            "default": 0
+          },
+          "sessions_completed": {
+            "type": "integer",
+            "title": "Sessions Completed",
+            "default": 0
+          },
+          "sessions_skipped": {
+            "type": "integer",
+            "title": "Sessions Skipped",
+            "default": 0
+          },
+          "planned_distance_m": {
+            "type": "number",
+            "title": "Planned Distance M",
+            "default": 0.0
+          },
+          "planned_duration_s": {
+            "type": "number",
+            "title": "Planned Duration S",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start_date",
+          "end_date",
+          "is_active",
+          "version",
+          "source",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TrainingPlanOut"
+      },
+      "TrainingPlanSessionCreate": {
+        "properties": {
+          "session_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Session Date"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "rest",
+              "easy",
+              "recovery",
+              "strides",
+              "long",
+              "threshold",
+              "race_pace",
+              "strength",
+              "cross_training",
+              "other"
+            ],
+            "title": "Type"
+          },
+          "intensity": {
+            "type": "string",
+            "enum": [
+              "rest",
+              "easy",
+              "moderate",
+              "hard"
+            ],
+            "title": "Intensity",
+            "default": "easy"
+          },
+          "distance_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 500000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 86400.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "completed",
+              "skipped"
+            ],
+            "title": "Status",
+            "default": "planned"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_date",
+          "type"
+        ],
+        "title": "TrainingPlanSessionCreate"
+      },
+      "TrainingPlanSessionOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "plan_id": {
+            "type": "integer",
+            "title": "Plan Id"
+          },
+          "session_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Session Date"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "intensity": {
+            "type": "string",
+            "title": "Intensity"
+          },
+          "distance_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "activity_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Name"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "plan_id",
+          "session_date",
+          "position",
+          "type",
+          "intensity",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TrainingPlanSessionOut"
+      },
+      "TrainingPlanSessionUpdate": {
+        "properties": {
+          "session_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Date"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rest",
+                  "easy",
+                  "recovery",
+                  "strides",
+                  "long",
+                  "threshold",
+                  "race_pace",
+                  "strength",
+                  "cross_training",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "intensity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rest",
+                  "easy",
+                  "moderate",
+                  "hard"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intensity"
+          },
+          "distance_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 500000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 86400.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "planned",
+                  "completed",
+                  "skipped"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "TrainingPlanSessionUpdate"
+      },
+      "TrainingPlanSessionsBulk": {
+        "properties": {
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/TrainingPlanSessionCreate"
+            },
+            "type": "array",
+            "maxItems": 400,
+            "minItems": 1,
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sessions"
+        ],
+        "title": "TrainingPlanSessionsBulk"
+      },
+      "TrainingPlanUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "goal_race_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Race Id"
+          }
+        },
+        "type": "object",
+        "title": "TrainingPlanUpdate"
       },
       "TrainingSessionOut": {
         "properties": {
