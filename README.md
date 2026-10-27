@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M6 — comparable training.** The dashboard opens with the current
+> **Status: M7 — workout comparison.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -21,7 +21,8 @@ metric dump.
 > projected goal gap; Tracking compares past predictions with real results,
 > follows goal revisions and training actions, and pairs training factors with
 > fitness changes as associations. The briefing composes those views instead
-> of repeating them.
+> of repeating them. Comparison puts two sessions side by side, states whether
+> they are comparable, and only reads the difference when the data supports it.
 
 ## What works today
 
@@ -54,6 +55,10 @@ metric dump.
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
   the number of paired weeks; it is explicitly an association, not a cause.
+- **Workout comparison**: two sessions side by side with distance, duration,
+  pace, heart rate, cadence, power, elevation, training effect and load. The
+  page scores comparability first, lists why it is limited, and only computes
+  one-kilometre splits when both sessions have distance and elapsed streams.
 - **Weekly briefing** on the dashboard: current 10K fitness with its 80%
   range, 4/8/12-week evolution, the four distance predictions, a rule-based
   weekly message backed by visible evidence, the strongest dimension, the
@@ -127,6 +132,17 @@ observed in that week's snapshot. It reports Pearson's correlation and the
 average improvement when the factor was above or below its median. It needs at
 least four paired weeks and labels small samples explicitly; a strong
 correlation is still not evidence that the factor caused the improvement.
+
+### Comparing two workouts
+
+Comparison starts with a comparability check: different sports, a distance
+ratio of 1.6 or more, or a large terrain gap make the pair non-comparable; a
+smaller distance, duration or elevation gap makes it limited. Missing heart
+rate, streams or cadence, or one race against one training run, are shown as
+caveats. The page then reports summary differences and, when both sessions
+have distance and elapsed streams, the pace and heart rate of each shared
+kilometre. It never attributes the difference to a cause and does not treat
+the comparison as a controlled test.
 
 The pace–heart-rate comparison only uses aerobic runs of at least 4 km, groups
 them by distance and terrain, and fits pace against heart rate inside each
@@ -407,7 +423,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M3** | Progress views, goals, calendar, weekly/monthly reports and race planning. |
 | **M4** | Future scenarios, continuous tracking of predictions, goals and actions. |
 | **M5** | Weekly briefing: current state, evolution, predictions, strength, limiter and next action. |
-| **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. **Current.** |
+| **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. |
+| **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. **Current.** |
 
 ## License and disclaimer
 
