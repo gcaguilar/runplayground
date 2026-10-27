@@ -58,6 +58,19 @@ export type WeeklyLoad = Schemas["WeeklyLoadOut"];
 export type AnalysisCoverage = Schemas["AnalysisCoverageOut"];
 export type AnalysisReference = Schemas["AnalysisReferenceOut"];
 export type TrainingPlan = Schemas["TrainingPlan"];
+export type RegisteredPlan = Schemas["TrainingPlanOut"];
+export type RegisteredPlanDetail = Schemas["TrainingPlanDetailOut"];
+export type RegisteredPlanCreate = Schemas["TrainingPlanCreate"];
+export type RegisteredPlanUpdate = Schemas["TrainingPlanUpdate"];
+export type RegisteredPlanSession = Schemas["TrainingPlanSessionOut"];
+export type RegisteredPlanSessionCreate = Schemas["TrainingPlanSessionCreate"];
+export type RegisteredPlanSessionUpdate = Schemas["TrainingPlanSessionUpdate"];
+export type RegisteredPlanBulk = Schemas["TrainingPlanSessionsBulk"];
+export type RegisteredPlanBulkResult = Schemas["TrainingPlanBulkOut"];
+export type RegisteredPlanFromSuggested = Schemas["TrainingPlanFromSuggested"];
+export type RegisteredPlanActivation = Schemas["TrainingPlanActivationOut"];
+export type CalendarPlan = Schemas["CalendarActivePlanOut"];
+export type AdherenceSessionItem = Schemas["AdherenceSessionItemOut"];
 export type TrainingFocus = Schemas["TrainingFocusOut"];
 export type TrainingSession = Schemas["TrainingSessionOut"];
 export type TrainingLoadTarget = Schemas["TrainingLoadTargetOut"];
@@ -154,7 +167,7 @@ function errorDetail(payload: unknown, fallback: string): string {
   return fallback;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!(init.body instanceof FormData) && init.body !== undefined) {
     headers.set("Content-Type", "application/json");
@@ -182,7 +195,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await response.json()) as T;
 }
 
-function queryString(params: Record<string, string | number | undefined | null>): string {
+export function queryString(params: Record<string, string | number | undefined | null>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== "") {

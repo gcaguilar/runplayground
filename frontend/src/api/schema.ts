@@ -641,6 +641,164 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/training-plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Plans */
+        get: operations["list_plans_api_v1_training_plans_get"];
+        put?: never;
+        /** Create Plan */
+        post: operations["create_plan_api_v1_training_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/from-suggested": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create From Suggested */
+        post: operations["create_from_suggested_api_v1_training_plans_from_suggested_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan */
+        get: operations["get_plan_api_v1_training_plans__plan_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Plan */
+        delete: operations["delete_plan_api_v1_training_plans__plan_id__delete"];
+        options?: never;
+        head?: never;
+        /** Patch Plan */
+        patch: operations["patch_plan_api_v1_training_plans__plan_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Plan */
+        post: operations["activate_plan_api_v1_training_plans__plan_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive Plan */
+        post: operations["archive_plan_api_v1_training_plans__plan_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Session */
+        post: operations["create_session_api_v1_training_plans__plan_id__sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/sessions/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk Create Sessions */
+        post: operations["bulk_create_sessions_api_v1_training_plans__plan_id__sessions_bulk_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Session */
+        delete: operations["delete_session_api_v1_training_plans__plan_id__sessions__session_id__delete"];
+        options?: never;
+        head?: never;
+        /** Patch Session */
+        patch: operations["patch_session_api_v1_training_plans__plan_id__sessions__session_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/training-plans/{plan_id}/sessions/{session_id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link Activity */
+        post: operations["link_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_post"];
+        /** Unlink Activity */
+        delete: operations["unlink_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -982,6 +1140,26 @@ export interface components {
              * Format: date
              */
             current_week_start: string;
+            /**
+             * Basis
+             * @default suggested
+             * @enum {string}
+             */
+            basis: "registered" | "suggested" | "mixed";
+            /** Plan Id */
+            plan_id?: number | null;
+            /** Plan Name */
+            plan_name?: string | null;
+            /**
+             * Registered Weeks
+             * @default 0
+             */
+            registered_weeks: number;
+            /**
+             * Suggested Weeks
+             * @default 0
+             */
+            suggested_weeks: number;
             summary: components["schemas"]["AdherenceSummaryOut"];
             /** Items */
             items?: components["schemas"]["AdherenceWeekOut"][];
@@ -989,6 +1167,43 @@ export interface components {
             warnings?: string[];
             /** Notes */
             notes?: string[];
+        };
+        /** AdherenceSessionItemOut */
+        AdherenceSessionItemOut: {
+            /** Session Id */
+            session_id?: number | null;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Type */
+            type: string;
+            /** Intensity */
+            intensity: string;
+            /** Status */
+            status: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "completed" | "skipped" | "missed" | "pending";
+            /** Distance Low M */
+            distance_low_m?: number | null;
+            /** Distance High M */
+            distance_high_m?: number | null;
+            /** Duration Low S */
+            duration_low_s?: number | null;
+            /** Duration High S */
+            duration_high_s?: number | null;
+            /** Actual Distance M */
+            actual_distance_m?: number | null;
+            /** Actual Duration S */
+            actual_duration_s?: number | null;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Compliance Pct */
+            compliance_pct?: number | null;
         };
         /** AdherenceSummaryOut */
         AdherenceSummaryOut: {
@@ -1010,6 +1225,23 @@ export interface components {
             quality_ratio?: number | null;
             /** Rest Ratio */
             rest_ratio?: number | null;
+            /**
+             * Sessions Completed
+             * @default 0
+             */
+            sessions_completed: number;
+            /**
+             * Sessions Skipped
+             * @default 0
+             */
+            sessions_skipped: number;
+            /**
+             * Sessions Missed
+             * @default 0
+             */
+            sessions_missed: number;
+            /** Completion Rate */
+            completion_rate?: number | null;
         };
         /** AdherenceWeekOut */
         AdherenceWeekOut: {
@@ -1024,6 +1256,16 @@ export interface components {
             status: string;
             /** Score */
             score?: number | null;
+            /**
+             * Basis
+             * @default suggested
+             * @enum {string}
+             */
+            basis: "registered" | "suggested";
+            /** Plan Id */
+            plan_id?: number | null;
+            /** Plan Name */
+            plan_name?: string | null;
             /** Volume Actual M */
             volume_actual_m: number;
             /** Volume Low M */
@@ -1058,10 +1300,29 @@ export interface components {
             sessions_actual: number;
             /** Sessions Planned */
             sessions_planned: number;
+            /**
+             * Sessions Completed
+             * @default 0
+             */
+            sessions_completed: number;
+            /**
+             * Sessions Skipped
+             * @default 0
+             */
+            sessions_skipped: number;
+            /**
+             * Sessions Missed
+             * @default 0
+             */
+            sessions_missed: number;
+            /** Completion Rate */
+            completion_rate?: number | null;
             /** Active Days */
             active_days: number;
             /** Reasons */
             reasons?: string[];
+            /** Session Items */
+            session_items?: components["schemas"]["AdherenceSessionItemOut"][];
         };
         /** AnalysisCoverageOut */
         AnalysisCoverageOut: {
@@ -1347,6 +1608,27 @@ export interface components {
             /** Notes */
             notes?: string[];
         };
+        /** CalendarActivePlanOut */
+        CalendarActivePlanOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+            /** Goal Race Name */
+            goal_race_name?: string | null;
+        };
         /** CalendarDayOut */
         CalendarDayOut: {
             /**
@@ -1380,7 +1662,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "activity" | "race" | "session";
+            kind: "activity" | "race" | "session" | "plan";
             /** Title */
             title: string;
             /** Sport */
@@ -1389,6 +1671,10 @@ export interface components {
             activity_id?: number | null;
             /** Race Id */
             race_id?: number | null;
+            /** Plan Id */
+            plan_id?: number | null;
+            /** Session Id */
+            session_id?: number | null;
             /** Distance M */
             distance_m?: number | null;
             /** Duration S */
@@ -1422,6 +1708,7 @@ export interface components {
             today: string;
             /** Weeks */
             weeks: components["schemas"]["CalendarWeekOut"][];
+            active_plan?: components["schemas"]["CalendarActivePlanOut"] | null;
         };
         /** CalendarWeekOut */
         CalendarWeekOut: {
@@ -3250,6 +3537,322 @@ export interface components {
             /** Notes */
             notes?: string[];
         };
+        /** TrainingPlanActivationOut */
+        TrainingPlanActivationOut: {
+            /** Plan Id */
+            plan_id: number;
+            /** Is Active */
+            is_active: boolean;
+            /** Replaced Plan Id */
+            replaced_plan_id?: number | null;
+        };
+        /** TrainingPlanBulkOut */
+        TrainingPlanBulkOut: {
+            /** Created */
+            created: number;
+            /** Sessions */
+            sessions?: components["schemas"]["TrainingPlanSessionOut"][];
+        };
+        /** TrainingPlanCreate */
+        TrainingPlanCreate: {
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+            /**
+             * Source
+             * @default manual
+             * @enum {string}
+             */
+            source: "manual" | "suggested" | "import";
+        };
+        /** TrainingPlanDetailOut */
+        TrainingPlanDetailOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+            /** Goal Race Name */
+            goal_race_name?: string | null;
+            /** Is Active */
+            is_active: boolean;
+            /** Version */
+            version: number;
+            /** Parent Plan Id */
+            parent_plan_id?: number | null;
+            /** Archived At */
+            archived_at?: string | null;
+            /** Source */
+            source: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Sessions Total
+             * @default 0
+             */
+            sessions_total: number;
+            /**
+             * Sessions Completed
+             * @default 0
+             */
+            sessions_completed: number;
+            /**
+             * Sessions Skipped
+             * @default 0
+             */
+            sessions_skipped: number;
+            /**
+             * Planned Distance M
+             * @default 0
+             */
+            planned_distance_m: number;
+            /**
+             * Planned Duration S
+             * @default 0
+             */
+            planned_duration_s: number;
+            /** Sessions */
+            sessions?: components["schemas"]["TrainingPlanSessionOut"][];
+        };
+        /** TrainingPlanFromSuggested */
+        TrainingPlanFromSuggested: {
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /** Start Date */
+            start_date?: string | null;
+            /**
+             * Weeks
+             * @default 4
+             * @enum {integer}
+             */
+            weeks: 4 | 8 | 12;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+            /**
+             * Activate
+             * @default false
+             */
+            activate: boolean;
+        };
+        /** TrainingPlanLinkActivity */
+        TrainingPlanLinkActivity: {
+            /** Activity Id */
+            activity_id: number;
+        };
+        /** TrainingPlanOut */
+        TrainingPlanOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+            /** Goal Race Name */
+            goal_race_name?: string | null;
+            /** Is Active */
+            is_active: boolean;
+            /** Version */
+            version: number;
+            /** Parent Plan Id */
+            parent_plan_id?: number | null;
+            /** Archived At */
+            archived_at?: string | null;
+            /** Source */
+            source: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Sessions Total
+             * @default 0
+             */
+            sessions_total: number;
+            /**
+             * Sessions Completed
+             * @default 0
+             */
+            sessions_completed: number;
+            /**
+             * Sessions Skipped
+             * @default 0
+             */
+            sessions_skipped: number;
+            /**
+             * Planned Distance M
+             * @default 0
+             */
+            planned_distance_m: number;
+            /**
+             * Planned Duration S
+             * @default 0
+             */
+            planned_duration_s: number;
+        };
+        /** TrainingPlanSessionCreate */
+        TrainingPlanSessionCreate: {
+            /**
+             * Session Date
+             * Format: date
+             */
+            session_date: string;
+            /** Position */
+            position?: number | null;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "rest" | "easy" | "recovery" | "strides" | "long" | "threshold" | "race_pace" | "strength" | "cross_training" | "other";
+            /**
+             * Intensity
+             * @default easy
+             * @enum {string}
+             */
+            intensity: "rest" | "easy" | "moderate" | "hard";
+            /** Distance M */
+            distance_m?: number | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /**
+             * Status
+             * @default planned
+             * @enum {string}
+             */
+            status: "planned" | "completed" | "skipped";
+            /** Notes */
+            notes?: string | null;
+        };
+        /** TrainingPlanSessionOut */
+        TrainingPlanSessionOut: {
+            /** Id */
+            id: number;
+            /** Plan Id */
+            plan_id: number;
+            /**
+             * Session Date
+             * Format: date
+             */
+            session_date: string;
+            /** Position */
+            position: number;
+            /** Type */
+            type: string;
+            /** Intensity */
+            intensity: string;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Status */
+            status: string;
+            /** Activity Id */
+            activity_id?: number | null;
+            /** Activity Name */
+            activity_name?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** TrainingPlanSessionUpdate */
+        TrainingPlanSessionUpdate: {
+            /** Session Date */
+            session_date?: string | null;
+            /** Position */
+            position?: number | null;
+            /** Type */
+            type?: ("rest" | "easy" | "recovery" | "strides" | "long" | "threshold" | "race_pace" | "strength" | "cross_training" | "other") | null;
+            /** Intensity */
+            intensity?: ("rest" | "easy" | "moderate" | "hard") | null;
+            /** Distance M */
+            distance_m?: number | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Status */
+            status?: ("planned" | "completed" | "skipped") | null;
+            /** Notes */
+            notes?: string | null;
+        };
+        /** TrainingPlanSessionsBulk */
+        TrainingPlanSessionsBulk: {
+            /** Sessions */
+            sessions: components["schemas"]["TrainingPlanSessionCreate"][];
+        };
+        /** TrainingPlanUpdate */
+        TrainingPlanUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Goal Race Id */
+            goal_race_id?: number | null;
+        };
         /** TrainingSessionOut */
         TrainingSessionOut: {
             /** Type */
@@ -4824,6 +5427,494 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BriefingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_plans_api_v1_training_plans_get: {
+        parameters: {
+            query?: {
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_plan_api_v1_training_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_from_suggested_api_v1_training_plans_from_suggested_post: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanFromSuggested"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_api_v1_training_plans__plan_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_plan_api_v1_training_plans__plan_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_plan_api_v1_training_plans__plan_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_plan_api_v1_training_plans__plan_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanActivationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_plan_api_v1_training_plans__plan_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_session_api_v1_training_plans__plan_id__sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanSessionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanSessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bulk_create_sessions_api_v1_training_plans__plan_id__sessions_bulk_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanSessionsBulk"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanBulkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_session_api_v1_training_plans__plan_id__sessions__session_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+                session_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_session_api_v1_training_plans__plan_id__sessions__session_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+                session_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanSessionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanSessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+                session_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanLinkActivity"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanSessionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlink_activity_api_v1_training_plans__plan_id__sessions__session_id__activity_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+                session_id: number;
+            };
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanSessionOut"];
                 };
             };
             /** @description Validation Error */

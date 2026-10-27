@@ -26,9 +26,10 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Activity, RaceGoal
+from app.models import Activity, RaceGoal, TrainingPlan, TrainingPlanSession
 from app.schemas import (
     AdherenceOverview,
+    AdherenceSessionItemOut,
     AdherenceSummaryOut,
     AdherenceWeekOut,
 )
@@ -43,9 +44,14 @@ from app.services.analysis import (
 )
 from app.services.analysis_settings import get_analysis_settings
 from app.services.performance import build_overview, ensure_efforts
+from app.services.plans import (
+    get_active_plan,
+    plan_covers_week,
+    plan_sessions_in_range,
+)
 from app.utils import as_utc, utcnow
 
-MODEL_VERSION = "m10.0"
+MODEL_VERSION = "m12.0"
 ALLOWED_WEEKS = (4, 8, 12)
 
 
@@ -223,6 +229,103 @@ def _rest_score(actual: int, planned: int) -> float:
     return max(0.0, 100.0 - difference * 25.0)
 
 
+RUNNING_TYPES = frozenset(
+    {"easy", "recovery", "strides", "long", "threshold", "race_pace", "other"}
+)
+
+
+def _session_outcome(status: str, session_date: date, today: date) -> str:
+    if status == "completed":
+        return "completed"
+    if status == "skipped":
+        return "skipped"
+    if session_date < today:
+        return "missed"
+    return "pending"
+
+
+def _session_compliance(
+    session: TrainingPlanSession,
+    outcome: str,
+) -> float | None:
+    if outcome in {"skipped", "missed"}:
+        return 0.0
+    if outcome == "pending":
+        return None
+    activity = session.activity
+    actual_distance = activity.distance_m if activity is not None else None
+    actual_duration = activity.duration_s if activity is not None else None
+    if session.distance_m and actual_distance is not None:
+        return round(min(1.0, actual_distance / session.distance_m) * 100.0, 1)
+    if session.duration_s and actual_duration is not None:
+        return round(min(1.0, actual_duration / session.duration_s) * 100.0, 1)
+    return 100.0
+
+
+def _session_item(session: TrainingPlanSession, today: date) -> AdherenceSessionItemOut:
+    outcome = _session_outcome(session.status, session.session_date, today)
+    activity = session.activity
+    return AdherenceSessionItemOut(
+        session_id=session.id,
+        date=session.session_date,
+        type=session.type,
+        intensity=session.intensity,
+        status=session.status,
+        outcome=outcome,
+        distance_low_m=session.distance_m,
+        distance_high_m=session.distance_m,
+        duration_low_s=session.duration_s,
+        duration_high_s=session.duration_s,
+        actual_distance_m=round(activity.distance_m, 1) if activity is not None else None,
+        actual_duration_s=round(activity.duration_s, 1) if activity is not None else None,
+        activity_id=session.activity_id,
+        compliance_pct=_session_compliance(session, outcome),
+    )
+
+
+def _registered_targets(
+    plan: TrainingPlan,
+    monday: date,
+    today: date,
+) -> dict[str, object]:
+    end = monday + timedelta(days=6)
+    sessions = plan_sessions_in_range(plan, monday, end)
+    running = [session for session in sessions if session.type in RUNNING_TYPES]
+    volume_target = round(sum(float(session.distance_m or 0.0) for session in running), 1)
+    long_target = round(
+        max(
+            (float(session.distance_m or 0.0) for session in running if session.type == "long"),
+            default=0.0,
+        ),
+        1,
+    )
+    quality_target = sum(1 for session in running if session.intensity == "hard")
+    rest_planned = sum(1 for session in sessions if session.type == "rest")
+    sessions_planned = sum(1 for session in sessions if session.type != "rest")
+    # Rest is a target, not a decision to complete: it is scored through
+    # rest_planned and does not add a missed session when no activity exists.
+    items = [_session_item(session, today) for session in sessions if session.type != "rest"]
+    completed = sum(1 for item in items if item.outcome == "completed")
+    skipped = sum(1 for item in items if item.outcome == "skipped")
+    missed = sum(1 for item in items if item.outcome == "missed")
+    decided = completed + skipped + missed
+    return {
+        "volume_low": volume_target,
+        "volume_high": volume_target,
+        "long_low": long_target,
+        "long_high": long_target,
+        "quality_low": quality_target,
+        "quality_high": quality_target,
+        "rest_planned": rest_planned,
+        "sessions_planned": sessions_planned,
+        "items": items,
+        "completed": completed,
+        "skipped": skipped,
+        "missed": missed,
+        "completion_rate": round(completed / decided, 3) if decided else None,
+    }
+
+
 def _week_out(
     actual: WeekActual,
     *,
@@ -236,6 +339,14 @@ def _week_out(
     rest_planned: int,
     sessions_planned: int,
     in_progress: bool,
+    basis: str = "suggested",
+    plan_id: int | None = None,
+    plan_name: str | None = None,
+    sessions_completed: int = 0,
+    sessions_skipped: int = 0,
+    sessions_missed: int = 0,
+    completion_rate: float | None = None,
+    session_items: list[AdherenceSessionItemOut] | None = None,
 ) -> AdherenceWeekOut:
     volume_status = _in_range_status(actual.volume_m, weekly_low, weekly_high)
     long_status = _in_range_status(actual.longest_m, long_low, long_high)
@@ -262,10 +373,11 @@ def _week_out(
         components.append((quality_score, 0.15))
     components.append((_rest_score(actual.rest_days, rest_planned), 0.10))
 
+    measurable = volume_score is not None or long_score is not None or quality_high > 0
     total_weight = sum(weight for _score, weight in components)
     score = (
         round(sum(value * weight for value, weight in components) / total_weight, 1)
-        if total_weight > 0 and not in_progress
+        if total_weight > 0 and not in_progress and measurable
         else None
     )
 
@@ -307,6 +419,9 @@ def _week_out(
         phase=phase,
         status=status,
         score=score,
+        basis=basis,  # type: ignore[arg-type]
+        plan_id=plan_id,
+        plan_name=plan_name,
         volume_actual_m=actual.volume_m,
         volume_low_m=weekly_low,
         volume_high_m=weekly_high,
@@ -324,8 +439,13 @@ def _week_out(
         rest_status=rest_status,
         sessions_actual=len(actual.records),
         sessions_planned=sessions_planned,
+        sessions_completed=sessions_completed,
+        sessions_skipped=sessions_skipped,
+        sessions_missed=sessions_missed,
+        completion_rate=completion_rate,
         active_days=actual.active_days,
         reasons=reasons,
+        session_items=session_items or [],
     )
 
 
@@ -373,6 +493,10 @@ def _summary(items: list[AdherenceWeekOut], current_week: date) -> AdherenceSumm
                 values.append(value)
         return round(sum(values) / len(values), 2) if values else None
 
+    total_completed = sum(item.sessions_completed for item in items)
+    total_skipped = sum(item.sessions_skipped for item in items)
+    total_missed = sum(item.sessions_missed for item in items)
+    decided = total_completed + total_skipped + total_missed
     return AdherenceSummaryOut(
         weeks=len(items),
         scored_weeks=len(completed),
@@ -399,6 +523,10 @@ def _summary(items: list[AdherenceWeekOut], current_week: date) -> AdherenceSumm
             if completed
             else None
         ),
+        sessions_completed=total_completed,
+        sessions_skipped=total_skipped,
+        sessions_missed=total_missed,
+        completion_rate=round(total_completed / decided, 3) if decided else None,
     )
 
 
@@ -430,6 +558,7 @@ def build_adherence(
     )
     goals = list(db.scalars(select(RaceGoal)).all())
 
+    active_plan = get_active_plan(db)
     items: list[AdherenceWeekOut] = []
     for index in range(weeks):
         monday = first_week + timedelta(weeks=index)
@@ -449,6 +578,39 @@ def build_adherence(
             goal.target_date if goal else None,
             last_race,
         )
+        in_progress = monday == current_week
+        registered = (
+            active_plan
+            if active_plan is not None and plan_covers_week(active_plan, monday)
+            else None
+        )
+        if registered is not None:
+            targets = _registered_targets(registered, monday, today)
+            items.append(
+                _week_out(
+                    actual,
+                    phase=phase.key,
+                    weekly_low=float(targets["volume_low"]),
+                    weekly_high=float(targets["volume_high"]),
+                    long_low=float(targets["long_low"]),
+                    long_high=float(targets["long_high"]),
+                    quality_low=int(targets["quality_low"]),
+                    quality_high=int(targets["quality_high"]),
+                    rest_planned=int(targets["rest_planned"]),
+                    sessions_planned=int(targets["sessions_planned"]),
+                    in_progress=in_progress,
+                    basis="registered",
+                    plan_id=registered.id,
+                    plan_name=registered.name,
+                    sessions_completed=int(targets["completed"]),
+                    sessions_skipped=int(targets["skipped"]),
+                    sessions_missed=int(targets["missed"]),
+                    completion_rate=targets["completion_rate"],  # type: ignore[arg-type]
+                    session_items=targets["items"],  # type: ignore[arg-type]
+                )
+            )
+            continue
+
         weekly_low, weekly_high = target_weekly_distance(phase.key, base_weekly)
         long_low, long_high = long_run_target(weekly_low, weekly_high)
         goal_pace = (
@@ -482,10 +644,20 @@ def build_adherence(
                 quality_high=quality_high,
                 rest_planned=rest_planned,
                 sessions_planned=sessions_planned,
-                in_progress=monday == current_week,
+                in_progress=in_progress,
+                basis="suggested",
             )
         )
 
+    registered_weeks = sum(1 for item in items if item.basis == "registered")
+    suggested_weeks = len(items) - registered_weeks
+    if registered_weeks and suggested_weeks:
+        basis = "mixed"
+    elif registered_weeks:
+        basis = "registered"
+    else:
+        basis = "suggested"
+    used_plan = active_plan if registered_weeks else None
     summary = _summary(items, current_week)
     warnings: list[str] = []
     if not records:
@@ -507,7 +679,7 @@ def build_adherence(
         else "partial"
     )
     notes = [
-        "suggested_plan_not_registered",
+        "registered_plan_used" if registered_weeks else "suggested_plan_not_registered",
         "adherence_is_heuristic",
         "current_week_excluded",
         "rest_days_derived",
@@ -516,6 +688,8 @@ def build_adherence(
     ]
     if analysis.has_manual:
         notes.append("manual_thresholds_applied")
+    if basis == "mixed":
+        notes.append("mixed_registered_and_suggested")
 
     return AdherenceOverview(
         generated_at=reference,
@@ -523,6 +697,11 @@ def build_adherence(
         weeks=weeks,
         status=status,
         current_week_start=current_week,
+        basis=basis,  # type: ignore[arg-type]
+        plan_id=used_plan.id if used_plan is not None else None,
+        plan_name=used_plan.name if used_plan is not None else None,
+        registered_weeks=registered_weeks,
+        suggested_weeks=suggested_weeks,
         summary=summary,
         items=items,
         warnings=warnings,

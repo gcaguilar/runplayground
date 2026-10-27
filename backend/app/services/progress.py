@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Activity, BestEffort, PerformanceSnapshot, PlannedRace, RaceGoal
 from app.schemas import (
+    CalendarActivePlanOut,
     CalendarDayOut,
     CalendarEntryOut,
     CalendarView,
@@ -47,6 +48,7 @@ from app.schemas import (
     WeeklyDay,
     WeeklyLoadOut,
 )
+from app.schemas_plans import RUNNING_SESSION_TYPES as RUNNING_TYPES
 from app.services.analysis import (
     RunRecord,
     build_sessions,
@@ -65,6 +67,10 @@ from app.services.performance_models import (
     STANDARD_DISTANCES,
     riegel_time,
     round_prediction_time,
+)
+from app.services.plans import (
+    get_active_plan,
+    plan_sessions_in_range,
 )
 from app.utils import as_utc, utcnow
 
@@ -743,6 +749,13 @@ def build_calendar(
         )
         .order_by(PlannedRace.race_date, PlannedRace.id)
     ).all()
+    active_plan = get_active_plan(db)
+    registered_sessions = (
+        plan_sessions_in_range(active_plan, grid_start, grid_end) if active_plan is not None else []
+    )
+    registered_by_day: dict[date, list[Any]] = {}
+    for session in registered_sessions:
+        registered_by_day.setdefault(session.session_date, []).append(session)
     next_race = db.scalar(
         select(PlannedRace)
         .where(
@@ -789,11 +802,17 @@ def build_calendar(
         for session_day, session in sessions:
             if next_race is not None and session_day > next_race.race_date:
                 continue
+            # Inside the registered plan the suggestion is replaced by the
+            # plan's own sessions. Outside it, M3 behaviour is untouched.
+            if (
+                active_plan is not None
+                and active_plan.start_date <= session_day <= active_plan.end_date
+            ):
+                continue
             sessions_by_day.setdefault(session_day, []).append((session_day, session))
 
         days: list[CalendarDayOut] = []
         week_actual = 0.0
-        week_planned = 0.0
         for day_index in range(7):
             day = week_monday + timedelta(days=day_index)
             entries: list[CalendarEntryOut] = []
@@ -825,6 +844,26 @@ def build_calendar(
                         is_race=activity.is_race,
                     )
                 )
+            for session in registered_by_day.get(day, []):
+                entries.append(
+                    CalendarEntryOut(
+                        id=f"plan:{session.id}",
+                        date=day,
+                        kind="plan",
+                        title=session.type,
+                        distance_m=round(session.distance_m, 1)
+                        if session.distance_m is not None
+                        else None,
+                        duration_s=round(session.duration_s, 1)
+                        if session.duration_s is not None
+                        else None,
+                        intensity=session.intensity,
+                        status=session.status,
+                        plan_id=active_plan.id if active_plan is not None else None,
+                        session_id=session.id,
+                        activity_id=session.activity_id,
+                    )
+                )
             for _session_day, session in sessions_by_day.get(day, []):
                 distance = None
                 if session.distance_low_m and session.distance_high_m:
@@ -844,8 +883,6 @@ def build_calendar(
                         status="suggested",
                     )
                 )
-                if distance:
-                    week_planned += distance
 
             actual = sum(
                 activity.distance_m
@@ -860,7 +897,10 @@ def build_calendar(
                     actual_distance_m=round(actual, 1),
                     planned_distance_m=round(
                         sum(
-                            entry.distance_m or 0.0 for entry in entries if entry.kind == "session"
+                            entry.distance_m or 0.0
+                            for entry in entries
+                            if entry.kind == "session"
+                            or (entry.kind == "plan" and entry.title in RUNNING_TYPES)
                         ),
                         1,
                     ),
@@ -871,7 +911,7 @@ def build_calendar(
                 week_start=week_monday,
                 days=days,
                 actual_distance_m=round(week_actual, 1),
-                planned_distance_m=round(week_planned, 1),
+                planned_distance_m=round(sum(day.planned_distance_m for day in days), 1),
             )
         )
 
@@ -880,6 +920,20 @@ def build_calendar(
         end=grid_end,
         today=today,
         weeks=output_weeks,
+        active_plan=(
+            CalendarActivePlanOut(
+                id=active_plan.id,
+                name=active_plan.name,
+                start_date=active_plan.start_date,
+                end_date=active_plan.end_date,
+                goal_race_id=active_plan.goal_race_id,
+                goal_race_name=(
+                    active_plan.goal_race.name if active_plan.goal_race is not None else None
+                ),
+            )
+            if active_plan is not None
+            else None
+        ),
     )
 
 
