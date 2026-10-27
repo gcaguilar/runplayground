@@ -538,6 +538,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/briefing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Briefing */
+        get: operations["briefing_api_v1_briefing_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -958,6 +975,116 @@ export interface components {
         Body_import_garmin_export_zip_api_v1_imports_garmin_export_post: {
             /** File */
             file: string;
+        };
+        /** BriefingActionOut */
+        BriefingActionOut: {
+            /** Dimension Key */
+            dimension_key: string;
+            /** Score */
+            score?: number | null;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** BriefingDistanceOut */
+        BriefingDistanceOut: {
+            /** Distance Key */
+            distance_key: string;
+            /** Distance M */
+            distance_m: number;
+            /** Time S */
+            time_s?: number | null;
+            /** Low S */
+            low_s?: number | null;
+            /** High S */
+            high_s?: number | null;
+            /** Goal Time S */
+            goal_time_s?: number | null;
+            /** Goal Gap S */
+            goal_gap_s?: number | null;
+            /** Confidence */
+            confidence: string;
+        };
+        /** BriefingInsightOut */
+        BriefingInsightOut: {
+            /** Key */
+            key: string;
+            /** Dimension Key */
+            dimension_key?: string | null;
+            /** Value */
+            value?: number | null;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** BriefingSignalOut */
+        BriefingSignalOut: {
+            /** Key */
+            key: string;
+            /** Score */
+            score?: number | null;
+            /** Status */
+            status: string;
+            /** Confidence */
+            confidence: string;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** BriefingTrendOut */
+        BriefingTrendOut: {
+            /** Window Days */
+            window_days: number;
+            /** As Of */
+            as_of?: string | null;
+            /** Current S */
+            current_s?: number | null;
+            /** Previous S */
+            previous_s?: number | null;
+            /** Change S */
+            change_s?: number | null;
+            /** Change Pct */
+            change_pct?: number | null;
+            /** Status */
+            status: string;
+        };
+        /** BriefingView */
+        BriefingView: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Status */
+            status: string;
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            fitness_anchor?: components["schemas"]["FitnessAnchorOut"] | null;
+            /** Trends */
+            trends?: components["schemas"]["BriefingTrendOut"][];
+            /** Distances */
+            distances?: components["schemas"]["BriefingDistanceOut"][];
+            /** Signals */
+            signals?: components["schemas"]["BriefingSignalOut"][];
+            /** Headline */
+            headline: string;
+            /** Headline Params */
+            headline_params?: {
+                [key: string]: number | string | null;
+            };
+            improvement?: components["schemas"]["BriefingInsightOut"] | null;
+            limitation?: components["schemas"]["BriefingInsightOut"] | null;
+            action?: components["schemas"]["BriefingActionOut"] | null;
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
         };
         /** CalendarDayOut */
         CalendarDayOut: {
@@ -3872,6 +3999,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    briefing_api_v1_briefing_get: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefingView"];
+                };
             };
             /** @description Validation Error */
             422: {

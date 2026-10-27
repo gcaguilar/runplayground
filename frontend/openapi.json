@@ -2308,6 +2308,67 @@
           }
         }
       }
+    },
+    "/api/v1/briefing": {
+      "get": {
+        "tags": [
+          "briefing"
+        ],
+        "summary": "Briefing",
+        "operationId": "briefing_api_v1_briefing_get",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefingView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3699,6 +3760,412 @@
           "file"
         ],
         "title": "Body_import_garmin_export_zip_api_v1_imports_garmin_export_post"
+      },
+      "BriefingActionOut": {
+        "properties": {
+          "dimension_key": {
+            "type": "string",
+            "title": "Dimension Key"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dimension_key"
+        ],
+        "title": "BriefingActionOut"
+      },
+      "BriefingDistanceOut": {
+        "properties": {
+          "distance_key": {
+            "type": "string",
+            "title": "Distance Key"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time S"
+          },
+          "low_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low S"
+          },
+          "high_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High S"
+          },
+          "goal_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Time S"
+          },
+          "goal_gap_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Gap S"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "distance_key",
+          "distance_m",
+          "confidence"
+        ],
+        "title": "BriefingDistanceOut"
+      },
+      "BriefingInsightOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "dimension_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Key"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "title": "BriefingInsightOut"
+      },
+      "BriefingSignalOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "status",
+          "confidence"
+        ],
+        "title": "BriefingSignalOut"
+      },
+      "BriefingTrendOut": {
+        "properties": {
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "as_of": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of"
+          },
+          "current_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current S"
+          },
+          "previous_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous S"
+          },
+          "change_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change S"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window_days",
+          "status"
+        ],
+        "title": "BriefingTrendOut"
+      },
+      "BriefingView": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "fitness_anchor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FitnessAnchorOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trends": {
+            "items": {
+              "$ref": "#/components/schemas/BriefingTrendOut"
+            },
+            "type": "array",
+            "title": "Trends"
+          },
+          "distances": {
+            "items": {
+              "$ref": "#/components/schemas/BriefingDistanceOut"
+            },
+            "type": "array",
+            "title": "Distances"
+          },
+          "signals": {
+            "items": {
+              "$ref": "#/components/schemas/BriefingSignalOut"
+            },
+            "type": "array",
+            "title": "Signals"
+          },
+          "headline": {
+            "type": "string",
+            "title": "Headline"
+          },
+          "headline_params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Headline Params"
+          },
+          "improvement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BriefingInsightOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limitation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BriefingInsightOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BriefingActionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "status",
+          "as_of",
+          "confidence",
+          "confidence_score",
+          "headline"
+        ],
+        "title": "BriefingView"
       },
       "CalendarDayOut": {
         "properties": {
