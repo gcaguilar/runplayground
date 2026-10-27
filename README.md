@@ -5,10 +5,13 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M15 — final planned milestone, plus optional M16 analysis windows.**
+> **Status: M15 — final planned milestone, plus optional M16 analysis windows
+> and M17 heart-rate zones.**
 > M15 delivered the light theme, accessibility and print output. M16 adds
 > explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows and a
-> read-only diagnostics trend by dimension. The dashboard
+> read-only diagnostics trend by dimension. M17 adds optional heart-rate zones
+> to the running activity detail: five zones with time, share, explicit cuts,
+> coverage and the reference used, with no database migration. The dashboard
 > opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -168,7 +171,10 @@ metric dump.
   Cross-format duplicates are merged instead of double-counted.
 - **Activity library** with search, sport filter, sorting and pagination.
 - **Activity detail** with pace/HR streams, route, laps, quality flags and
-  editable name/race flag.
+  editable name/race flag. Running activities also show **heart-rate zones**:
+  five zones with bpm cuts, time, share, coverage and the max/threshold
+  reference from Settings, or an explicit empty state when the data cannot
+  support them.
 - **Weekly summary** with week-over-week comparisons.
 - **Data audit** with a deterministic score, coverage by stream/HR/GPS/laps,
   suspicious data detection and race candidates.
@@ -321,6 +327,33 @@ by at least ±5 points; otherwise it is `unknown`. A window without data returns
 `score: null` and `status: unknown`. The service function accepts a
 `window_days` argument (default 84) for training plan, forecast, adherence,
 briefing and tracking callers, which keep the default unchanged.
+
+### Heart-rate zones in the activity detail
+
+M17 adds a read-only zone card to running activities. It reads that activity's
+own stream and reports five zones: recovery, aerobic, tempo, threshold and
+VO2max. Each zone shows its bpm range, the explicit cut percentages, seconds
+and share of the time with valid heart rate. The card also reports total time
+with HR, sample coverage, and the reference and source actually used.
+
+The reference follows M11 settings: a manual threshold HR wins, then a manual
+max HR, then the observed max from running activities, and finally the activity
+or stream maximum as a clearly marked fallback. With a max-HR reference the
+cuts are 60/70/80/90 %; with a manual threshold they are 80/90/100/105 %. The
+open ends absorb everything inside the physiological range, so the shares add
+up to 100 % of the time with heart rate. Cuts are rounded, clamped to 30–230
+bpm and always strictly increasing. The endpoint is additive:
+`GET /api/v1/activities/{id}/zones`. It was chosen over embedding `hr_zones` in
+`ActivityDetail` so the existing detail contract and payload stay unchanged.
+
+Time is approximate: each sample covers the interval until the next sample,
+using elapsed time or timestamps; the last sample reuses the previous interval
+and gaps longer than 60 s are not counted. Heart rates outside 30–230 bpm are
+ignored. When there are no streams, no valid heart rate or no usable reference,
+the endpoint returns `insufficient` with empty zones instead of inventing them.
+Low coverage, sparse samples, filtered heart rates and an estimated maximum are
+warnings. Zones are context and never a medical diagnosis; they do not feed
+predictions, diagnostics or load.
 
 ### Suggested-plan adherence
 
@@ -733,14 +766,15 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. |
 | **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Final.** |
 | **M16** | Optional enhancement: explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows, plus a read-only diagnostics trend by dimension across 4, 8 and 12 weeks. No migration. |
+| **M17** | Optional enhancement: heart-rate zones in the running activity detail, with five zones, explicit bpm cuts, per-zone time and share, coverage, warnings and the max/threshold reference from Settings. No migration. |
 
-M15 closes the planned roadmap. M16 is an optional enhancement rather than a
-gap in the current scope. Further additions remain optional product work:
+M15 closes the planned roadmap. M16 and M17 are optional enhancements rather
+than gaps in the current scope. Further additions remain optional product work:
 automatic wellness sync (sleep/HRV/weight still come from the Garmin export),
-temperature/terrain adjustment in pace–heart-rate comparisons, plan import from
-CSV, and richer activity-detail zones. The core promise — own the data,
-understand the numbers, see their provenance and confidence, and decide what to
-train next — is implemented without sending anything to a third party.
+temperature/terrain adjustment in pace–heart-rate comparisons, and plan import
+from CSV. The core promise — own the data, understand the numbers, see their
+provenance and confidence, and decide what to train next — is implemented
+without sending anything to a third party.
 
 ## License and disclaimer
 
