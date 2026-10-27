@@ -3,8 +3,10 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  CalendarDays,
   Database,
   Dumbbell,
+  FileText,
   Gauge,
   LayoutDashboard,
   Menu,
@@ -28,7 +30,18 @@ import { formatDateTime, formatRelative } from "@/lib/format";
 import { useI18n, type MessageKey } from "@/i18n";
 
 type NavItem = {
-  to: "/" | "/performance" | "/progress" | "/diagnostics" | "/training" | "/activities" | "/imports" | "/data" | "/settings";
+  to:
+    | "/"
+    | "/performance"
+    | "/progress"
+    | "/calendar"
+    | "/reports"
+    | "/diagnostics"
+    | "/training"
+    | "/activities"
+    | "/imports"
+    | "/data"
+    | "/settings";
   label: MessageKey;
   icon: LucideIcon;
   exact?: boolean;
@@ -38,6 +51,8 @@ const primaryNav: NavItem[] = [
   { to: "/", label: "nav.overview", icon: LayoutDashboard, exact: true },
   { to: "/performance", label: "nav.performance", icon: Gauge },
   { to: "/progress", label: "nav.progress", icon: TrendingUp },
+  { to: "/calendar", label: "nav.calendar", icon: CalendarDays },
+  { to: "/reports", label: "nav.reports", icon: FileText },
   { to: "/diagnostics", label: "nav.diagnostics", icon: Stethoscope },
   { to: "/training", label: "nav.training", icon: Dumbbell },
 ];
@@ -55,6 +70,8 @@ function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/settings")) return "nav.settings";
   if (pathname.startsWith("/performance")) return "nav.performance";
   if (pathname.startsWith("/progress")) return "nav.progress";
+  if (pathname.startsWith("/calendar")) return "nav.calendar";
+  if (pathname.startsWith("/reports")) return "nav.reports";
   if (pathname.startsWith("/diagnostics")) return "nav.diagnostics";
   if (pathname.startsWith("/training")) return "nav.training";
   return "nav.overview";

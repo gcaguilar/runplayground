@@ -7,6 +7,7 @@ import { Button, ErrorState, Spinner } from "@/components/ui";
 import { useAuthStatus } from "@/api/queries";
 import { useI18n } from "@/i18n";
 import { ActivitiesPage } from "@/pages/ActivitiesPage";
+import { CalendarPage } from "@/pages/CalendarPage";
 import { ActivityDetailPage } from "@/pages/ActivityDetailPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DataQualityPage } from "@/pages/DataQualityPage";
@@ -15,7 +16,8 @@ import { ImportsPage } from "@/pages/ImportsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PerformancePage } from "@/pages/PerformancePage";
-import { ProgressPage } from "@/pages/PlaceholderPages";
+import { ProgressPage } from "@/pages/ProgressPage";
+import { ReportsPage } from "@/pages/ReportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { TrainingPage } from "@/pages/TrainingPage";
 
@@ -96,6 +98,18 @@ const progressRoute = createRoute({
   component: ProgressPage,
 });
 
+const calendarRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/calendar",
+  component: CalendarPage,
+});
+
+const reportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports",
+  component: ReportsPage,
+});
+
 const diagnosticsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/diagnostics",
@@ -142,6 +156,8 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   performanceRoute,
   progressRoute,
+  calendarRoute,
+  reportsRoute,
   diagnosticsRoute,
   trainingRoute,
   activitiesRoute,
