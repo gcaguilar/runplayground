@@ -538,6 +538,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/comparables/pace-hr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pace Hr */
+        get: operations["pace_hr_api_v1_comparables_pace_hr_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/briefing": {
         parameters: {
             query?: never;
@@ -1882,6 +1899,122 @@ export interface components {
             start_time_utc: string;
             /** Missing */
             missing: string[];
+        };
+        /** PaceHrAnalysisOut */
+        PaceHrAnalysisOut: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Window Days */
+            window_days: number;
+            /** Status */
+            status: string;
+            /** Sessions */
+            sessions: number;
+            /** Excluded Races */
+            excluded_races: number;
+            /** Excluded Hard */
+            excluded_hard: number;
+            /** Excluded Missing Hr */
+            excluded_missing_hr: number;
+            /** Groups */
+            groups?: components["schemas"]["PaceHrGroupOut"][];
+            /** Primary Group */
+            primary_group?: string | null;
+            /** Conclusion */
+            conclusion: string;
+            /** Conclusion Params */
+            conclusion_params?: {
+                [key: string]: number | string | null;
+            };
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
+        /** PaceHrGroupOut */
+        PaceHrGroupOut: {
+            /** Key */
+            key: string;
+            /** Distance Band */
+            distance_band: string;
+            /** Terrain Band */
+            terrain_band: string;
+            /** Sessions */
+            sessions: number;
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Reference Hr */
+            reference_hr: number;
+            /** Hr Min */
+            hr_min: number;
+            /** Hr Max */
+            hr_max: number;
+            /** Early Pace S Per Km */
+            early_pace_s_per_km?: number | null;
+            /** Recent Pace S Per Km */
+            recent_pace_s_per_km?: number | null;
+            /** Change S Per Km */
+            change_s_per_km?: number | null;
+            /** Change Pct */
+            change_pct?: number | null;
+            /** Status */
+            status: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score: number;
+            /** Reasons */
+            reasons?: string[];
+            /** Points */
+            points?: components["schemas"]["PaceHrPointOut"][];
+            /** Early Line */
+            early_line?: components["schemas"]["PaceHrLineOut"][];
+            /** Recent Line */
+            recent_line?: components["schemas"]["PaceHrLineOut"][];
+        };
+        /** PaceHrLineOut */
+        PaceHrLineOut: {
+            /** Hr */
+            hr: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+        };
+        /** PaceHrPointOut */
+        PaceHrPointOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Activity Id */
+            activity_id: number;
+            /** Activity Name */
+            activity_name: string;
+            /** Avg Hr */
+            avg_hr: number;
+            /** Pace S Per Km */
+            pace_s_per_km: number;
+            /** Adjusted Pace S Per Km */
+            adjusted_pace_s_per_km?: number | null;
+            /** Distance M */
+            distance_m: number;
+            /** Elevation Gain M */
+            elevation_gain_m?: number | null;
+            /** Period */
+            period: string;
         };
         /** PerformanceDataSummary */
         PerformanceDataSummary: {
@@ -3999,6 +4132,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pace_hr_api_v1_comparables_pace_hr_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaceHrAnalysisOut"];
+                };
             };
             /** @description Validation Error */
             422: {

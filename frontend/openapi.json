@@ -2309,6 +2309,79 @@
         }
       }
     },
+    "/api/v1/comparables/pace-hr": {
+      "get": {
+        "tags": [
+          "comparables"
+        ],
+        "summary": "Pace Hr",
+        "operationId": "pace_hr_api_v1_comparables_pace_hr_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 730,
+              "minimum": 30,
+              "default": 180,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaceHrAnalysisOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/briefing": {
       "get": {
         "tags": [
@@ -6713,6 +6786,338 @@
           "missing"
         ],
         "title": "MissingActivity"
+      },
+      "PaceHrAnalysisOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          },
+          "excluded_races": {
+            "type": "integer",
+            "title": "Excluded Races"
+          },
+          "excluded_hard": {
+            "type": "integer",
+            "title": "Excluded Hard"
+          },
+          "excluded_missing_hr": {
+            "type": "integer",
+            "title": "Excluded Missing Hr"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/PaceHrGroupOut"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "primary_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Group"
+          },
+          "conclusion": {
+            "type": "string",
+            "title": "Conclusion"
+          },
+          "conclusion_params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Conclusion Params"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "window_days",
+          "status",
+          "sessions",
+          "excluded_races",
+          "excluded_hard",
+          "excluded_missing_hr",
+          "conclusion"
+        ],
+        "title": "PaceHrAnalysisOut"
+      },
+      "PaceHrGroupOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "distance_band": {
+            "type": "string",
+            "title": "Distance Band"
+          },
+          "terrain_band": {
+            "type": "string",
+            "title": "Terrain Band"
+          },
+          "sessions": {
+            "type": "integer",
+            "title": "Sessions"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "title": "End"
+          },
+          "reference_hr": {
+            "type": "number",
+            "title": "Reference Hr"
+          },
+          "hr_min": {
+            "type": "integer",
+            "title": "Hr Min"
+          },
+          "hr_max": {
+            "type": "integer",
+            "title": "Hr Max"
+          },
+          "early_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Early Pace S Per Km"
+          },
+          "recent_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recent Pace S Per Km"
+          },
+          "change_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change S Per Km"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "type": "number",
+            "title": "Confidence Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/PaceHrPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "early_line": {
+            "items": {
+              "$ref": "#/components/schemas/PaceHrLineOut"
+            },
+            "type": "array",
+            "title": "Early Line"
+          },
+          "recent_line": {
+            "items": {
+              "$ref": "#/components/schemas/PaceHrLineOut"
+            },
+            "type": "array",
+            "title": "Recent Line"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "distance_band",
+          "terrain_band",
+          "sessions",
+          "start",
+          "end",
+          "reference_hr",
+          "hr_min",
+          "hr_max",
+          "status",
+          "confidence",
+          "confidence_score"
+        ],
+        "title": "PaceHrGroupOut"
+      },
+      "PaceHrLineOut": {
+        "properties": {
+          "hr": {
+            "type": "number",
+            "title": "Hr"
+          },
+          "pace_s_per_km": {
+            "type": "number",
+            "title": "Pace S Per Km"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hr",
+          "pace_s_per_km"
+        ],
+        "title": "PaceHrLineOut"
+      },
+      "PaceHrPointOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "activity_name": {
+            "type": "string",
+            "title": "Activity Name"
+          },
+          "avg_hr": {
+            "type": "integer",
+            "title": "Avg Hr"
+          },
+          "pace_s_per_km": {
+            "type": "number",
+            "title": "Pace S Per Km"
+          },
+          "adjusted_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adjusted Pace S Per Km"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "elevation_gain_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elevation Gain M"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "activity_id",
+          "activity_name",
+          "avg_hr",
+          "pace_s_per_km",
+          "distance_m",
+          "period"
+        ],
+        "title": "PaceHrPointOut"
       },
       "PerformanceDataSummary": {
         "properties": {
