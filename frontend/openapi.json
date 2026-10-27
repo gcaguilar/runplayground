@@ -1076,6 +1076,67 @@
         }
       }
     },
+    "/api/v1/diagnostics/trend": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Diagnostics Trend",
+        "operationId": "diagnostics_trend_api_v1_diagnostics_trend_get",
+        "parameters": [
+          {
+            "name": "tz_offset_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 840,
+              "minimum": -840,
+              "default": 0,
+              "title": "Tz Offset Minutes"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticsTrendOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/training": {
       "get": {
         "tags": [
@@ -2093,7 +2154,7 @@
             "schema": {
               "type": "integer",
               "maximum": 730,
-              "minimum": 30,
+              "minimum": 7,
               "default": 180,
               "title": "Days"
             }
@@ -7894,6 +7955,64 @@
           "reference"
         ],
         "title": "DiagnosticsOverview"
+      },
+      "DiagnosticsTrendOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "current_window_days": {
+            "type": "integer",
+            "title": "Current Window Days"
+          },
+          "windows": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Windows"
+          },
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/TrendSeriesOut"
+            },
+            "type": "array",
+            "title": "Dimensions"
+          },
+          "overall": {
+            "$ref": "#/components/schemas/TrendSeriesOut"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "current_window_days",
+          "windows",
+          "dimensions",
+          "overall"
+        ],
+        "title": "DiagnosticsTrendOut"
       },
       "DimensionOut": {
         "properties": {
@@ -14388,6 +14507,114 @@
           "purpose"
         ],
         "title": "TrainingSessionOut"
+      },
+      "TrendPointOut": {
+        "properties": {
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "window_weeks": {
+            "type": "integer",
+            "title": "Window Weeks"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "confidence_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Score"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window_days",
+          "window_weeks",
+          "status",
+          "confidence"
+        ],
+        "title": "TrendPointOut"
+      },
+      "TrendSeriesOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/TrendPointOut"
+            },
+            "type": "array",
+            "title": "Windows"
+          },
+          "current": {
+            "$ref": "#/components/schemas/TrendPointOut"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "trend": {
+            "type": "string",
+            "enum": [
+              "improving",
+              "stable",
+              "worsening",
+              "unknown"
+            ],
+            "title": "Trend",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "windows",
+          "current"
+        ],
+        "title": "TrendSeriesOut"
       },
       "ValidationError": {
         "properties": {
