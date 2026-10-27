@@ -339,10 +339,7 @@ export function ForecastPage() {
                 value={formatDistance(training.longest_28_m, units, locale, { digits: 1 })}
               />
               <TrainingStat
-                label={t("forecast.training.activeWeeks", {
-                  active: training.active_weeks ?? 0,
-                  total: training.weeks ?? 0,
-                })}
+                label={t("forecast.training.activeWeeks")}
                 value={`${training.active_weeks ?? 0} / ${training.weeks ?? 0}`}
               />
               <TrainingStat
