@@ -6,6 +6,8 @@ export type Activity = Schemas["ActivityOut"];
 export type ActivityDetail = Schemas["ActivityDetail"];
 export type ActivityList = Schemas["ActivityList"];
 export type ActivityStreams = Schemas["ActivityStreams"];
+export type HrZones = Schemas["HrZonesOut"];
+export type HrZone = Schemas["HrZoneOut"];
 export type StreamPoint = Schemas["StreamPoint"];
 export type Lap = Schemas["LapOut"];
 export type ActivitySource = Schemas["SourceOut"];
@@ -318,6 +320,8 @@ export const api = {
 
   streams: (id: number | string, maxPoints = 1500) =>
     request<ActivityStreams>(`/activities/${id}/streams?max_points=${maxPoints}`),
+
+  zones: (id: number | string) => request<HrZones>(`/activities/${id}/zones`),
 
   patchActivity: (id: number | string, patch: ActivityPatch) =>
     request<ActivityDetail>(`/activities/${id}`, {

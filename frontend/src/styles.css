@@ -10272,3 +10272,260 @@ progress {
     grid-column: auto;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Activity heart-rate zones (M17)                                     */
+/* ------------------------------------------------------------------ */
+
+.hr-zones-card__summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  padding: 13px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.hr-zones-card__summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.hr-zones-card__label {
+  color: var(--faint);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.hr-zones-card__summary strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.hr-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 18px;
+}
+
+.hr-zone__head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.hr-zone__key {
+  border-radius: 6px;
+  padding: 3px 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.hr-zone__key--z1 {
+  color: var(--blue);
+  background: rgb(var(--blue-rgb) / 0.14);
+}
+
+.hr-zone__key--z2 {
+  color: var(--teal);
+  background: rgb(var(--teal-rgb) / 0.14);
+}
+
+.hr-zone__key--z3 {
+  color: var(--accent);
+  background: rgb(var(--accent-rgb) / 0.14);
+}
+
+.hr-zone__key--z4 {
+  color: var(--orange);
+  background: rgb(var(--orange-rgb) / 0.14);
+}
+
+.hr-zone__key--z5 {
+  color: var(--red);
+  background: rgb(var(--red-rgb) / 0.14);
+}
+
+.hr-zone__name {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  min-width: 0;
+}
+
+.hr-zone__bpm {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.hr-zone__bpm small,
+.hr-zone__time small {
+  display: block;
+  color: var(--faint);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.hr-zone__time {
+  min-width: 74px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hr-zone__time strong {
+  display: block;
+  font-weight: 650;
+}
+
+.hr-zone__track {
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 20px;
+  background: rgb(var(--overlay-rgb) / 0.07);
+  overflow: hidden;
+}
+
+.hr-zone__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.hr-zone__fill--z1 {
+  background: var(--blue);
+}
+
+.hr-zone__fill--z2 {
+  background: var(--teal);
+}
+
+.hr-zone__fill--z3 {
+  background: var(--accent);
+}
+
+.hr-zone__fill--z4 {
+  background: var(--orange);
+}
+
+.hr-zone__fill--z5 {
+  background: var(--red);
+}
+
+.hr-zones-card__warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  list-style: none;
+  border: 1px solid rgb(var(--orange-rgb) / 0.24);
+  border-radius: var(--radius-sm);
+  background: rgb(var(--orange-rgb) / 0.06);
+}
+
+.hr-zones-card__warnings li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--orange);
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.hr-zones-card__warnings svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.hr-zones-card__note {
+  margin: 10px 0 0;
+  color: var(--faint);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.hr-zones-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 10.5px;
+}
+
+.hr-zones-card__footer .inline-link {
+  margin-left: auto;
+  color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .hr-zones-card__summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .hr-zones-card__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hr-zone__head {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    row-gap: 2px;
+    gap: 6px 10px;
+  }
+
+  .hr-zone__key {
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+
+  .hr-zone__bpm {
+    grid-column: 2;
+    grid-row: 2;
+    color: var(--faint);
+    text-align: left;
+  }
+
+  .hr-zone__time {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .hr-zones-card__footer .inline-link {
+    margin-left: 0;
+  }
+}
+
+@media print {
+  .hr-zone__fill {
+    transition: none;
+  }
+}
