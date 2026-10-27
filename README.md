@@ -14,8 +14,9 @@ metric dump.
 > calendar merges real activities, suggested sessions and planned races;
 > reports are generated on demand for any week or month. Scenarios compare
 > four 8- or 12-week training hypotheses with explicit assumptions and capped
-> effects; Tracking compares past predictions with real results and follows
-> goal revisions and training actions over time.
+> effects and the projected goal gap; Tracking compares past predictions
+> with real results, follows goal revisions and training actions over time,
+> and pairs training factors with fitness changes as associations.
 
 ## What works today
 
@@ -32,13 +33,16 @@ metric dump.
 - **Future scenarios**: maintain, improve consistency, add specific work or
   deload, projected over 8 or 12 weeks. Every scenario shows its starting
   assumptions, evidence, capped modelled effect and widening 80% range. The
-  focus distance comes from the next goal or race, otherwise 10K.
+  focus distance comes from the next goal or race, otherwise 10K. When there
+  is a target, every scenario also shows the conditional gap and whether it
+  would be ahead, close or behind; it is never a probability of achieving it.
 - **Continuous tracking**: daily snapshots are compared with the first real
   result after them, up to 90 days later, to report bias, mean absolute error
   and how often the result fell inside the 80% range. Training efforts are
   marked separately from races.
 - **Goal and action follow-up**: every target change is a revision with the
-  prediction in force at the time; goals show their 28-day trend and gap.
+  prediction in force at the time; goals show their 28-day trend, gap and the
+  actual race or best-effort results overlaid on the prediction history.
   Recommendations can be marked pending, in progress or completed, with a
   baseline score so later improvement, stability or decline is explicit.
 - **Association analysis**: weekly volume, sessions, longest run, hard
@@ -97,9 +101,11 @@ statistical validation.
 
 Goal targets are append-only: saving a different target records what was asked
 for and what the model predicted at that moment. Re-saving the same target
-does not create noise. Tracked actions store a baseline diagnostic score when
-they are created, so a later review can say whether the related dimension
-improved, stayed stable or got worse without claiming causality.
+does not create noise. The goal chart overlays real races and best efforts on
+the prediction line, so the distance between what the model expected and what
+was actually run stays visible. Tracked actions store a baseline diagnostic
+score when they are created, so a later review can say whether the related
+dimension improved, stayed stable or got worse without claiming causality.
 
 The association panel pairs each week of training with the fitness change
 observed in that week's snapshot. It reports Pearson's correlation and the
