@@ -312,6 +312,75 @@
         }
       }
     },
+    "/api/v1/activities/compare": {
+      "get": {
+        "tags": [
+          "activities"
+        ],
+        "summary": "Compare Activities",
+        "operationId": "compare_activities_api_v1_activities_compare_get",
+        "parameters": [
+          {
+            "name": "left_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Left Id"
+            }
+          },
+          {
+            "name": "right_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Right Id"
+            }
+          },
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/activities/{activity_id}": {
       "get": {
         "tags": [
@@ -4452,6 +4521,422 @@
           "planned_distance_m"
         ],
         "title": "CalendarWeekOut"
+      },
+      "ComparisonInsightOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "title": "ComparisonInsightOut"
+      },
+      "ComparisonMetricOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "left": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Left"
+          },
+          "right": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Right"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Pct"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction",
+            "default": "context"
+          },
+          "better": {
+            "type": "string",
+            "title": "Better",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "title": "ComparisonMetricOut"
+      },
+      "ComparisonSideOut": {
+        "properties": {
+          "activity_id": {
+            "type": "integer",
+            "title": "Activity Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sport": {
+            "type": "string",
+            "title": "Sport"
+          },
+          "sub_sport": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub Sport"
+          },
+          "start_time_utc": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time Utc"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "duration_s": {
+            "type": "number",
+            "title": "Duration S"
+          },
+          "pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pace S Per Km"
+          },
+          "avg_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Hr"
+          },
+          "max_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Hr"
+          },
+          "cadence_spm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cadence Spm"
+          },
+          "power_w": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Power W"
+          },
+          "elevation_gain_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elevation Gain M"
+          },
+          "is_race": {
+            "type": "boolean",
+            "title": "Is Race"
+          },
+          "has_streams": {
+            "type": "boolean",
+            "title": "Has Streams"
+          },
+          "has_gps": {
+            "type": "boolean",
+            "title": "Has Gps"
+          },
+          "training_effect": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Effect"
+          },
+          "training_load": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Load"
+          }
+        },
+        "type": "object",
+        "required": [
+          "activity_id",
+          "name",
+          "sport",
+          "start_time_utc",
+          "distance_m",
+          "duration_s",
+          "is_race",
+          "has_streams",
+          "has_gps"
+        ],
+        "title": "ComparisonSideOut"
+      },
+      "ComparisonSplitOut": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "distance_m": {
+            "type": "number",
+            "title": "Distance M"
+          },
+          "left_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Left Pace S Per Km"
+          },
+          "right_pace_s_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Right Pace S Per Km"
+          },
+          "left_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Left Hr"
+          },
+          "right_hr": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Right Hr"
+          },
+          "pace_delta_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pace Delta S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "distance_m"
+        ],
+        "title": "ComparisonSplitOut"
+      },
+      "ComparisonView": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "comparability": {
+            "type": "number",
+            "title": "Comparability"
+          },
+          "left": {
+            "$ref": "#/components/schemas/ComparisonSideOut"
+          },
+          "right": {
+            "$ref": "#/components/schemas/ComparisonSideOut"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonMetricOut"
+            },
+            "type": "array",
+            "title": "Metrics"
+          },
+          "splits": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonSplitOut"
+            },
+            "type": "array",
+            "title": "Splits"
+          },
+          "insights": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonInsightOut"
+            },
+            "type": "array",
+            "title": "Insights"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "model_version",
+          "status",
+          "comparability",
+          "left",
+          "right"
+        ],
+        "title": "ComparisonView"
       },
       "ConsistencyOut": {
         "properties": {

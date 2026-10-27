@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/activities/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compare Activities */
+        get: operations["compare_activities_api_v1_activities_compare_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/activities/{activity_id}": {
         parameters: {
             query?: never;
@@ -1192,6 +1209,127 @@ export interface components {
             actual_distance_m: number;
             /** Planned Distance M */
             planned_distance_m: number;
+        };
+        /** ComparisonInsightOut */
+        ComparisonInsightOut: {
+            /** Key */
+            key: string;
+            /** Value */
+            value?: number | null;
+            /** Params */
+            params?: {
+                [key: string]: number | string | null;
+            };
+        };
+        /** ComparisonMetricOut */
+        ComparisonMetricOut: {
+            /** Key */
+            key: string;
+            /** Left */
+            left?: number | null;
+            /** Right */
+            right?: number | null;
+            /** Delta */
+            delta?: number | null;
+            /** Delta Pct */
+            delta_pct?: number | null;
+            /**
+             * Direction
+             * @default context
+             */
+            direction: string;
+            /**
+             * Better
+             * @default unknown
+             */
+            better: string;
+        };
+        /** ComparisonSideOut */
+        ComparisonSideOut: {
+            /** Activity Id */
+            activity_id: number;
+            /** Name */
+            name: string;
+            /** Sport */
+            sport: string;
+            /** Sub Sport */
+            sub_sport?: string | null;
+            /**
+             * Start Time Utc
+             * Format: date-time
+             */
+            start_time_utc: string;
+            /** Distance M */
+            distance_m: number;
+            /** Duration S */
+            duration_s: number;
+            /** Pace S Per Km */
+            pace_s_per_km?: number | null;
+            /** Avg Hr */
+            avg_hr?: number | null;
+            /** Max Hr */
+            max_hr?: number | null;
+            /** Cadence Spm */
+            cadence_spm?: number | null;
+            /** Power W */
+            power_w?: number | null;
+            /** Elevation Gain M */
+            elevation_gain_m?: number | null;
+            /** Is Race */
+            is_race: boolean;
+            /** Has Streams */
+            has_streams: boolean;
+            /** Has Gps */
+            has_gps: boolean;
+            /** Training Effect */
+            training_effect?: number | null;
+            /** Training Load */
+            training_load?: number | null;
+        };
+        /** ComparisonSplitOut */
+        ComparisonSplitOut: {
+            /** Index */
+            index: number;
+            /** Distance M */
+            distance_m: number;
+            /** Left Pace S Per Km */
+            left_pace_s_per_km?: number | null;
+            /** Right Pace S Per Km */
+            right_pace_s_per_km?: number | null;
+            /** Left Hr */
+            left_hr?: number | null;
+            /** Right Hr */
+            right_hr?: number | null;
+            /** Pace Delta S */
+            pace_delta_s?: number | null;
+        };
+        /** ComparisonView */
+        ComparisonView: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Status */
+            status: string;
+            /** Comparability */
+            comparability: number;
+            left: components["schemas"]["ComparisonSideOut"];
+            right: components["schemas"]["ComparisonSideOut"];
+            /** Metrics */
+            metrics?: components["schemas"]["ComparisonMetricOut"][];
+            /** Splits */
+            splits?: components["schemas"]["ComparisonSplitOut"][];
+            /** Insights */
+            insights?: components["schemas"]["ComparisonInsightOut"][];
+            /** Reasons */
+            reasons?: string[];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
         };
         /** ConsistencyOut */
         ConsistencyOut: {
@@ -3057,6 +3195,40 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compare_activities_api_v1_activities_compare_get: {
+        parameters: {
+            query: {
+                left_id: number;
+                right_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComparisonView"];
                 };
             };
             /** @description Validation Error */
