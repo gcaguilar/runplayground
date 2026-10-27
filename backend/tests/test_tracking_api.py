@@ -254,3 +254,93 @@ def test_progress_keeps_a_daily_snapshot(client):
     assert history["items"]
     today = utcnow().date().isoformat()
     assert any(item["date"] == today for item in history["items"])
+
+
+def test_driver_analysis_finds_an_association_without_claiming_causality(client):
+    from app.services.drivers import build_drivers
+
+    session = get_session_factory()()
+    now = utcnow()
+    today = now.date()
+    this_monday = today - timedelta(days=today.weekday())
+    try:
+        fitness = 3000.0
+        volumes = [10, 20, 12, 24, 14, 22, 16, 26]
+        for index, volume in enumerate(volumes):
+            week = this_monday - timedelta(weeks=len(volumes) - index)
+            if index > 0:
+                improvement = 0.1 + (volume - 10) / 16 * 1.2
+                fitness = fitness * (1 - improvement / 100)
+            session.add(
+                Activity(
+                    fingerprint=f"m4-driver-{index}",
+                    name=f"Week {index}",
+                    sport="running",
+                    start_time_utc=now - timedelta(days=(today - week).days, hours=2),
+                    distance_m=volume * 1000,
+                    duration_s=volume * 360,
+                    avg_hr=145,
+                    max_hr=170,
+                )
+            )
+            session.add(
+                PerformanceSnapshot(
+                    snapshot_date=week,
+                    computed_at=now - timedelta(days=(today - week).days),
+                    model_version="m1.0",
+                    fitness_anchor_s=fitness,
+                    fitness_anchor_low_s=fitness - 40,
+                    fitness_anchor_high_s=fitness + 40,
+                    fitness_confidence="medium",
+                    predictions=[
+                        {
+                            "distance_key": "10k",
+                            "distance_m": 10000.0,
+                            "planning_s": fitness,
+                            "planning_low_s": fitness - 40,
+                            "planning_high_s": fitness + 40,
+                            "confidence": "medium",
+                        }
+                    ],
+                )
+            )
+        session.commit()
+
+        analysis = build_drivers(
+            session,
+            this_monday - timedelta(days=90),
+            this_monday - timedelta(days=1),
+            timedelta(0),
+            threshold_pace=360.0,
+            hr_reference=None,
+        )
+    finally:
+        session.close()
+
+    assert analysis.status == "ok"
+    assert analysis.samples >= 6
+    assert len(analysis.drivers) == 6
+    assert "association_not_causation" in analysis.notes
+
+    volume = next(item for item in analysis.drivers if item.key == "volume_m")
+    assert volume.samples >= 6
+    assert volume.correlation is not None
+    assert volume.correlation > 0.5
+    assert volume.direction == "positive"
+    assert volume.strength in {"moderate", "strong"}
+    assert volume.difference_pct is not None
+    assert volume.difference_pct > 0
+    assert "association_not_causation" in volume.reasons
+
+
+def test_tracking_exposes_driver_analysis(client):
+    _seed()
+    client.get("/api/v1/performance")
+
+    payload = client.get("/api/v1/tracking").json()
+    drivers = payload["drivers"]
+    assert drivers["status"] in {"ok", "insufficient"}
+    assert len(drivers["drivers"]) == 6
+    assert "association_not_causation" in drivers["notes"]
+    assert all(item["confidence"] in {"low", "medium", "high"} for item in drivers["drivers"])
+    assert "association_not_causation" in payload["notes"]
