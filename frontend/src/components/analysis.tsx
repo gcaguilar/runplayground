@@ -151,6 +151,13 @@ const WARNING_KEYS: Record<string, MessageKey> = {
   short_history: "analysis.warning.short_history",
   stale_data: "analysis.warning.stale_data",
   trail_heavy: "analysis.warning.trail_heavy",
+  no_running_activities: "analysis.warning.no_running_activities",
+  no_best_efforts: "analysis.warning.no_best_efforts",
+  no_goals: "analysis.warning.no_goals",
+  no_upcoming_races: "analysis.warning.no_upcoming_races",
+  no_fitness_history: "analysis.warning.no_fitness_history",
+  load_attention: "analysis.warning.load_attention",
+  load_risk: "analysis.warning.load_risk",
 };
 
 const INTENSITY_META = [
