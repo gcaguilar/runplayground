@@ -4269,6 +4269,139 @@
         ],
         "title": "DistancePredictionOut"
       },
+      "DriverAnalysisOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          },
+          "weeks": {
+            "type": "integer",
+            "title": "Weeks"
+          },
+          "samples": {
+            "type": "integer",
+            "title": "Samples"
+          },
+          "drivers": {
+            "items": {
+              "$ref": "#/components/schemas/DriverOut"
+            },
+            "type": "array",
+            "title": "Drivers"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "window_days",
+          "weeks",
+          "samples"
+        ],
+        "title": "DriverAnalysisOut"
+      },
+      "DriverOut": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "strength": {
+            "type": "string",
+            "title": "Strength"
+          },
+          "samples": {
+            "type": "integer",
+            "title": "Samples"
+          },
+          "improvement_high_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Improvement High Pct"
+          },
+          "improvement_low_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Improvement Low Pct"
+          },
+          "difference_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference Pct"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "direction",
+          "strength",
+          "samples",
+          "confidence"
+        ],
+        "title": "DriverOut"
+      },
       "EffortOut": {
         "properties": {
           "activity_id": {
@@ -8216,6 +8349,9 @@
           "accuracy": {
             "$ref": "#/components/schemas/PredictionAccuracyOut"
           },
+          "drivers": {
+            "$ref": "#/components/schemas/DriverAnalysisOut"
+          },
           "goals": {
             "items": {
               "$ref": "#/components/schemas/GoalTrackingOut"
@@ -8258,7 +8394,8 @@
           "model_version",
           "days",
           "status",
-          "accuracy"
+          "accuracy",
+          "drivers"
         ],
         "title": "TrackingOverview"
       },

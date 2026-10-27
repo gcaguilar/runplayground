@@ -1154,6 +1154,46 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** DriverAnalysisOut */
+        DriverAnalysisOut: {
+            /** Status */
+            status: string;
+            /** Window Days */
+            window_days: number;
+            /** Weeks */
+            weeks: number;
+            /** Samples */
+            samples: number;
+            /** Drivers */
+            drivers?: components["schemas"]["DriverOut"][];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
+        };
+        /** DriverOut */
+        DriverOut: {
+            /** Key */
+            key: string;
+            /** Correlation */
+            correlation?: number | null;
+            /** Direction */
+            direction: string;
+            /** Strength */
+            strength: string;
+            /** Samples */
+            samples: number;
+            /** Improvement High Pct */
+            improvement_high_pct?: number | null;
+            /** Improvement Low Pct */
+            improvement_low_pct?: number | null;
+            /** Difference Pct */
+            difference_pct?: number | null;
+            /** Confidence */
+            confidence: string;
+            /** Reasons */
+            reasons?: string[];
+        };
         /** EffortOut */
         EffortOut: {
             /** Activity Id */
@@ -2356,6 +2396,7 @@ export interface components {
             /** Status */
             status: string;
             accuracy: components["schemas"]["PredictionAccuracyOut"];
+            drivers: components["schemas"]["DriverAnalysisOut"];
             /** Goals */
             goals?: components["schemas"]["GoalTrackingOut"][];
             /** Actions */
