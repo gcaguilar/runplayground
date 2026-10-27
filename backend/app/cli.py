@@ -3,6 +3,7 @@
 Examples:
     python -m app.cli sync --mode incremental
     python -m app.cli create-db
+    python -m app.cli apply-restore
     python -m app.cli export-openapi
 """
 
@@ -93,6 +94,29 @@ def cmd_recompute() -> int:
         session.close()
 
 
+def cmd_apply_restore() -> int:
+    from app.services.backup import BackupError, apply_pending_restore
+
+    try:
+        result = apply_pending_restore(get_settings())
+    except BackupError as exc:
+        print(f"Restore failed: {exc.message}", file=sys.stderr)
+        for error in exc.errors:
+            print(f"  - {error}", file=sys.stderr)
+        return 1
+    if not result.applied:
+        print("No pending restore.")
+        return 0
+    manifest = result.manifest or {}
+    print(
+        "Restore applied: "
+        f"{manifest.get('app_version', '?')} backup from {manifest.get('created_at', '?')}"
+    )
+    if result.pre_restore_database is not None:
+        print(f"Previous database: {result.pre_restore_database}")
+    return 0
+
+
 def cmd_check() -> int:
     settings = get_settings()
     print(f"app: {settings.app_name} {settings.app_version}")
@@ -113,6 +137,10 @@ def main() -> int:
     sync_parser.add_argument("--mode", choices=["incremental", "backfill"], default="incremental")
 
     subparsers.add_parser("create-db", help="create tables without Alembic (development)")
+    subparsers.add_parser(
+        "apply-restore",
+        help="apply a pending restore before Alembic runs",
+    )
     subparsers.add_parser("export-openapi", help="write frontend/openapi.json")
     subparsers.add_parser("recompute", help="rebuild best efforts and performance snapshots")
     subparsers.add_parser("check", help="print effective configuration")
@@ -122,6 +150,8 @@ def main() -> int:
         return cmd_sync(args.mode)
     if args.command == "create-db":
         return cmd_create_db()
+    if args.command == "apply-restore":
+        return cmd_apply_restore()
     if args.command == "export-openapi":
         return cmd_export_openapi()
     if args.command == "recompute":

@@ -131,6 +131,11 @@ export type BriefingDistance = Schemas["BriefingDistanceOut"];
 export type BriefingSignal = Schemas["BriefingSignalOut"];
 export type BriefingInsight = Schemas["BriefingInsightOut"];
 export type BriefingAction = Schemas["BriefingActionOut"];
+export type BackupStatus = Schemas["BackupStatusOut"];
+export type BackupPending = Schemas["BackupPendingOut"];
+export type BackupManifest = Schemas["BackupManifestOut"];
+export type BackupValidation = Schemas["BackupValidationOut"];
+export type BackupRestoreResult = Schemas["BackupRestoreOut"];
 
 const API_BASE = "/api/v1";
 
@@ -161,6 +166,13 @@ function errorDetail(payload: unknown, fallback: string): string {
         )
         .filter(Boolean);
       if (messages.length) return messages.join("; ");
+    }
+    if (detail && typeof detail === "object") {
+      const nested = detail as Record<string, unknown>;
+      if (typeof nested.message === "string") return nested.message;
+      if (Array.isArray(nested.errors) && nested.errors.length) {
+        return nested.errors.map(String).join("; ");
+      }
     }
     if (typeof record.message === "string") return record.message;
   }
@@ -193,6 +205,51 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+async function requestBlob(path: string): Promise<{ blob: Blob; filename: string }> {
+  const response = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!response.ok) {
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = await response.text();
+    }
+    throw new ApiError(
+      response.status,
+      errorDetail(payload, `${response.status} ${response.statusText}`),
+    );
+  }
+  const disposition = response.headers.get("content-disposition") ?? "";
+  const match = /filename="?([^";]+)"?/i.exec(disposition);
+  return {
+    blob: await response.blob(),
+    filename: match?.[1] ?? "run-backup.zip",
+  };
+}
+
+async function requestValidation(file: File): Promise<BackupValidation> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch(`${API_BASE}/backups/validate`, {
+    method: "POST",
+    body: form,
+    credentials: "include",
+  });
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+  if (payload && typeof payload === "object" && "valid" in payload) {
+    return payload as BackupValidation;
+  }
+  throw new ApiError(
+    response.status,
+    errorDetail(payload, `${response.status} ${response.statusText}`),
+  );
 }
 
 export function queryString(params: Record<string, string | number | undefined | null>): string {
@@ -292,6 +349,20 @@ export const api = {
       body: form,
     });
   },
+
+  exportBackup: () => requestBlob("/backups/export"),
+  validateBackup: (file: File) => requestValidation(file),
+  stageRestore: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<BackupRestoreResult>("/backups/restore", {
+      method: "POST",
+      body: form,
+    });
+  },
+  backupStatus: () => request<BackupStatus>("/backups/status"),
+  cancelPendingRestore: () =>
+    request<void>("/backups/pending", { method: "DELETE" }),
 
   performance: () => request<PerformanceOverview>("/performance"),
   recomputePerformance: () =>

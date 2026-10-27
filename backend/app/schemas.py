@@ -1494,3 +1494,56 @@ class SystemStatus(ApiModel):
     sync_interval_hours: int
     last_sync: dict[str, Any] | None = None
     supported_formats: list[str]
+
+
+# ---------------------------------------------------------------------------
+# Backup and restore
+
+
+class BackupManifestOut(ApiModel):
+    format: str
+    format_version: int
+    app_version: str
+    alembic_revision: str
+    created_at: str
+    counts: dict[str, int] = Field(default_factory=dict)
+    file_count: int = 0
+    total_bytes: int = 0
+    warnings: list[str] = Field(default_factory=list)
+
+
+class BackupValidationOut(ApiModel):
+    valid: bool
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    manifest: BackupManifestOut | None = None
+    archive_size_bytes: int = 0
+    uncompressed_size_bytes: int = 0
+    file_count: int = 0
+
+
+class BackupPendingOut(ApiModel):
+    staged_at: datetime
+    original_filename: str
+    archive_size_bytes: int
+    archive_sha256: str
+    manifest: BackupManifestOut | None = None
+    warnings: list[str] = Field(default_factory=list)
+
+
+class BackupStatusOut(ApiModel):
+    pending: BackupPendingOut | None = None
+    last_restore: dict[str, Any] | None = None
+    max_backup_mb: int
+    max_restore_mb: int
+    database_revision: str | None = None
+    head_revision: str | None = None
+    sync_running: bool = False
+    active_ingest: dict[str, Any] | None = None
+    data_dir: str
+
+
+class BackupRestoreOut(ApiModel):
+    staged: bool
+    message: str
+    pending: BackupPendingOut | None = None

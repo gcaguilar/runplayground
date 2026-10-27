@@ -7,6 +7,7 @@ import { Button, ErrorState, Spinner } from "@/components/ui";
 import { useAuthStatus } from "@/api/queries";
 import { useI18n } from "@/i18n";
 import { ActivitiesPage } from "@/pages/ActivitiesPage";
+import { BackupPage } from "@/pages/BackupPage";
 import { CalendarPage } from "@/pages/CalendarPage";
 import { ActivityDetailPage } from "@/pages/ActivityDetailPage";
 import { ComparePage } from "@/pages/ComparePage";
@@ -186,6 +187,12 @@ const dataRoute = createRoute({
   component: DataQualityPage,
 });
 
+const backupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/backup",
+  component: BackupPage,
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
@@ -209,6 +216,7 @@ const routeTree = rootRoute.addChildren([
   compareRoute,
   importsRoute,
   dataRoute,
+  backupRoute,
   settingsRoute,
 ]);
 

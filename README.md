@@ -5,12 +5,11 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M12 — registered training plan and adherence by session.** The
-> dashboard opens with the current 10K fitness anchor, its 4/8/12-week
-> evolution, the four distance predictions, a weekly message, the main
-> strength, the main limitation and the next action. Sync, import, activities,
-> weekly summary and data audit work. Performance turns your efforts into
-> 5K/10K/half/marathon predictions
+> **Status: M13 — portability and operation.** The dashboard opens with the
+> current 10K fitness anchor, its 4/8/12-week evolution, the four distance
+> predictions, a weekly message, the main strength, the main limitation and
+> the next action. Sync, import, activities, weekly summary and data audit
+> work. Performance turns your efforts into 5K/10K/half/marathon predictions
 > with ranges and confidence. Diagnostics scores six training dimensions and
 > explains every limiter; Training turns that reading and your goal into a
 > conservative seven-day plan. Progress adds trends, personal bests, goals and
@@ -24,23 +23,25 @@ metric dump.
 > fitness changes as associations. The briefing composes those views instead
 > of repeating them. Comparison puts two sessions side by side, states whether
 > they are comparable, and only reads the difference when the data supports it.
-> Reports now open with a derived period reading: the strongest measured
-> change, the current main limitation and the next action, with an explicit
-> fallback when there are not enough fitness snapshots. Recovery adds sleep,
-> HRV, resting heart rate, Body Battery and weight from the Garmin data
-> export; it is context only and never changes the fitness or diagnostics
-> scores. Training now reconstructs what the suggested plan would have asked
-> each recent week and compares it with actual volume, long run, hard sessions
-> and rest. The current week stays in progress and is excluded from the score.
-> Analysis settings add persistent max, resting and threshold heart rates plus a
-> threshold pace and an auto/pace/HR classification mode, always showing what was
-> observed, what was set by hand and what is actually used. Any running activity
-> can be corrected to easy, moderate or hard and given an RPE; the correction
-> feeds the analysis views but never rewrites the 10K anchor, best efforts or
-> predictions. You can now register your own plan with dated sessions, mark them
-> completed or skipped, link real activities and read adherence against those
-> exact targets. While a plan is active it replaces the suggested sessions in
-> the calendar; archived plans fall back to the suggested engine.
+> Reports open with a derived period reading: the strongest measured change,
+> the current main limitation and the next action, with an explicit fallback
+> when there are not enough fitness snapshots. Recovery adds sleep, HRV,
+> resting heart rate, Body Battery and weight from the Garmin data export; it
+> is context only and never changes the fitness or diagnostics scores. Training
+> reconstructs what the suggested plan would have asked each recent week and
+> compares it with actual volume, long run, hard sessions and rest; the current
+> week stays in progress. Analysis settings add persistent max, resting and
+> threshold heart rates plus a threshold pace and an auto/pace/HR classification
+> mode, always showing what was observed, what was set by hand and what is
+> actually used. Any running activity can be corrected to easy, moderate or hard
+> and given an RPE; the correction feeds the analysis views but never rewrites
+> the 10K anchor, best efforts or predictions. You can register your own plan
+> with dated sessions, mark them completed or skipped, link real activities and
+> read adherence against those exact targets; while a plan is active it replaces
+> the suggested sessions in the calendar. The Backup page downloads a consistent
+> archive, validates an uploaded ZIP without touching live data, stages a restore
+> for the next startup and reports pending status. Polite in-app notifications
+> announce completed syncs and imports.
 
 ## What works today
 
@@ -146,6 +147,17 @@ metric dump.
 - **Weekly summary** with week-over-week comparisons.
 - **Data audit** with a deterministic score, coverage by stream/HR/GPS/laps,
   suspicious data detection and race candidates.
+- **Portable backups and safe restore**: one ZIP with a consistent SQLite
+  snapshot (taken with the sqlite3 backup API, WAL included), every raw file
+  referenced by the database, readable CSV/JSON exports and a manifest with the
+  Alembic revision, row counts and SHA-256 checksums. Uploads are validated
+  against path traversal, symlinks, zip bombs, size limits, checksums, expected
+  tables and revision compatibility. A restore is staged under
+  `DATA_DIR/restore/pending`; startup replaces the database and raw files
+  atomically after keeping `run.db.pre-restore-<timestamp>`.
+- **Polite notifications** for completed syncs, imports, backups and restore
+  actions, with links to Data quality or Settings and the last seen run stored
+  in the browser.
 - **Bilingual UI** (Spanish default, English) and metric/imperial units.
 - **Optional password login** and a localhost-only Docker Compose setup.
 
@@ -278,6 +290,61 @@ M10 suggested engine, so a window can mix both and says so. The score keeps the
 M10 weights (volume 45%, long run 30%, quality 15%, rest 10%), the current week
 stays in progress with no score, and archived plans are ignored.
 
+### Backup and restore
+
+**Backup → Descargar copia** (or `GET /api/v1/backups/export`) builds a
+temporary ZIP and streams it with a timestamped filename. The archive contains:
+
+- `manifest.json` with the format version, app version, Alembic revision,
+  creation time, row counts, per-file sizes and SHA-256 checksums, and warnings.
+- `run.db`, a consistent snapshot made with the sqlite3 backup API. This is not
+  a hot file copy: committed WAL pages are included and no half-written
+  transaction can leak into the archive.
+- `raw/…`, only the original files referenced by `raw_files`, with their stored
+  paths.
+- `exports/activities.{csv,json}`, `goals`, `races`, `actions` and
+  `external_metrics`, so the data remains readable without Run.
+
+The ZIP is written under `DATA_DIR/tmp`, bounded by `MAX_BACKUP_MB`, and deleted
+after the response finishes. It never contains `.env`, tokens, keys or other
+configuration. The database itself stores no secrets.
+
+**Restore** is deliberately two-phase:
+
+1. Upload the ZIP in **Backup → Validar y restaurar** (or
+   `POST /api/v1/backups/validate`). Validation never writes to live data. It
+   checks the manifest, every checksum, the Alembic revision against the
+   running application, expected tables, SQLite integrity, raw paths, symlinks,
+   entry count, uncompressed size and compression ratio. The endpoint returns a
+   validation report; an archive with problems gets HTTP 400 and `valid: false`.
+2. Type `RESTORE` and stage it (`POST /api/v1/backups/restore`). Run copies the
+   archive to `DATA_DIR/restore/pending/` with a metadata file and returns. It
+   refuses with HTTP 409 while a sync or import is running, or when another
+   restore is already pending. The live database and raw files are not touched.
+3. Restart the application. `scripts/entrypoint.sh` runs
+   `python -m app.cli apply-restore` **before** `alembic upgrade head`. The CLI
+   validates the pending archive again, writes
+   `run.db.pre-restore-<timestamp>`, atomically replaces the database and the
+   `raw/` directory, removes stale WAL/SHM files and writes
+   `DATA_DIR/restore/last-restore.json`. The pending directory is then removed.
+
+`GET /api/v1/backups/status` shows the pending archive, the last applied restore,
+the current and expected revisions, active ingest work and configured limits.
+`DELETE /api/v1/backups/pending` cancels a staged restore. If you run the
+application outside Docker, stop it and apply the same step manually:
+
+```bash
+cd backend
+DATA_DIR=../data ../.venv/bin/python -m app.cli apply-restore
+DATA_DIR=../data ../.venv/bin/alembic upgrade head
+```
+
+Restores are strict about the Alembic revision: a backup from a different
+schema version is rejected instead of being silently migrated. Keep the ZIP off
+the server; it is a portable copy, not a substitute for a snapshot of the whole
+Docker volume. If a restore is interrupted, the pre-restore database and the
+pending metadata remain available for manual recovery.
+
 ## Quick start
 
 Requirements: Docker with Compose v2.
@@ -370,7 +437,9 @@ See [`.env.example`](.env.example) for the full annotated list.
 | `SYNC_DOWNLOAD_FIT` | `true` | Keep the original FIT file for each activity. |
 | `MAX_UPLOAD_MB` | `50` | Maximum size per imported FIT/TCX/GPX file. |
 | `GARMIN_EXPORT_MAX_MB` | `500` | Maximum size of a Garmin bulk-export ZIP. |
-| `DATA_DIR` | `/data` | Database and raw files. Do not change inside Docker. |
+| `MAX_BACKUP_MB` | `4096` | Maximum uncompressed size of a generated backup. |
+| `MAX_RESTORE_MB` | `1024` | Maximum compressed and uncompressed size of an uploaded restore. |
+| `DATA_DIR` | `/data` | Database, raw files, temporary archives and restore staging. Do not change inside Docker. |
 | `LOG_LEVEL` | `INFO` | Python log level. |
 
 ## Data, backups and privacy
@@ -379,8 +448,13 @@ Everything stays on your machine: SQLite plus the original files under
 `$DATA_DIR`. Nothing is sent anywhere except requests to Garmin when you
 configure a key. There is no telemetry and no third-party analytics.
 
-Back up the named volume (stop the container first so SQLite and its WAL are
-consistent):
+For a portable copy, use **Backup → Descargar copia**. It reads a consistent
+snapshot without stopping the container and includes the data plus the original
+files in one archive. The in-app restore is validated before it is staged, and
+only runs on the next startup. See [Backup and restore](#backup-and-restore).
+
+For disaster recovery of the complete volume (including files Run does not
+reference), stop the container first so SQLite and its WAL are consistent:
 
 ```bash
 docker compose stop
@@ -506,7 +580,7 @@ cd ../frontend && bun run api:types
 backend/
   app/
     api/          HTTP endpoints (activities, imports, sync, audit, …)
-    services/     Garmin client, sync, parsers, ingestion, audit
+    services/     Garmin client, sync, parsers, ingestion, audit, backup/restore
     models.py     SQLAlchemy models
     schemas.py    API contracts (source of the OpenAPI file)
   alembic/        Schema migrations
@@ -550,7 +624,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. |
 | **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. |
 | **M11** | Analysis settings and manual corrections: persistent heart-rate/pace thresholds, classification mode and per-activity intensity override with RPE. |
-| **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. **Current.** |
+| **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. |
+| **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. **Current.** |
 
 ## License and disclaimer
 

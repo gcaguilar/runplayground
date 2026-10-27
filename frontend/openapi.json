@@ -624,6 +624,270 @@
         }
       }
     },
+    "/api/v1/backups/export": {
+      "get": {
+        "tags": [
+          "backups"
+        ],
+        "summary": "Export Backup",
+        "operationId": "export_backup_api_v1_backups_export_get",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/zip": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backups/validate": {
+      "post": {
+        "tags": [
+          "backups"
+        ],
+        "summary": "Validate Backup",
+        "operationId": "validate_backup_api_v1_backups_validate_post",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_validate_backup_api_v1_backups_validate_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupValidationOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupValidationOut"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backups/restore": {
+      "post": {
+        "tags": [
+          "backups"
+        ],
+        "summary": "Stage Restore",
+        "operationId": "stage_restore_api_v1_backups_restore_post",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_stage_restore_api_v1_backups_restore_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupRestoreOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backups/status": {
+      "get": {
+        "tags": [
+          "backups"
+        ],
+        "summary": "Backup Status",
+        "operationId": "backup_status_api_v1_backups_status_get",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupStatusOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backups/pending": {
+      "delete": {
+        "tags": [
+          "backups"
+        ],
+        "summary": "Cancel Pending Restore",
+        "operationId": "cancel_pending_restore_api_v1_backups_pending_delete",
+        "parameters": [
+          {
+            "name": "run_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/summary/weekly": {
       "get": {
         "tags": [
@@ -5900,6 +6164,273 @@
         ],
         "title": "AuthStatus"
       },
+      "BackupManifestOut": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "format_version": {
+            "type": "integer",
+            "title": "Format Version"
+          },
+          "app_version": {
+            "type": "string",
+            "title": "App Version"
+          },
+          "alembic_revision": {
+            "type": "string",
+            "title": "Alembic Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "file_count": {
+            "type": "integer",
+            "title": "File Count",
+            "default": 0
+          },
+          "total_bytes": {
+            "type": "integer",
+            "title": "Total Bytes",
+            "default": 0
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "format_version",
+          "app_version",
+          "alembic_revision",
+          "created_at"
+        ],
+        "title": "BackupManifestOut"
+      },
+      "BackupPendingOut": {
+        "properties": {
+          "staged_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Staged At"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "archive_size_bytes": {
+            "type": "integer",
+            "title": "Archive Size Bytes"
+          },
+          "archive_sha256": {
+            "type": "string",
+            "title": "Archive Sha256"
+          },
+          "manifest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupManifestOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "staged_at",
+          "original_filename",
+          "archive_size_bytes",
+          "archive_sha256"
+        ],
+        "title": "BackupPendingOut"
+      },
+      "BackupRestoreOut": {
+        "properties": {
+          "staged": {
+            "type": "boolean",
+            "title": "Staged"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "pending": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupPendingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "staged",
+          "message"
+        ],
+        "title": "BackupRestoreOut"
+      },
+      "BackupStatusOut": {
+        "properties": {
+          "pending": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupPendingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_restore": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Restore"
+          },
+          "max_backup_mb": {
+            "type": "integer",
+            "title": "Max Backup Mb"
+          },
+          "max_restore_mb": {
+            "type": "integer",
+            "title": "Max Restore Mb"
+          },
+          "database_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Database Revision"
+          },
+          "head_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Head Revision"
+          },
+          "sync_running": {
+            "type": "boolean",
+            "title": "Sync Running",
+            "default": false
+          },
+          "active_ingest": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Ingest"
+          },
+          "data_dir": {
+            "type": "string",
+            "title": "Data Dir"
+          }
+        },
+        "type": "object",
+        "required": [
+          "max_backup_mb",
+          "max_restore_mb",
+          "data_dir"
+        ],
+        "title": "BackupStatusOut"
+      },
+      "BackupValidationOut": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "manifest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupManifestOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "archive_size_bytes": {
+            "type": "integer",
+            "title": "Archive Size Bytes",
+            "default": 0
+          },
+          "uncompressed_size_bytes": {
+            "type": "integer",
+            "title": "Uncompressed Size Bytes",
+            "default": 0
+          },
+          "file_count": {
+            "type": "integer",
+            "title": "File Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "title": "BackupValidationOut"
+      },
       "Body_import_files_api_v1_imports_post": {
         "properties": {
           "files": {
@@ -5930,6 +6461,34 @@
           "file"
         ],
         "title": "Body_import_garmin_export_zip_api_v1_imports_garmin_export_post"
+      },
+      "Body_stage_restore_api_v1_backups_restore_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_stage_restore_api_v1_backups_restore_post"
+      },
+      "Body_validate_backup_api_v1_backups_validate_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_validate_backup_api_v1_backups_validate_post"
       },
       "BriefingActionOut": {
         "properties": {

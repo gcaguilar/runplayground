@@ -18,6 +18,7 @@ from app.api import (
     analysis,
     audit,
     auth,
+    backups,
     briefing,
     comparables,
     imports,
@@ -112,6 +113,7 @@ app.include_router(auth.router, prefix="/api/v1")
 
 api = APIRouter(prefix="/api/v1", dependencies=[Depends(require_auth)])
 api.include_router(activities.router)
+api.include_router(backups.router)
 api.include_router(summary.router)
 api.include_router(audit.router)
 api.include_router(analysis.router)
