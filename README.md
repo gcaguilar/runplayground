@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M10 — suggested-plan adherence.** The dashboard opens with the current
+> **Status: M12 — registered training plan and adherence by session.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -31,6 +31,10 @@ metric dump.
 > scores. Training now reconstructs what the suggested plan would have asked
 > each recent week and compares it with actual volume, long run, hard sessions
 > and rest. The current week stays in progress and is excluded from the score.
+> You can now register your own plan with dated sessions, mark them completed
+> or skipped, link real activities and read adherence against those exact
+> targets. While a plan is active it replaces the suggested sessions in the
+> calendar; archived plans fall back to the suggested engine.
 
 ## What works today
 
@@ -63,6 +67,14 @@ metric dump.
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
   the number of paired weeks; it is explicitly an association, not a cause.
+- **Registered training plan**: a stored plan with a date range, an optional
+  goal race, dated sessions (type, intensity, distance or duration, notes) and
+  a single active plan. Sessions can be created one by one or in an atomic
+  batch of up to 400, marked completed or skipped, and linked to a real
+  activity; a linked activity marks the session completed and can only satisfy
+  one session. While the plan covers a week, the calendar shows its sessions
+  instead of the suggestion and adherence scores those exact targets; outside
+  the range, or with no active plan, the suggested plan is used unchanged.
 - **Suggested-plan adherence**: the training page reconstructs the plan that
   each recent week would have received from the phase and 28-day base volume,
   then compares actual volume, longest run, hard sessions and rest against it.
@@ -203,7 +215,33 @@ days. Volume and long-run range checks tolerate 10%; quality follows the phase
 target; rest is derived from days without running. The current week is marked
 in progress and excluded from the average, because a long run scheduled for
 Saturday is not missed on Wednesday. The score is a heuristic and is labelled
-as such; it is not compliance with a coach's registered plan.
+as such.
+
+### Registered plan and adherence by session
+
+A registered plan is user-owned data instead of a reconstruction. It stores its
+name, description, start and end dates, optional goal race, source, version and
+one active flag; a SQLite partial unique index guarantees that only one plan is
+active. Its sessions store the date, order, type, intensity, distance or
+duration target, decision and optional activity. The same validation runs on
+single and bulk writes: dates must fall inside the plan, rest has no targets,
+every other type needs a distance or duration, skipped sessions cannot link an
+activity and an activity cannot satisfy two sessions.
+
+The calendar reads the active plan. Inside its date range, registered sessions
+are shown as `plan` entries and the suggested sessions disappear; outside it,
+the M3 suggestion is untouched. Planned distance only adds running sessions, so
+strength, cross-training and rest never inflate the weekly total. Registered
+sessions do not depend on activities existing: an unlinked session is still
+planned or missed, not invisible.
+
+Training adherence chooses its basis per week. If the active plan covers the
+week, the volume, long-run, quality and rest targets come from its exact
+sessions and each session gets an outcome (completed, skipped, missed or
+pending) plus a distance compliance percentage. Weeks not covered keep the
+M10 suggested engine, so a window can mix both and says so. The score keeps the
+M10 weights (volume 45%, long run 30%, quality 15%, rest 10%), the current week
+stays in progress with no score, and archived plans are ignored.
 
 ## Quick start
 
@@ -475,7 +513,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. |
 | **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. |
 | **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. |
-| **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. **Current.** |
+| **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. |
+| **M12** | Registered training plan: stored dated sessions, single active plan, atomic bulk create, activity linking and adherence by session. **Current.** |
 
 ## License and disclaimer
 
