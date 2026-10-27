@@ -13,6 +13,7 @@ import {
   ShieldAlert,
   Stethoscope,
   Target,
+  TrendingUp,
   Upload,
   Zap,
 } from "lucide-react";
@@ -21,8 +22,11 @@ import type {
   AnalysisCoverage,
   AnalysisReference,
   DiagnosticsOverview,
+  DiagnosticsTrend,
+  DiagnosticsTrendPoint,
+  DiagnosticsTrendSeries,
 } from "@/api/client";
-import { useDiagnostics } from "@/api/queries";
+import { useDiagnostics, useDiagnosticsTrend } from "@/api/queries";
 import { WeeklyLoadChart } from "@/components/Charts";
 import {
   AnalysisConfidence,
@@ -56,6 +60,9 @@ import {
   formatPace,
   formatPercent,
 } from "@/lib/format";
+import { cn } from "@/lib/cn";
+
+type TrendTone = "neutral" | "accent" | "success" | "warning" | "danger" | "info";
 
 const DISTANCE_LABELS: Array<[number, MessageKey]> = [
   [5000, "distance.5k"],
@@ -63,6 +70,40 @@ const DISTANCE_LABELS: Array<[number, MessageKey]> = [
   [21097.5, "distance.half_marathon"],
   [42195, "distance.marathon"],
 ];
+
+const TREND_STATUS_KEYS: Record<string, MessageKey> = {
+  strong: "analysis.status.strong",
+  ok: "analysis.status.ok",
+  watch: "analysis.status.watch",
+  risk: "analysis.status.risk",
+  unknown: "analysis.status.unknown",
+  insufficient: "analysis.status.insufficient",
+};
+
+const TREND_LABEL_KEYS: Record<string, MessageKey> = {
+  improving: "diagnostics.trend.improving",
+  stable: "diagnostics.trend.stable",
+  worsening: "diagnostics.trend.worsening",
+  unknown: "diagnostics.trend.unknown",
+};
+
+const TREND_TONES: Record<string, TrendTone> = {
+  improving: "success",
+  stable: "neutral",
+  worsening: "warning",
+  unknown: "neutral",
+};
+
+const TREND_WARNING_KEYS: Record<string, MessageKey> = {
+  partial_window_data: "diagnostics.trend.warning.partial_window_data",
+  no_current_score: "diagnostics.trend.warning.no_current_score",
+};
+
+const TREND_NOTE_KEYS: Record<string, MessageKey> = {
+  windows_overlap: "diagnostics.trend.note.windows_overlap",
+  short_windows_lower_confidence: "diagnostics.trend.note.short_windows_lower_confidence",
+  delta_threshold_5_points: "diagnostics.trend.note.delta_threshold_5_points",
+};
 
 export function DiagnosticsPage() {
   const { t, locale, units } = useI18n();
@@ -216,6 +257,7 @@ export function DiagnosticsPage() {
           {data.dimensions.map((dimension) => (
             <DimensionCard
               key={dimension.key}
+              id={`dimension-${dimension.key}`}
               dimension={dimension}
               locale={locale}
               units={units}
@@ -223,6 +265,8 @@ export function DiagnosticsPage() {
           ))}
         </div>
       </section>
+
+      <DimensionTrendSection />
 
       <Card className="panel diagnostics-limiters">
         <SectionHeading
@@ -320,6 +364,177 @@ export function DiagnosticsPage() {
       />
     </div>
   );
+}
+
+function DimensionTrendSection() {
+  const { t } = useI18n();
+  const trend = useDiagnosticsTrend();
+
+  return (
+    <Card className="panel diagnostics-trend">
+      <SectionHeading
+        title={t("diagnostics.trend.title")}
+        subtitle={t("diagnostics.trend.subtitle")}
+        icon={TrendingUp}
+        action={<Badge tone="info">{t("diagnostics.trend.delta")}</Badge>}
+      />
+      {trend.isLoading ? (
+        <div className="analysis-skeleton">
+          <Skeleton className="skeleton--line" />
+          <Skeleton className="skeleton--line" />
+        </div>
+      ) : trend.isError || !trend.data ? (
+        <p className="analysis-empty">{t("diagnostics.trend.error")}</p>
+      ) : (
+        <TrendTable data={trend.data} />
+      )}
+    </Card>
+  );
+}
+
+function TrendTable({ data }: { data: DiagnosticsTrend }) {
+  const { t } = useI18n();
+  const warnings = data.warnings ?? [];
+  const notes = data.notes ?? [];
+  return (
+    <>
+      <div className="trend-table-wrap">
+        <table className="trend-table">
+          <caption className="visually-hidden">{t("diagnostics.trend.title")}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t("diagnostics.trend.dimension")}</th>
+              {data.windows.map((days) => (
+                <th scope="col" key={days}>
+                  {t("diagnostics.trend.weeks", { weeks: Math.round(days / 7) })}
+                </th>
+              ))}
+              <th scope="col">{t("diagnostics.trend.current")}</th>
+              <th scope="col">{t("diagnostics.trend.direction")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.dimensions.map((series) => (
+              <TrendRow key={series.key} series={series} windows={data.windows} />
+            ))}
+            <TrendRow series={data.overall} windows={data.windows} />
+          </tbody>
+        </table>
+      </div>
+
+      {warnings.length ? (
+        <div className="trend-alerts" role="status">
+          {warnings.map((warning) => {
+            const key = TREND_WARNING_KEYS[warning];
+            if (!key) return null;
+            return (
+              <p key={warning}>
+                <ShieldAlert size={14} aria-hidden="true" />
+                {t(key)}
+              </p>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {notes.length ? (
+        <ul className="trend-notes">
+          {notes.map((note) => {
+            const key = TREND_NOTE_KEYS[note];
+            if (!key) return null;
+            return <li key={note}>{t(key)}</li>;
+          })}
+        </ul>
+      ) : null}
+    </>
+  );
+}
+
+function TrendRow({
+  series,
+  windows,
+}: {
+  series: DiagnosticsTrendSeries;
+  windows: number[];
+}) {
+  const { t, locale } = useI18n();
+  const overall = series.key === "overall";
+  const meta = overall ? null : DIMENSION_META[series.key];
+  const Icon = overall ? TrendingUp : (meta?.icon ?? Activity);
+  const label = overall ? t("diagnostics.trend.overall") : meta ? t(meta.label) : series.key;
+
+  return (
+    <tr className={cn("trend-row", overall && "trend-row--overall")}>
+      <th scope="row" className="trend-row__name">
+        {overall ? (
+          <span className="trend-row__label">
+            <Icon size={14} aria-hidden="true" />
+            {label}
+          </span>
+        ) : (
+          <a className="trend-row__link" href={`#dimension-${series.key}`}>
+            <Icon size={14} aria-hidden="true" />
+            {label}
+          </a>
+        )}
+      </th>
+      {windows.map((days) => {
+        const point = series.windows.find((item) => item.window_days === days);
+        return (
+          <td key={days}>
+            {point ? <TrendScore point={point} /> : <span className="trend-score is-empty">—</span>}
+          </td>
+        );
+      })}
+      <td>
+        <TrendScore point={series.current} current />
+      </td>
+      <td>
+        <div className="trend-direction">
+          <Badge tone={TREND_TONES[series.trend] ?? "neutral"}>
+            {t(TREND_LABEL_KEYS[series.trend] ?? "diagnostics.trend.unknown")}
+          </Badge>
+          {series.delta != null ? (
+            <small>
+              Δ {formatSigned(series.delta, locale)} {t("diagnostics.trend.delta")}
+            </small>
+          ) : null}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function TrendScore({
+  point,
+  current = false,
+}: {
+  point: DiagnosticsTrendPoint;
+  current?: boolean;
+}) {
+  const { t, locale } = useI18n();
+  const statusKey = TREND_STATUS_KEYS[point.status];
+  const confidence =
+    point.confidence_score == null
+      ? null
+      : `${Math.round(point.confidence_score * 100)}%`;
+  return (
+    <span className={cn("trend-score", point.score == null && "is-empty")}>
+      <strong>{point.score == null ? "—" : formatNumber(point.score, locale, 1)}</strong>
+      <small>
+        {statusKey ? t(statusKey) : point.status}
+        {confidence ? ` · ${confidence}` : ""}
+      </small>
+      {!current && point.delta != null ? (
+        <em>Δ {formatSigned(point.delta, locale)}</em>
+      ) : null}
+    </span>
+  );
+}
+
+function formatSigned(value: number, locale: Locale): string {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${formatNumber(value, locale, 1)}`;
 }
 
 function headlineTitle(

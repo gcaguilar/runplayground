@@ -295,6 +295,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/diagnostics/trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diagnostics Trend */
+        get: operations["diagnostics_trend_api_v1_diagnostics_trend_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/training": {
         parameters: {
             query?: never;
@@ -2133,6 +2150,27 @@ export interface components {
             reference: components["schemas"]["AnalysisReferenceOut"];
             /** Warnings */
             warnings?: string[];
+        };
+        /** DiagnosticsTrendOut */
+        DiagnosticsTrendOut: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Model Version */
+            model_version: string;
+            /** Current Window Days */
+            current_window_days: number;
+            /** Windows */
+            windows: number[];
+            /** Dimensions */
+            dimensions: components["schemas"]["TrendSeriesOut"][];
+            overall: components["schemas"]["TrendSeriesOut"];
+            /** Warnings */
+            warnings?: string[];
+            /** Notes */
+            notes?: string[];
         };
         /** DimensionOut */
         DimensionOut: {
@@ -4155,6 +4193,39 @@ export interface components {
             /** Purpose */
             purpose: string;
         };
+        /** TrendPointOut */
+        TrendPointOut: {
+            /** Window Days */
+            window_days: number;
+            /** Window Weeks */
+            window_weeks: number;
+            /** Score */
+            score?: number | null;
+            /** Status */
+            status: string;
+            /** Confidence */
+            confidence: string;
+            /** Confidence Score */
+            confidence_score?: number | null;
+            /** Delta */
+            delta?: number | null;
+        };
+        /** TrendSeriesOut */
+        TrendSeriesOut: {
+            /** Key */
+            key: string;
+            /** Windows */
+            windows: components["schemas"]["TrendPointOut"][];
+            current: components["schemas"]["TrendPointOut"];
+            /** Delta */
+            delta?: number | null;
+            /**
+             * Trend
+             * @default unknown
+             * @enum {string}
+             */
+            trend: "improving" | "stable" | "worsening" | "unknown";
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -4839,6 +4910,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DiagnosticsOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    diagnostics_trend_api_v1_diagnostics_trend_get: {
+        parameters: {
+            query?: {
+                tz_offset_minutes?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                run_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticsTrendOut"];
                 };
             };
             /** @description Validation Error */

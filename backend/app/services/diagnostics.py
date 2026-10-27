@@ -12,6 +12,7 @@ from app.schemas import (
     AnalysisCoverageOut,
     AnalysisReferenceOut,
     DiagnosticsOverview,
+    DiagnosticsTrendOut,
     DimensionOut,
     GoalOut,
     IntensityBucketOut,
@@ -23,6 +24,8 @@ from app.schemas import (
     TrainingLoadTargetOut,
     TrainingPlan,
     TrainingSessionOut,
+    TrendPointOut,
+    TrendSeriesOut,
     WeeklyLoadOut,
 )
 from app.services.analysis import (
@@ -30,7 +33,6 @@ from app.services.analysis import (
     DIMENSION_WEIGHTS,
     INTENSITY_TARGETS,
     MODEL_VERSION,
-    WEEKS_IN_WINDOW,
     WINDOW_DAYS,
     LoadSummary,
     Phase,
@@ -68,11 +70,14 @@ def build_diagnostics(
     db: Session,
     now: datetime | None = None,
     tz_offset_minutes: int = 0,
+    window_days: int = WINDOW_DAYS,
 ) -> DiagnosticsOverview:
     reference = now or utcnow()
     offset = timedelta(minutes=tz_offset_minutes)
     today = (as_utc(reference) + offset).date()
-    query_start = reference - timedelta(days=WINDOW_DAYS + BASELINE_DAYS)
+    window_days = max(7, min(window_days, 730))
+    window_weeks = max(1, (window_days + 6) // 7)
+    query_start = reference - timedelta(days=window_days + BASELINE_DAYS)
 
     activities = db.scalars(
         select(Activity)
@@ -88,7 +93,7 @@ def build_diagnostics(
         for activity in activities
         if activity.distance_m > 0 and activity.duration_s > 0
     ]
-    window_start = today - timedelta(days=WINDOW_DAYS - 1)
+    window_start = today - timedelta(days=window_days - 1)
     window = [record for record in records if record.local_date >= window_start]
 
     overview = build_overview(db, reference)
@@ -274,7 +279,7 @@ def build_diagnostics(
     return DiagnosticsOverview(
         generated_at=reference,
         model_version=MODEL_VERSION,
-        window_days=WINDOW_DAYS,
+        window_days=window_days,
         status=overall_status,
         score=overall_score,
         headline=headline,
@@ -288,7 +293,7 @@ def build_diagnostics(
         coverage=AnalysisCoverageOut(
             activities=len(window),
             weeks_with_data=len(week_starts),
-            window_weeks=WEEKS_IN_WINDOW,
+            window_weeks=window_weeks,
             first_activity_at=min(
                 (record.start_time_utc for record in window),
                 default=None,
@@ -311,6 +316,160 @@ def build_diagnostics(
         ),
         warnings=warnings,
     )
+
+
+TREND_WINDOWS = (28, 56, 84)
+TREND_THRESHOLD = 5.0
+TREND_DIMENSIONS = (
+    "volume",
+    "consistency",
+    "intensity",
+    "load",
+    "recovery",
+    "specificity",
+)
+TREND_NOTES = (
+    "windows_overlap",
+    "short_windows_lower_confidence",
+    "delta_threshold_5_points",
+)
+
+
+def build_diagnostics_trend(
+    db: Session,
+    now: datetime | None = None,
+    tz_offset_minutes: int = 0,
+) -> DiagnosticsTrendOut:
+    """Compare the six dimensions across 4, 8 and 12 weeks.
+
+    Every window ends today, so the windows overlap: this is a comparison of
+    recent form against a longer baseline, not three independent periods. The
+    ``current`` point is the default 84-day diagnostics, and every window also
+    carries an absolute delta in points against it. The series trend compares
+    the current score with the shortest available window (4 weeks, then 8) with
+    a ±5-point threshold. Missing scores stay ``None``; nothing is filled in.
+    """
+
+    reference = now or utcnow()
+    overviews = {
+        days: build_diagnostics(
+            db,
+            reference,
+            tz_offset_minutes,
+            window_days=days,
+        )
+        for days in TREND_WINDOWS
+    }
+    current_overview = overviews[WINDOW_DAYS]
+
+    dimensions: list[TrendSeriesOut] = []
+    partial = False
+    for key in TREND_DIMENSIONS:
+        points: list[TrendPointOut] = []
+        for days in TREND_WINDOWS:
+            dimension = next(
+                (item for item in overviews[days].dimensions if item.key == key),
+                None,
+            )
+            if dimension is None or dimension.score is None:
+                partial = True
+            points.append(
+                _trend_point(
+                    days,
+                    dimension.score if dimension else None,
+                    dimension.status if dimension else "unknown",
+                    dimension.confidence if dimension else "low",
+                    dimension.confidence_score if dimension else None,
+                )
+            )
+        dimensions.append(_trend_series(key, points))
+
+    overall_points = [
+        _trend_point(
+            days,
+            overviews[days].score,
+            overviews[days].status,
+            overviews[days].confidence,
+            overviews[days].confidence_score,
+        )
+        for days in TREND_WINDOWS
+    ]
+    overall = _trend_series("overall", overall_points)
+
+    warnings: list[str] = []
+    if partial:
+        warnings.append("partial_window_data")
+    if current_overview.score is None:
+        warnings.append("no_current_score")
+
+    return DiagnosticsTrendOut(
+        generated_at=reference,
+        model_version=MODEL_VERSION,
+        current_window_days=WINDOW_DAYS,
+        windows=list(TREND_WINDOWS),
+        dimensions=dimensions,
+        overall=overall,
+        warnings=warnings,
+        notes=list(TREND_NOTES),
+    )
+
+
+def _trend_point(
+    window_days: int,
+    score: float | None,
+    status: str,
+    confidence: str,
+    confidence_score: float | None,
+) -> TrendPointOut:
+    return TrendPointOut(
+        window_days=window_days,
+        window_weeks=max(1, (window_days + 6) // 7),
+        score=round(score, 1) if score is not None else None,
+        status=status if score is not None else "unknown",
+        confidence=confidence,
+        confidence_score=confidence_score,
+    )
+
+
+def _trend_series(key: str, points: list[TrendPointOut]) -> TrendSeriesOut:
+    current = next(
+        (point for point in points if point.window_days == WINDOW_DAYS),
+        points[-1],
+    )
+    for point in points:
+        point.delta = (
+            round(current.score - point.score, 1)
+            if current.score is not None
+            and point.score is not None
+            and point.window_days != current.window_days
+            else None
+        )
+    delta, trend = _trend_direction(current, points)
+    return TrendSeriesOut(
+        key=key,
+        windows=points,
+        current=current,
+        delta=delta,
+        trend=trend,
+    )
+
+
+def _trend_direction(
+    current: TrendPointOut,
+    points: list[TrendPointOut],
+) -> tuple[float | None, str]:
+    if current.score is None:
+        return None, "unknown"
+    for point in points:
+        if point.window_days == current.window_days or point.score is None:
+            continue
+        delta = round(current.score - point.score, 1)
+        if delta >= TREND_THRESHOLD:
+            return delta, "improving"
+        if delta <= -TREND_THRESHOLD:
+            return delta, "worsening"
+        return delta, "stable"
+    return None, "unknown"
 
 
 def build_training_plan(

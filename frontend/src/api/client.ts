@@ -50,6 +50,9 @@ export type AnalysisSettingsUpdate = Schemas["AnalysisSettingsUpdate"];
 export type AnalysisClassificationMode = "auto" | "pace" | "hr";
 export type ActivityClassification = Schemas["ActivityClassificationOut"];
 export type DiagnosticsOverview = Schemas["DiagnosticsOverview"];
+export type DiagnosticsTrend = Schemas["DiagnosticsTrendOut"];
+export type DiagnosticsTrendSeries = Schemas["TrendSeriesOut"];
+export type DiagnosticsTrendPoint = Schemas["TrendPointOut"];
 export type AnalysisDimension = Schemas["DimensionOut"];
 export type AnalysisLimiter = Schemas["LimiterOut"];
 export type AnalysisIntensity = Schemas["IntensityOut"];
@@ -390,6 +393,12 @@ export const api = {
   diagnostics: () =>
     request<DiagnosticsOverview>(
       `/diagnostics${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  diagnosticsTrend: () =>
+    request<DiagnosticsTrend>(
+      `/diagnostics/trend${queryString({
         tz_offset_minutes: -new Date().getTimezoneOffset(),
       })}`,
     ),
