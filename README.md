@@ -5,7 +5,7 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M9 — recovery context.** The dashboard opens with the current
+> **Status: M10 — suggested-plan adherence.** The dashboard opens with the current
 > 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -28,7 +28,9 @@ metric dump.
 > fallback when there are not enough fitness snapshots. Recovery adds sleep,
 > HRV, resting heart rate, Body Battery and weight from the Garmin data
 > export; it is context only and never changes the fitness or diagnostics
-> scores.
+> scores. Training now reconstructs what the suggested plan would have asked
+> each recent week and compares it with actual volume, long run, hard sessions
+> and rest. The current week stays in progress and is excluded from the score.
 
 ## What works today
 
@@ -61,6 +63,11 @@ metric dump.
   sessions, active days and estimated load are paired with the change in the
   10K fitness anchor. Each factor reports its correlation, a median split and
   the number of paired weeks; it is explicitly an association, not a cause.
+- **Suggested-plan adherence**: the training page reconstructs the plan that
+  each recent week would have received from the phase and 28-day base volume,
+  then compares actual volume, longest run, hard sessions and rest against it.
+  The current week is shown in progress and excluded; the score is explicit
+  that the plan is derived and that adherence is a heuristic.
 - **Recovery context**: sleep duration and score, HRV, resting heart rate,
   Body Battery and weight imported from the Garmin data export. Each metric
   shows its latest value, 7/28-day averages, 28-day change and coverage. The
@@ -185,6 +192,18 @@ the top diagnostic limiter and writes one sentence from those facts. The
 sentence is returned as a code plus parameters, and the underlying numbers and
 evidence are always shown next to it. It never projects a result or replaces a
 race.
+
+### Suggested-plan adherence
+
+The plan is derived, so adherence is reconstructed, not read from a stored
+calendar. For each week the app chooses the phase at that week's start, takes
+the 28-day base volume before it, builds the same seven-day session template
+and compares four things: weekly volume, longest run, hard sessions and rest
+days. Volume and long-run range checks tolerate 10%; quality follows the phase
+target; rest is derived from days without running. The current week is marked
+in progress and excluded from the average, because a long run scheduled for
+Saturday is not missed on Wednesday. The score is a heuristic and is labelled
+as such; it is not compliance with a coach's registered plan.
 
 ## Quick start
 
@@ -455,7 +474,8 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M6** | Comparable training: pace–heart-rate analysis by distance and terrain, with confidence and caveats. |
 | **M7** | Workout comparison: side-by-side metrics, comparability check and one-kilometre splits. |
 | **M8** | Narrative reports: derived main improvement, current limitation and suggested action per period. |
-| **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. **Current.** |
+| **M9** | Recovery context: sleep, HRV, resting heart rate, Body Battery and weight from the Garmin export. |
+| **M10** | Suggested-plan adherence: reconstructed weekly targets versus actual volume, long run, quality and rest. **Current.** |
 
 ## License and disclaimer
 
