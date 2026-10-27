@@ -5,7 +5,10 @@ and explains fitness, progress, race potential and training priorities. One
 place for the numbers, with their provenance and confidence — not another
 metric dump.
 
-> **Status: M15 — final milestone: light theme, accessibility and print output.** The dashboard
+> **Status: M15 — final planned milestone, plus optional M16 analysis windows.**
+> M15 delivered the light theme, accessibility and print output. M16 adds
+> explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows and a
+> read-only diagnostics trend by dimension. The dashboard
 > opens with the current 10K fitness anchor, its 4/8/12-week evolution, the four distance
 > predictions, a weekly message, the main strength, the main limitation and
 > the next action. Sync, import, activities, weekly summary and data audit
@@ -125,6 +128,10 @@ metric dump.
 - **Diagnostics** across six dimensions: volume, consistency, intensity, load,
   recovery and specificity. Every score shows its status, confidence, evidence
   and reason codes; missing data lowers confidence instead of inventing a value.
+  A separate **trend by dimension** compares the same six scores over 4, 8 and
+  12 weeks against the current 84-day reading, with absolute deltas and an
+  improving/stable/worsening label. The windows overlap and shorter windows
+  carry lower confidence; missing scores stay empty instead of being filled in.
 - **Intensity and load analysis**: approximate easy/moderate/hard distribution
   from pace relative to the 10K anchor (HR fallback), plus a transparent
   internally estimated load model, acute/chronic ratio and a 12-week chart.
@@ -135,7 +142,10 @@ metric dump.
 - **Progress and consistency**: weekly distance and estimated load, the daily
   10K fitness trend with its 80% range, streak and active-day stats, personal
   bests per standard distance, goal progress against the B forecast, and
-  period highlights.
+  period highlights. The analysis window is explicit: 4, 8 or 12 weeks, 6
+  months, 1 year or 2 years. Every view (weekly series, consistency, fitness,
+  goals, races and charts) is rebuilt for the selected window; the API accepts
+  any window from 7 to 730 days.
 - **Pace–heart-rate comparison**: aerobic runs are grouped by distance band
   and terrain. Each group removes the within-group heart-rate effect, compares
   the earlier and recent halves, and reports the pace change at the same heart
@@ -288,6 +298,29 @@ classifies sessions, and the detail page still shows the automatic result next
 to it. It is deliberately not applied to best efforts, performance predictions
 or stored snapshots: those answer what the athlete ran, while the correction
 answers how the session should be read as training.
+
+### Analysis windows and dimension trend
+
+Progress windows are explicit rather than fixed. The page offers 4, 8 and 12
+weeks, 6 months, 1 year and 2 years, and recalculates the same response for the
+selected range; `GET /api/v1/progress` accepts `days` from 7 to 730 (default
+180). This is a read-time parameter, not stored state, so it needs no database
+migration. Pace–heart-rate comparison keeps its own 30-day minimum and receives
+the clamped window from the page.
+
+Diagnostics keeps its existing contract and default 84-day window. The M16
+additive endpoint `GET /api/v1/diagnostics/trend` returns the six dimensions and
+the overall index for 28, 56 and 84 days plus the current 84-day reading. It was
+chosen over adding a nested `dimension_trend` object to `/diagnostics` so the
+existing response is untouched. All windows end today and therefore overlap:
+the result compares recent form with a longer baseline, not three independent
+periods. Each point carries score, status, confidence and an absolute delta in
+points against the current value. A series is labelled `improving`, `stable` or
+`worsening` when the current score differs from the shortest available window
+by at least ±5 points; otherwise it is `unknown`. A window without data returns
+`score: null` and `status: unknown`. The service function accepts a
+`window_days` argument (default 84) for training plan, forecast, adherence,
+briefing and tracking callers, which keep the default unchanged.
 
 ### Suggested-plan adherence
 
@@ -699,14 +732,15 @@ for a single-user instance; horizontal scaling is not a goal.
 | **M13** | Portability and operation: consistent backup export, validated restore staging, startup apply with a pre-restore database, and polite notifications. |
 | **M14** | Goal lifecycle and archive: close a goal as achieved, missed or cancelled with its outcome, keep the final revision and prediction, free the distance for a new target, and show completed/cancelled races in the calendar and reports. |
 | **M15** | Light, dark and system themes, keyboard and screen-reader accessibility, and print/PDF output. **Final.** |
+| **M16** | Optional enhancement: explicit 4/8/12-week, 6-month, 1-year and 2-year progress windows, plus a read-only diagnostics trend by dimension across 4, 8 and 12 weeks. No migration. |
 
-M15 closes the planned roadmap. Further additions are optional product work
-rather than gaps in the current scope: custom analysis windows and dimension
-history, automatic wellness sync (sleep/HRV/weight still come from the Garmin
-export), temperature/terrain adjustment in pace–heart-rate comparisons, plan
-import from CSV, and richer activity-detail zones. The core promise — own the
-data, understand the numbers, see their provenance and confidence, and decide
-what to train next — is implemented without sending anything to a third party.
+M15 closes the planned roadmap. M16 is an optional enhancement rather than a
+gap in the current scope. Further additions remain optional product work:
+automatic wellness sync (sleep/HRV/weight still come from the Garmin export),
+temperature/terrain adjustment in pace–heart-rate comparisons, plan import from
+CSV, and richer activity-detail zones. The core promise — own the data,
+understand the numbers, see their provenance and confidence, and decide what to
+train next — is implemented without sending anything to a third party.
 
 ## License and disclaimer
 
