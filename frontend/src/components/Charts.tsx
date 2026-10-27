@@ -16,6 +16,7 @@ import type {
   AnalysisLoad,
   FitnessPoint,
   GarminMetricPoint,
+  GoalHistoryPoint,
   PerformanceSnapshot,
   ProgressWeek,
   StreamPoint,
@@ -941,6 +942,121 @@ export function FitnessTrendChart({ points }: { points: FitnessPoint[] }) {
       option={option}
       opts={chartOpts}
       style={{ height: 252, width: "100%" }}
+      notMerge
+      lazyUpdate
+    />
+  );
+}
+
+export function GoalTrendChart({
+  points,
+  targetTimeS,
+}: {
+  points: GoalHistoryPoint[];
+  targetTimeS: number;
+}) {
+  const { locale, t } = useI18n();
+  const labels = points.map((point) =>
+    formatDate(point.date, locale, { day: "numeric", month: "short" }),
+  );
+  const predicted = points.map((point) => point.predicted_s ?? null);
+
+  const option = useMemo<EChartsOption>(
+    () => ({
+      animationDuration: 450,
+      grid: { left: 8, right: 14, top: 20, bottom: 6, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: PANEL,
+        borderColor: "rgba(255,255,255,0.09)",
+        borderWidth: 1,
+        padding: [10, 12],
+        textStyle: { color: "#eef5f0", fontFamily: "Manrope Variable", fontSize: 12 },
+        formatter: (params: unknown) => {
+          const list = (Array.isArray(params) ? params : [params]) as TooltipItem[];
+          const index = list[0]?.dataIndex ?? 0;
+          const point = points[index];
+          if (!point) return "";
+          const gap = point.gap_s;
+          return `<div style="font-weight:700;margin-bottom:4px">${formatDate(
+            point.date,
+            locale,
+            { day: "numeric", month: "short", year: "numeric" },
+          )}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${ACCENT};display:inline-block"></span>
+              <span style="color:#a9b5ae">${t("tracking.goal.predicted")}</span>
+              <strong style="margin-left:auto">${formatClock(point.predicted_s)}</strong>
+            </div>
+            ${
+              gap !== null && gap !== undefined
+                ? `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                    <span style="color:#a9b5ae">${t("tracking.goal.gap")}</span>
+                    <strong style="margin-left:auto">${gap > 0 ? "+" : ""}${formatClock(gap)}</strong>
+                  </div>`
+                : ""
+            }`;
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: labels,
+        axisLine: { lineStyle: { color: GRID } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: TEXT,
+          fontSize: 9.5,
+          fontFamily: "JetBrains Mono Variable",
+          hideOverlap: true,
+        },
+      },
+      yAxis: {
+        type: "value",
+        inverse: true,
+        scale: true,
+        axisLabel: {
+          color: TEXT,
+          fontSize: 10,
+          fontFamily: "JetBrains Mono Variable",
+          formatter: (value: number) => formatClock(value),
+        },
+        splitLine: { lineStyle: { color: GRID, type: "dashed" } },
+      },
+      series: [
+        {
+          name: t("tracking.goal.predicted"),
+          type: "line",
+          data: predicted,
+          showSymbol: predicted.length <= 40,
+          symbolSize: 4,
+          connectNulls: true,
+          lineStyle: { color: ACCENT, width: 2.2 },
+          itemStyle: { color: ACCENT },
+          markLine: {
+            silent: true,
+            symbol: "none",
+            label: {
+              color: TEXT,
+              fontSize: 9,
+              formatter: t("tracking.goal.target"),
+            },
+            lineStyle: { color: ORANGE, width: 1.4, type: "dashed" },
+            data: [{ yAxis: targetTimeS }],
+          },
+        },
+      ],
+    }),
+    [labels, locale, points, predicted, t, targetTimeS],
+  );
+
+  if (points.length < 2) return null;
+
+  return (
+    <ReactECharts
+      echarts={echarts}
+      option={option}
+      opts={chartOpts}
+      style={{ height: 190, width: "100%" }}
       notMerge
       lazyUpdate
     />

@@ -12,6 +12,7 @@ import { ActivityDetailPage } from "@/pages/ActivityDetailPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DataQualityPage } from "@/pages/DataQualityPage";
 import { DiagnosticsPage } from "@/pages/DiagnosticsPage";
+import { ForecastPage } from "@/pages/ForecastPage";
 import { ImportsPage } from "@/pages/ImportsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -19,6 +20,7 @@ import { PerformancePage } from "@/pages/PerformancePage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { TrackingPage } from "@/pages/TrackingPage";
 import { TrainingPage } from "@/pages/TrainingPage";
 
 function RootGate() {
@@ -92,10 +94,22 @@ const performanceRoute = createRoute({
   component: PerformancePage,
 });
 
+const forecastRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/forecast",
+  component: ForecastPage,
+});
+
 const progressRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/progress",
   component: ProgressPage,
+});
+
+const trackingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tracking",
+  component: TrackingPage,
 });
 
 const calendarRoute = createRoute({
@@ -155,7 +169,9 @@ const settingsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   performanceRoute,
+  forecastRoute,
   progressRoute,
+  trackingRoute,
   calendarRoute,
   reportsRoute,
   diagnosticsRoute,

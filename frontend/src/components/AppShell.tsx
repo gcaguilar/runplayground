@@ -8,11 +8,13 @@ import {
   Dumbbell,
   FileText,
   Gauge,
+  History,
   LayoutDashboard,
   Menu,
   Plus,
   RefreshCw,
   Settings,
+  Sparkles,
   Stethoscope,
   TrendingUp,
   Upload,
@@ -33,7 +35,9 @@ type NavItem = {
   to:
     | "/"
     | "/performance"
+    | "/forecast"
     | "/progress"
+    | "/tracking"
     | "/calendar"
     | "/reports"
     | "/diagnostics"
@@ -50,7 +54,9 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { to: "/", label: "nav.overview", icon: LayoutDashboard, exact: true },
   { to: "/performance", label: "nav.performance", icon: Gauge },
+  { to: "/forecast", label: "nav.forecast", icon: Sparkles },
   { to: "/progress", label: "nav.progress", icon: TrendingUp },
+  { to: "/tracking", label: "nav.tracking", icon: History },
   { to: "/calendar", label: "nav.calendar", icon: CalendarDays },
   { to: "/reports", label: "nav.reports", icon: FileText },
   { to: "/diagnostics", label: "nav.diagnostics", icon: Stethoscope },
@@ -69,7 +75,9 @@ function pageKey(pathname: string): MessageKey {
   if (pathname.startsWith("/data")) return "nav.data";
   if (pathname.startsWith("/settings")) return "nav.settings";
   if (pathname.startsWith("/performance")) return "nav.performance";
+  if (pathname.startsWith("/forecast")) return "nav.forecast";
   if (pathname.startsWith("/progress")) return "nav.progress";
+  if (pathname.startsWith("/tracking")) return "nav.tracking";
   if (pathname.startsWith("/calendar")) return "nav.calendar";
   if (pathname.startsWith("/reports")) return "nav.reports";
   if (pathname.startsWith("/diagnostics")) return "nav.diagnostics";
@@ -99,6 +107,14 @@ export function AppShell() {
       void queryClient.invalidateQueries({ queryKey: ["summary"] });
       void queryClient.invalidateQueries({ queryKey: ["audit"] });
       void queryClient.invalidateQueries({ queryKey: ["system"] });
+      void queryClient.invalidateQueries({ queryKey: ["performance"] });
+      void queryClient.invalidateQueries({ queryKey: ["diagnostics"] });
+      void queryClient.invalidateQueries({ queryKey: ["training"] });
+      void queryClient.invalidateQueries({ queryKey: ["progress"] });
+      void queryClient.invalidateQueries({ queryKey: ["calendar"] });
+      void queryClient.invalidateQueries({ queryKey: ["reports"] });
+      void queryClient.invalidateQueries({ queryKey: ["forecast"] });
+      void queryClient.invalidateQueries({ queryKey: ["tracking"] });
     }
     wasRunning.current = running;
   }, [sync.data?.running, queryClient]);

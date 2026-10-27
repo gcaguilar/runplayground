@@ -7,6 +7,7 @@ import {
 
 import {
   api,
+  type ActionUpsert,
   type ActivityListParams,
   type ActivityPatch,
   type GoalUpsert,
@@ -37,6 +38,8 @@ export const queryKeys = {
   report: (period: ReportPeriod, date: string | undefined) =>
     ["reports", period, date ?? "current"] as const,
   races: ["races"] as const,
+  forecast: (weeks: 8 | 12) => ["forecast", weeks] as const,
+  tracking: (days: number) => ["tracking", days] as const,
 };
 
 function invalidatePlanData(queryClient: QueryClient) {
@@ -44,6 +47,8 @@ function invalidatePlanData(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: ["calendar"] });
   void queryClient.invalidateQueries({ queryKey: ["reports"] });
   void queryClient.invalidateQueries({ queryKey: queryKeys.races });
+  void queryClient.invalidateQueries({ queryKey: ["forecast"] });
+  void queryClient.invalidateQueries({ queryKey: ["tracking"] });
 }
 
 export function useAuthStatus() {
@@ -358,5 +363,44 @@ export function useDeleteRace() {
   return useMutation({
     mutationFn: (id: number) => api.deleteRace(id),
     onSuccess: () => invalidatePlanData(queryClient),
+  });
+}
+
+export function useForecast(weeks: 8 | 12 = 8) {
+  return useQuery({
+    queryKey: queryKeys.forecast(weeks),
+    queryFn: () => api.forecast(weeks),
+    staleTime: 60_000,
+  });
+}
+
+export function useTracking(days = 180) {
+  return useQuery({
+    queryKey: queryKeys.tracking(days),
+    queryFn: () => api.tracking(days),
+    staleTime: 60_000,
+  });
+}
+
+export function useUpsertTrackingAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ dimensionKey, payload }: { dimensionKey: string; payload: ActionUpsert }) =>
+      api.upsertTrackingAction(dimensionKey, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+    },
+  });
+}
+
+export function useDeleteTrackingAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dimensionKey: string) => api.deleteTrackingAction(dimensionKey),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tracking"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diagnostics });
+    },
   });
 }

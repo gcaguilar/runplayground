@@ -73,6 +73,20 @@ export type CalendarDay = Schemas["CalendarDayOut"];
 export type CalendarEntry = Schemas["CalendarEntryOut"];
 export type ReportPeriod = "week" | "month";
 export type Report = Schemas["ReportOut"];
+export type ForecastView = Schemas["ForecastView"];
+export type ForecastBaseline = Schemas["ForecastBaselineOut"];
+export type ForecastScenario = Schemas["ScenarioOut"];
+export type ScenarioProjection = Schemas["ScenarioProjectionOut"];
+export type TrackingOverview = Schemas["TrackingOverview"];
+export type PredictionAccuracy = Schemas["PredictionAccuracyOut"];
+export type AccuracySample = Schemas["AccuracySampleOut"];
+export type AccuracySummary = Schemas["AccuracySummaryOut"];
+export type GoalTracking = Schemas["GoalTrackingOut"];
+export type GoalHistoryPoint = Schemas["GoalHistoryPointOut"];
+export type GoalRevision = Schemas["GoalRevisionOut"];
+export type TrackedAction = Schemas["TrackedActionOut"];
+export type ActionUpsert = Schemas["ActionUpsert"];
+export type ActionSuggestion = Schemas["ActionSuggestionOut"];
 
 const API_BASE = "/api/v1";
 
@@ -292,4 +306,28 @@ export const api = {
       { method: "PATCH", body: JSON.stringify(patch) },
     ),
   deleteRace: (id: number) => request<void>(`/races/${id}`, { method: "DELETE" }),
+
+  forecast: (weeks: 8 | 12 = 8) =>
+    request<ForecastView>(
+      `/forecast${queryString({
+        weeks,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  tracking: (days = 180) =>
+    request<TrackingOverview>(
+      `/tracking${queryString({
+        days,
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+    ),
+  upsertTrackingAction: (dimensionKey: string, payload: ActionUpsert) =>
+    request<TrackedAction>(
+      `/tracking/actions/${dimensionKey}${queryString({
+        tz_offset_minutes: -new Date().getTimezoneOffset(),
+      })}`,
+      { method: "PUT", body: JSON.stringify(payload) },
+    ),
+  deleteTrackingAction: (dimensionKey: string) =>
+    request<void>(`/tracking/actions/${dimensionKey}`, { method: "DELETE" }),
 };
